@@ -1,11 +1,13 @@
 import discord
 import os
+import sys
 
 # import scripts
 from modules import quote
 
 
 PREFIX = "!c "
+TOKEN = "ODIyMjE2ODQ5NDg3Mjk4NTkz.YFPDHA.TYgb7wI4bUvNZN-QoIqA5QkD-gM"
 
 client = discord.Client()
 
@@ -32,5 +34,15 @@ async def on_message(message):
     else:
         await message.channel.send("What was that?")
 
+if os.getenv('TOKEN') == None:
+    try:
+        with open(".env", "r") as f:
+            tokens = f.readlines()
+    except Exception:
+        print("Could not acquire environment variables. Stopping.")
+        sys.exit(1)
+    discordToken = tokens[0].lstrip("TOKEN").strip()[1:]
+    client.run(TOKEN)
 
-client.run(os.getenv('TOKEN').strip("[]"))
+else:   
+    client.run(os.getenv('TOKEN'))
