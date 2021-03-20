@@ -1,5 +1,5 @@
 import discord
-from modules import common
+from modules import common #pylint: disable=import-error
 
 async def cmds(message):
     cmd_list = """List of available commands:
