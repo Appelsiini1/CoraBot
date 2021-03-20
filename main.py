@@ -6,7 +6,6 @@ import sys
 from modules import common
 from modules import quote
 from modules import insult
-from modules import embed_test
 from modules import commands
 from modules import choose
 
