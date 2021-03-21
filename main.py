@@ -12,6 +12,7 @@ from modules import commands
 from modules import choose
 from modules import get_tweet
 from modules import giveaway
+from modules import pressF
 
 
 PREFIX = "!c "
@@ -28,11 +29,11 @@ Twit_API_secret = tokens[2].lstrip("API_SECRET").strip()[1:]
 
 twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
 
-try:
-    exit_code = tokens[4].lstrip("EXIT_CODE").strip()[1:]
-except IndexError:
-    print("Exit code has not been set in .env, exit command has been disabled.")
-    exit_code = 0
+# try:
+#     exit_code = tokens[4].lstrip("EXIT_CODE").strip()[1:]
+# except IndexError:
+#     print("Exit code has not been set in .env, exit command has been disabled.")
+#     exit_code = 0
 
 @client.event
 async def on_ready():
@@ -44,6 +45,11 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
+    elif message.content.find("sairasta") != -1 or message.content.find("ei oo normaalii") != -1:
+        print("sairasta")
+        msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
+        await message.channel.send(msg)
+        return
     elif message.content.startswith(PREFIX) == False:
         return
     
@@ -51,9 +57,9 @@ async def on_message(message):
 
     if cmd == "hi" or cmd == "hello":
         await message.channel.send('Hello!')
-    elif cmd == "exit":
-        if exit_code != 0:
-            await common.exit_bot(message, exit_code)
+    # elif cmd == "exit":
+    #     if exit_code != 0:
+    #         await common.exit_bot(message, exit_code)
     elif cmd == "help":
         await commands.cmds(message)
     elif cmd == "author":
@@ -66,6 +72,8 @@ async def on_message(message):
         await insult.insult(message)
     elif cmd == "choose":
         await choose.choose(message)
+    elif cmd.lower() == "f":
+        await pressF.pressF(message)
     elif cmd == "tweet":
         #await get_tweet.get_tweet(message, twitter_auth)
         await message.channel.send("This feature is not yet implemented! Sorry!")
