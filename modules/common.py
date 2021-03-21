@@ -19,15 +19,15 @@ cora_eye = [True|False] Default: False"""
         hex_n = discord.Colour(value=random_n)
         return hex_n
         
-async def exit_bot(message, exit_code):
-    prefixs = "!c exit"
-    arg = message.content.replace(prefixs, "").strip()
-    print(arg)
-    if arg == exit_code:
-        await message.channel.send("The bot will now quit.")
-        sys.exit(0)
-    else:
-        await message.channel.send("What was that?")
+# async def exit_bot(message, exit_code):
+#     prefixs = "!c exit"
+#     arg = message.content.replace(prefixs, "").strip()
+#     print(arg)
+#     if arg == exit_code:
+#         await message.channel.send("The bot will now quit.")
+#         sys.exit(0)
+#     else:
+#         await message.channel.send("What was that?")
          
 
 def get_tokens():
