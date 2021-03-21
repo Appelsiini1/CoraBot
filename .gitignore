@@ -117,7 +117,7 @@ dmypy.json
 .vscode
 
 #Test modules
-modules/embed_test.py
+modules/test_module.py
 
 #Log
 Coralog.txt

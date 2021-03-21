@@ -8,6 +8,11 @@ help
 author
 git
 inspire
-insult [user]"""
+insult [user]
+tweet [twitter username]
+
+Admin commands:
+giveaway
+endgiveaway [GiveawayID]"""
     emb = discord.Embed(description=cmd_list, colour=common.get_hex_colour(cora_blonde=True))
     await message.channel.send(embed=emb)
