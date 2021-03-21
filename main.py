@@ -1,6 +1,8 @@
 import discord
 import os
 import sys
+import logging
+import tweepy
 
 # import scripts
 from modules import common
@@ -8,16 +10,24 @@ from modules import quote
 from modules import insult
 from modules import commands
 from modules import choose
+from modules import get_tweet
+from modules import giveaway
 
 
 PREFIX = "!c "
 
-author = "This bot is maintained by Appelsiini1"
-git = "This will have the GitHub link to the source code later."
+AUTHOR = "This bot is maintained by Appelsiini1"
+GIT = "Source code for this bot can be found at https://github.com/Appelsiini1/CoraBot"
 
+logging.basicConfig(filename="Coralog.txt", level=logging.INFO, format='%(asctime)s %(levelname)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 client = discord.Client()
 tokens = common.get_tokens()
 discordToken = tokens[0].lstrip("TOKEN").strip()[1:]
+Twit_API_key = tokens[1].lstrip("API_KEY").strip()[1:]
+Twit_API_secret = tokens[2].lstrip("API_SECRET").strip()[1:]
+
+twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
+
 try:
     exit_code = tokens[4].lstrip("EXIT_CODE").strip()[1:]
 except IndexError:
@@ -26,7 +36,8 @@ except IndexError:
 
 @client.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print('{0.user} is online & ready.'.format(client))
+    logging.info('{0.user} is online & ready.'.format(client))
 
 # main event, parses commands
 @client.event
@@ -46,19 +57,29 @@ async def on_message(message):
     elif cmd == "help":
         await commands.cmds(message)
     elif cmd == "author":
-        await message.channel.send(author)
+        await message.channel.send(AUTHOR)
     elif cmd == "git":
-        await message.channel.send(git)
+        await message.channel.send(GIT)
     elif cmd == "inspire":
         await quote.get_quote(message)
     elif cmd == "insult":
         await insult.insult(message)
     elif cmd == "choose":
         await choose.choose(message)
+    elif cmd == "tweet":
+        #await get_tweet.get_tweet(message, twitter_auth)
+        await message.channel.send("This feature is not yet implemented! Sorry!")
+        pass
+    elif cmd == "giveaway":
+        await giveaway.initiate_giveaway(message)
+    elif cmd == "endgiveaway":
+        await giveaway.end_giveaway(message, client.user.id)
 
+    #for testing random things
+    # elif cmd == "test":
+    #     await test_module.test_m(message, client)
+    #     pass
 
-    #elif cmd == "embed":
-    #    await embed_test.test_embed(message)
 
     else:
         await message.channel.send("What was that?")

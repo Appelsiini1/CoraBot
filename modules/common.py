@@ -2,6 +2,7 @@ import random
 import discord
 import sys
 import os
+import logging
 
 def get_hex_colour(cora_blonde=False, cora_eye=False):
     """Returns a hex colour as a discord.Colour object
@@ -26,7 +27,7 @@ async def exit_bot(message, exit_code):
         await message.channel.send("The bot will now quit.")
         sys.exit(0)
     else:
-        return
+        await message.channel.send("What was that?")
          
 
 def get_tokens():
