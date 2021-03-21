@@ -10,6 +10,7 @@ git
 inspire
 insult [user]
 tweet [twitter username]
+f (alias: F)
 
 Admin commands:
 giveaway
