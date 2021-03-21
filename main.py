@@ -11,6 +11,7 @@ from modules import insult
 from modules import commands
 from modules import choose
 from modules import get_tweet
+from modules import giveaway
 
 
 PREFIX = "!c "
@@ -66,7 +67,19 @@ async def on_message(message):
     elif cmd == "choose":
         await choose.choose(message)
     elif cmd == "tweet":
-        await get_tweet.get_tweet(message, twitter_auth)
+        #await get_tweet.get_tweet(message, twitter_auth)
+        await message.channel.send("This feature is not yet implemented! Sorry!")
+        pass
+    elif cmd == "giveaway":
+        await giveaway.initiate_giveaway(message)
+    elif cmd == "endgiveaway":
+        await giveaway.end_giveaway(message, client.user.id)
+
+    #for testing random things
+    # elif cmd == "test":
+    #     await test_module.test_m(message, client)
+    #     pass
+
 
     else:
         await message.channel.send("What was that?")
