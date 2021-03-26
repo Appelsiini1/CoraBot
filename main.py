@@ -13,6 +13,7 @@ from modules import choose
 from modules import get_tweet
 from modules import giveaway
 from modules import pressF
+from modules import vaccine
 
 
 PREFIX = "!c "
@@ -52,7 +53,7 @@ async def on_message(message):
         return
     elif message.content.startswith(PREFIX) == False:
         return
-    
+
     cmd = message.content.split(" ")[1]
 
     if cmd == "hi" or cmd == "hello":
@@ -82,6 +83,8 @@ async def on_message(message):
         await giveaway.initiate_giveaway(message)
     elif cmd == "endgiveaway":
         await giveaway.end_giveaway(message, client.user.id)
+    elif cmd == "vacc":
+        await vaccine.getVaccineInfo(message)
 
     #for testing random things
     # elif cmd == "test":

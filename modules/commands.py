@@ -11,6 +11,8 @@ inspire
 insult [user]
 tweet [twitter username]
 f (alias: F)
+choose [option1 | option2 | ...]
+vacc [Area code (or empty for all areas) | help]
 
 Admin commands:
 giveaway
