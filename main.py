@@ -14,6 +14,7 @@ from modules import get_tweet
 from modules import giveaway
 from modules import pressF
 from modules import vaccine
+from modules import tirsk
 
 
 PREFIX = "!c "
@@ -85,6 +86,8 @@ async def on_message(message):
         await giveaway.end_giveaway(message, client.user.id)
     elif cmd == "vacc":
         await vaccine.sendVaccInfo(message)
+    elif cmd == "tirsk":
+        await tirsk.tirskCount(message)
 
     #for testing random things
     # elif cmd == "test":
