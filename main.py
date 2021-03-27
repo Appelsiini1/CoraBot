@@ -28,7 +28,7 @@ discordToken = tokens[0].lstrip("TOKEN").strip()[1:]
 Twit_API_key = tokens[1].lstrip("API_KEY").strip()[1:]
 Twit_API_secret = tokens[2].lstrip("API_SECRET").strip()[1:]
 
-twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
+#twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
 
 # try:
 #     exit_code = tokens[4].lstrip("EXIT_CODE").strip()[1:]
@@ -84,7 +84,7 @@ async def on_message(message):
     elif cmd == "endgiveaway":
         await giveaway.end_giveaway(message, client.user.id)
     elif cmd == "vacc":
-        await vaccine.getVaccineInfo(message)
+        await vaccine.sendVaccInfo(message)
 
     #for testing random things
     # elif cmd == "test":
