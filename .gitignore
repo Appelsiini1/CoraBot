@@ -121,3 +121,6 @@ modules/test_module.py
 
 #Log
 Coralog.txt
+
+#Database
+databases.db
