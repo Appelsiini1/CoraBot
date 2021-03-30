@@ -4,7 +4,6 @@ import requests
 import discord
 from modules.common import get_hex_colour
 import logging
-import datetime
 
 ALUEET = {"518327": "Ahvenanmaa",
 "518294": "Etelä-Karjalan SHP",
@@ -58,7 +57,7 @@ def getVaccineInfo(param):
 def makeEmbed(one_dose, two_doses, emb, areaCode="Finland"):
     if two_doses.startswith("PARAM"):
         emb.description=one_dose
-        emb.color=0xFF0000
+        emb.color=get_hex_colour(error=True)
     else:
         if areaCode != "Finland":
             area = ALUEET[areaCode]
@@ -95,7 +94,7 @@ async def sendVaccInfo(message):
             except KeyError:
                 emb.description="Area code does not match any known areas. Please provide a valid code or leave empty for all areas.\
                 \nType '!c vacc help' for all currently available areas."
-                emb.color=0xFF0000
+                emb.color=get_hex_colour(error=True)
                 await s_msg.edit(embed=emb)
                 return
             one_dose, two_doses = getVaccineInfo(param)
