@@ -45,3 +45,4 @@ async def tirskCount(message):
     emb.title = f"Quote Scoreboard {time}:"
     emb.description = txt
     await msgID.edit(embed=emb)
+    logging.info("Quote counting in {} finished.".format(message.channel.name))
