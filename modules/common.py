@@ -6,6 +6,8 @@ from modules.emoji_list import _EMOJIS
 import sqlite3
 import os
 
+CURR_DIR = os.path.dirname(os.path.realpath(__file__))
+
 def get_hex_colour(cora_blonde=False, cora_eye=False, error=False):
     """Returns a hex colour as a discord.Colour object
 Args: cora_blonde = [True|False] Default: False
@@ -33,17 +35,22 @@ def get_tokens():
         sys.exit(1)
     return tokens
 
-def selectReactionEmoji(n):
+def selectReactionEmoji(n, indexes=False):
     selected = []
+    r_ns = []
     i = 0
     while(i<n):
         r_n = random.randint(0, len(_EMOJIS))
         if _EMOJIS[r_n] not in selected:
             selected.append(_EMOJIS[r_n])
+            r_ns.append(r_n)
             i += 1
         else:
             continue
-    return selected
+    if indexes == True:
+        return r_ns
+    else:
+        return selected
 
 async def sendEmoji(message):
     txt = ""
@@ -51,16 +58,68 @@ async def sendEmoji(message):
         txt += emoji + " ; "
     await message.channel.send(txt)
 
-def initializeDatabase(dir):
-    db_file = dir + "\\databases.db"
+def initializeDatabase():
+    db_file = CURR_DIR + "\\databases.db"
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
+    #BasicPolls Table
     c.execute('''CREATE TABLE IF NOT EXISTS BasicPolls(
-        Poll_ID INT,
-        Ch_ID INT,
+        Poll_ID INT UNIQUE,
+        Ch_ID INT,  
         Guild_ID INT,
+        Author_ID INT,
+        Emojis TEXT,
         PRIMARY KEY (Poll_ID)
     );''')
+
+    #RolePolls Table
+    c.execute('''CREATE TABLE IF NOT EXISTS RolePolls(
+        Poll_ID INT UNIQUE,
+        Ch_ID INT,
+        Guild_ID INT,
+        Author_ID INT,
+        Options TEXT,
+        PRIMARY KEY (Poll_ID)
+    );''')
+
+    #MaxVotes
+    c.execute('''CREATE TABLE IF NOT EXISTS RolesMaxVotes(
+        Role_ID INT UNIQUE,
+        Guild_ID INT,
+        MaxVotes INT,
+        PRIMARY KEY (Role_ID)
+    );''')
+
+    #Votes for RolePolls Table
+    c.execute('''CREATE TABLE IF NOT EXISTS RolePolls_Votes(
+        Vote_ID INT UNIQUE,
+        Poll_ID INT,
+        Voter_ID INT,
+        option1 INT,
+        option2 INT,
+        option3 INT,
+        option4 INT,
+        option5 INT,
+        option6 INT,
+        option7 INT,
+        option8 INT,
+        option9 INT,
+        option10 INT,
+        option11 INT,
+        option12 INT,
+        option13 INT,
+        option14 INT,
+        option15 INT,
+        option16 INT,
+        option17 INT,
+        option18 INT,
+        option19 INT,
+        option20 INT,
+        PRIMARY KEY (Vote_ID)
+        FOREIGN KEY (Poll_ID) REFERENCES RolePolls(Poll_ID)
+            ON DELETE CASCADE
+    );''')
+
     #other databases here
 
     conn.commit()
