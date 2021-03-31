@@ -21,7 +21,7 @@ async def end_giveaway(message, client_id):
     if message.author.guild_permissions.administrator:
         if len(message.content.split(" ")) <= 2:
             msg = "Usage: !c engiveaway [giveaway_ID]\n(Giveaway ID can be found in the footer of the giveaway message.)"
-            emb = discord.Embed(description=msg, color=0xFF0000)
+            emb = discord.Embed(description=msg, color=get_hex_colour(error=True))
             await message.channel.send(embed=emb)
             return
         prefix = "!c endgiveaway "

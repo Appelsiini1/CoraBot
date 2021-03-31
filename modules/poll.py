@@ -3,7 +3,7 @@ import logging
 import sqlite3
 
 from discord import embeds
-from modules.common import get_hex_colour, selectReactionEmoji
+from modules.common import get_hex_colour, selectReactionEmoji, CURR_DIR
 from datetime import datetime
 
 from modules.emoji_list import _EMOJIS
@@ -17,7 +17,7 @@ async def Poll(message):
     elif content == "new":
         await startBasicPoll(message)
     elif content == "end":
-        await endPoll(message)
+        await endBasicPoll(message)
     else:
         await sendHelp(message)
     #elif content == "edit": #TODO add an edit command?
@@ -41,6 +41,11 @@ async def sendHelp(message):
 async def startBasicPoll(message):
     # Command structure:
     # !c poll new [title]; [option1]; [option2]; ... ; [option20]
+
+    db_file = CURR_DIR + "\\databases.db"
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
+
     prefix = _POLL_PREFIX + "new "
     emb = discord.Embed()
     args = message.content[len(prefix):].split(";")
@@ -54,16 +59,18 @@ async def startBasicPoll(message):
         await message.channel.send(embed=emb)
     elif len(args) <=20:
         poll_txt = "React with the emojis listed below to vote on this poll!\n\n**Options:**\n"
-        emoji_list = selectReactionEmoji(len(args))
+        emoji_list = selectReactionEmoji(len(args), indexes=True)
         i = 0
         for option in args:
-            poll_txt += emoji_list[i] +": " + option.strip() + "\n"
+            emoji = _EMOJIS[emoji_list[i]]
+            poll_txt += emoji +": " + option.strip() + "\n"
             i += 1
 
         if len(poll_txt) >= 2048:
             emb.description = "Poll character limit exceeded! Try reducing some characters."
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
+            conn.close()
             return
 
         emb.description = poll_txt
@@ -74,7 +81,8 @@ async def startBasicPoll(message):
         emb.set_footer(text=footer)
 
         await msg.edit(embed=emb)
-        for emoji in emoji_list:
+        for i in emoji_list:
+            emoji = _EMOJIS[i]
             await msg.add_reaction(emoji)
 
         dm_channel = message.author.dm_channel
@@ -82,15 +90,44 @@ async def startBasicPoll(message):
             dm_channel = await message.author.create_dm()
         txt = "Your poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(message.channel.name, message.guild.name, str(msg.id))
         txt2 = "```{}```".format(message.content)
+
+        emoji_str = ""
+        for i in emoji_list:
+            emoji_str += str(i) + ","
+        
+        c.execute("INSERT INTO BasicPolls VALUES (?,?,?,?,?)", (msg.id, message.channel.id, message.guild.id, message.author.id, emoji_str))
+        conn.commit()
+        logging.info("Added poll {} into BasicPolls database table.".format(msg.id))
         await dm_channel.send(txt)
         await dm_channel.send(txt2)
-
         await message.delete()
     else:
-        emb.description = "Exceeded maximum option amount of 20 options for basic poll!"
+        emb.description = "Exceeded maximum option amount of 20 options for polls!"
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
+    conn.close()
 
 
-async def endPoll(message):
-    pass
+async def endBasicPoll(message):
+    # Command structure:
+    # !c vote end [poll_ID]
+
+    db_file = CURR_DIR + "\\databases.db"
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
+
+    prefix = _POLL_PREFIX + "end "
+    emb = discord.Embed()
+
+    if len(message.content.split(" ")) <= 3:
+        polls = c.execute("SELECT * FROM BasicPolls")
+        if len(polls) == 0:
+            emb.description = "You do not have any polls running."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
+            conn.close()
+            return
+        else:
+            for poll in polls:
+                pass
+            
