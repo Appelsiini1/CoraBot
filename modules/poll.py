@@ -3,9 +3,9 @@ import logging
 import sqlite3
 
 from discord import embeds
+from discord import channel
+from discord import emoji
 from modules.common import get_hex_colour, selectReactionEmoji, CURR_DIR
-from datetime import datetime
-
 from modules.emoji_list import _EMOJIS
 
 _POLL_PREFIX = "!c poll "
@@ -50,7 +50,11 @@ async def startBasicPoll(message):
     emb = discord.Embed()
     args = message.content[len(prefix):].split(";")
     title = args[0]
+    titleStatus = 0
     del args[0]
+    if title.strip() == "":
+        title = f"A poll by {message.author.name}"
+        titleStatus = 1
 
     if len(args) <= 1 or message.content.find(";") == -1:
         #help command
@@ -94,8 +98,10 @@ async def startBasicPoll(message):
         emoji_str = ""
         for i in emoji_list:
             emoji_str += str(i) + ","
+        if titleStatus == 1:
+            title = None
         
-        c.execute("INSERT INTO BasicPolls VALUES (?,?,?,?,?)", (msg.id, message.channel.id, message.guild.id, message.author.id, emoji_str))
+        c.execute("INSERT INTO BasicPolls VALUES (?,?,?,?,?,?)", (msg.id, message.channel.id, message.guild.id, message.author.id, emoji_str, title))
         conn.commit()
         logging.info("Added poll {} into BasicPolls database table.".format(msg.id))
         await dm_channel.send(txt)
@@ -107,6 +113,45 @@ async def startBasicPoll(message):
         await message.channel.send(embed=emb)
     conn.close()
 
+async def pollEndHelper(poll, message):
+    emb = discord.Embed()
+    emb.color = get_hex_colour()
+    # Poll_ID INT UNIQUE, 0
+    # Ch_ID INT,      1
+    # Guild_ID INT,   2
+    # Author_ID INT,  3
+    # Emojis TEXT,    4
+    # PollName TEXT,  5
+
+    msg = await message.channel.fetch_message(poll[0])
+    originalEmojis = poll[4][:-1].split(",")
+
+    emojis = []
+    for i in originalEmojis: 
+        emojis.append(_EMOJIS[int(i)])
+
+    pollName = poll[5]
+    results = {}
+    for reaction in msg.reactions:
+        if reaction.emoji in emojis:
+            results[reaction.emoji] = reaction.count
+
+    if pollName == None:
+        emb.title = "Poll results:"
+    else:
+        emb.title = f"Results for '{pollName}'"
+
+    txt = ""
+    i = 0
+    for keypair in sorted(results.items(),key=lambda x:x[1], reverse=True):
+        if i == 0:
+            txt += f"{keypair[0]}** : _{keypair[1]-1}_**\n"
+        else:
+            txt += f"{keypair[0]} : {keypair[1]-1}\n"
+        i += 1
+
+    emb.description = txt
+    return emb
 
 async def endBasicPoll(message):
     # Command structure:
@@ -119,15 +164,43 @@ async def endBasicPoll(message):
     prefix = _POLL_PREFIX + "end "
     emb = discord.Embed()
 
-    if len(message.content.split(" ")) <= 3:
-        polls = c.execute("SELECT * FROM BasicPolls")
+    if len(message.content.split(" ")) == 3:
+        c.execute("SELECT * FROM BasicPolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+        polls = c.fetchall()
         if len(polls) == 0:
-            emb.description = "You do not have any polls running."
+            emb.description = "There are no polls running that have been initiated by you on this channel."
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
-            conn.close()
-            return
+
         else:
             for poll in polls:
-                pass
+                emb = await pollEndHelper(poll, message)
+                await message.channel.send(embed=emb)
+            c.execute("DELETE FROM BasicPolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+            conn.commit()
+            logging.info(f"{len(polls)} poll(s) by {message.author.name} succesfully ended in {message.channel.name}")
+    else:
+        try:
+            arg = int(message.content.split(" ")[3])
+        except Exception:
+            logging.exception("Something wnet wrong when trying to convert poll ID to int")
+            txt = "\N{no entry} Invalid poll ID!"
+            await message.channel.send(txt)
+            conn.close()
+            return
+        
+        c.execute("SELECT * FROM BasicPolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?", (message.author.id, message.channel.id, arg))
+        poll = c.fetchall()
+        if len(poll) == 0:
+            emb.color= get_hex_colour(error=True)
+            emb.description = f"Unable to find poll with ID '{arg}'"
+            await message.channel.send(embed=emb)
+        else:
+            emb = await pollEndHelper(poll[0], message)
+            await message.channel.send(embed=emb)
+            c.execute("DELETE FROM BasicPolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?", (message.author.id, message.channel.id, arg))
+            conn.commit()
+            logging.info(f"Poll by {message.author.name} succesfully ended in {message.channel.name}")
+    await message.delete()
+    conn.close()
             
