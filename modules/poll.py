@@ -1,6 +1,7 @@
 import discord
 import logging
 import sqlite3
+import re
 
 from discord import embeds
 from discord import channel
@@ -12,12 +13,27 @@ _POLL_PREFIX = "!c poll "
 
 async def Poll(message):
     content = message.content.split(" ")[2]
+    try:
+        arg = message.content.split(" ")[3]
+    except IndexError:
+        arg = ""
+
     if content == "help":
         await sendHelp(message)
-    elif content == "new":
+    elif content == "new" and arg != "-r":
         await startBasicPoll(message)
     elif content == "end":
         await endBasicPoll(message)
+    elif content == "new" and arg == "-r":
+        await startRolePoll(message)
+    elif content == "setrole":
+        if message.author.guild_permissions.administrator:
+            await recordRoles(message)
+        else:
+            emb = discord.Embed()
+            emb.description = "You do not have the permissions to use this."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
     else:
         await sendHelp(message)
     #elif content == "edit": #TODO add an edit command?
@@ -203,4 +219,69 @@ async def endBasicPoll(message):
             logging.info(f"Poll by {message.author.name} succesfully ended in {message.channel.name}")
     await message.delete()
     conn.close()
-            
+
+# ######################################################################################################## #   
+
+async def recordRoles(message):
+    # Command format
+    # !c poll setroles [role]:[voteamount],[role]:[voteamount] : ...
+    prefix = _POLL_PREFIX + "setroles "
+    emb = discord.Embed()
+    args = message.content[len(prefix):].split(",")
+
+    if args == 0:
+        emb.description = "You did not give any arguments. Use '!c poll help' for the correct syntax."
+        emb.color = get_hex_colour(error=True)
+        await message.channel.send(embed=emb)
+        return
+
+    db_file = CURR_DIR + "\\databases.db"
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
+    reg = re.compile(r"^.*<@!(\d+)>")
+    results = {}
+
+    for arg in args:
+        try:
+            role = arg.split(":")[0].strip()
+            amount = int(arg.split(":")[1])
+        except ValueError:
+            emb.description = "Invalid arguments, role must be an ID or a mention and amount must be an integer. \nAlso make sure you have commas and colons in the right place."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
+            conn.close()
+            return
+
+        # parse mention
+        match = reg.match(role)
+        if match:
+            role_id = match.group(1)
+        else:
+            emb.description = "Invalid arguments, role must be an ID or a mention and amount must be an integer. \nAlso make sure you have commas and colons in the right place."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
+            conn.close()
+            return
+        c.execute("INSERT INTO RolesMaxVotes VALUES (?,?,?)", (role_id, message.guild.id, amount))
+        results[role_id] = amount
+    txt = "Following roles & vote amounts were set:\n"
+    roles = await message.guild.fetch_roles()
+    for role in roles:
+        if role.id in results:
+            txt += f"{role.name} : {results[role.id]}"
+
+    emb.description = txt
+    emb.colour = get_hex_colour()
+    await message.channel.send(embed=emb)
+    conn.commit()
+    conn.close()
+
+
+async def startRolePoll(message):
+    pass
+
+async def rolePollEndHelper():
+    pass
+
+async def endRolePoll(message):
+    pass
