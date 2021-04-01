@@ -40,7 +40,7 @@ def selectReactionEmoji(n, indexes=False):
     r_ns = []
     i = 0
     while(i<n):
-        r_n = random.randint(0, len(_EMOJIS))
+        r_n = random.randint(0, len(_EMOJIS)-1)
         if _EMOJIS[r_n] not in selected:
             selected.append(_EMOJIS[r_n])
             r_ns.append(r_n)
@@ -69,6 +69,7 @@ def initializeDatabase():
         Guild_ID INT,
         Author_ID INT,
         Emojis TEXT,
+        PollName TEXT,
         PRIMARY KEY (Poll_ID)
     );''')
 
@@ -79,6 +80,7 @@ def initializeDatabase():
         Guild_ID INT,
         Author_ID INT,
         Options TEXT,
+        PollName TEXT,
         PRIMARY KEY (Poll_ID)
     );''')
 
