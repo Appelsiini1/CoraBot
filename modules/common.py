@@ -69,6 +69,7 @@ def initializeDatabase():
         Guild_ID INT,
         Author_ID INT,
         Emojis TEXT,
+        PollName TEXT,
         PRIMARY KEY (Poll_ID)
     );''')
 
@@ -79,6 +80,7 @@ def initializeDatabase():
         Guild_ID INT,
         Author_ID INT,
         Options TEXT,
+        PollName TEXT,
         PRIMARY KEY (Poll_ID)
     );''')
 
