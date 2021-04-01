@@ -16,12 +16,10 @@ from modules import vaccine
 from modules import tirsk
 from modules import poll
 
-
 PREFIX = "!c "
 
 AUTHOR = "This bot is maintained by Appelsiini1"
 GIT = "Source code for this bot can be found at https://github.com/Appelsiini1/CoraBot"
-CURR_DIR = os.path.dirname(os.path.realpath(__file__))
 
 logging.basicConfig(filename="Coralog.txt", level=logging.INFO, format='%(asctime)s %(levelname)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 client = discord.Client()
@@ -30,7 +28,7 @@ discordToken = tokens[0].lstrip("TOKEN").strip()[1:]
 Twit_API_key = tokens[1].lstrip("API_KEY").strip()[1:]
 Twit_API_secret = tokens[2].lstrip("API_SECRET").strip()[1:]
 
-common.initializeDatabase(CURR_DIR)
+common.initializeDatabase()
 
 #twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
 
