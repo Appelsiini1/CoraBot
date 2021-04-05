@@ -139,7 +139,7 @@ async def startBasicPoll(message):
         dm_channel = message.author.dm_channel
         if dm_channel == None:
             dm_channel = await message.author.create_dm()
-        txt = "Your poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(message.channel.name, message.guild.name, str(msg.id))
+        txt = "Your basic poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(message.channel.name, message.guild.name, str(msg.id))
         txt2 = "```{}```".format(message.content)
 
         emoji_str = ""
@@ -331,7 +331,6 @@ async def startRolePoll(message):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
     g_id = message.guild.id
-    print(type(g_id))
     c.execute(f"SELECT * FROM RolesMaxVotes WHERE Guild_ID={g_id}")
     roles = c.fetchall()
 
@@ -385,7 +384,7 @@ async def startRolePoll(message):
         dm_channel = message.author.dm_channel
         if dm_channel == None:
             dm_channel = await message.author.create_dm()
-        txt = "Your poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(message.channel.name, message.guild.name, str(msg.id))
+        txt = "Your advanced poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(message.channel.name, message.guild.name, str(msg.id))
         txt2 = "```{}```".format(message.content)
 
         if titleStatus == 1:
