@@ -1,10 +1,7 @@
 import random
 import discord
-import sys
-import logging
 from modules.emoji_list import _EMOJIS
 import sqlite3
-import os
 from constants import DB_F
 
 
