@@ -1,7 +1,8 @@
 import discord
 import logging
 import os
-#import tweepy
+
+# import tweepy
 
 # import scripts
 from modules import common
@@ -9,19 +10,28 @@ from modules import quote
 from modules import insult
 from modules import commands
 from modules import choose
-#from modules import get_tweet
+
+# from modules import get_tweet
 from modules import giveaway
 from modules import pressF
 from modules import vaccine
 from modules import tirsk
 from modules import poll
 
+# TODO Commit viestin lähetystä ennen
+# TODO Sqlite connectit with:in kanssa
+
 PREFIX = "!c "
 
 AUTHOR = "This bot is maintained by Appelsiini1"
 GIT = "Source code for this bot can be found at https://github.com/Appelsiini1/CoraBot"
 
-logging.basicConfig(filename="Coralog.txt", level=logging.INFO, format='%(asctime)s %(levelname)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
+logging.basicConfig(
+    filename="Coralog.txt",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s - %(message)s",
+    datefmt="%d/%m/%Y %H:%M:%S",
+)
 client = discord.Client()
 tokens = common.get_tokens()
 discordToken = tokens[0].lstrip("TOKEN").strip()[1:]
@@ -30,19 +40,24 @@ Twit_API_secret = tokens[2].lstrip("API_SECRET").strip()[1:]
 
 common.initializeDatabase()
 
-#twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
+# twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
+
 
 @client.event
 async def on_ready():
-    print('{0.user} is online & ready.'.format(client))
-    logging.info('{0.user} is online & ready.'.format(client))
+    print("{0.user} is online & ready.".format(client))
+    logging.info("{0.user} is online & ready.".format(client))
+
 
 # main event, parses commands
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
-    elif message.content.find("sairasta") != -1 or message.content.find("ei oo normaalii") != -1:
+    elif (
+        message.content.find("sairasta") != -1
+        or message.content.find("ei oo normaalii") != -1
+    ):
         print("sairasta")
         msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
         await message.channel.send(msg)
@@ -53,7 +68,7 @@ async def on_message(message):
     cmd = message.content.split(" ")[1]
 
     if cmd == "hi" or cmd == "hello":
-        await message.channel.send('Hello!')
+        await message.channel.send("Hello!")
     elif cmd == "help":
         await commands.cmds(message)
     elif cmd == "author":
@@ -69,7 +84,7 @@ async def on_message(message):
     elif cmd.lower() == "f":
         await pressF.pressF(message)
     elif cmd == "tweet":
-        #await get_tweet.get_tweet(message, twitter_auth)
+        # await get_tweet.get_tweet(message, twitter_auth)
         await message.channel.send("This feature is not yet implemented! Sorry!")
     elif cmd == "giveaway":
         await giveaway.initiate_giveaway(message)
@@ -84,5 +99,6 @@ async def on_message(message):
 
     else:
         await message.channel.send("What was that?")
+
 
 client.run(discordToken)

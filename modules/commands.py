@@ -1,6 +1,7 @@
 import discord
 from modules import common
 
+
 async def cmds(message):
     cmd_list = """hi (alias: hello)
 help
@@ -20,5 +21,9 @@ endgiveaway [GiveawayID]
 poll [set|edit|del]role
 poll new -r
 """
-    emb = discord.Embed(title="List of available commands:", description=cmd_list, colour=common.get_hex_colour(cora_blonde=True))
+    emb = discord.Embed(
+        title="List of available commands:",
+        description=cmd_list,
+        colour=common.get_hex_colour(cora_blonde=True),
+    )
     await message.channel.send(embed=emb)

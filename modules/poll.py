@@ -10,6 +10,7 @@ _POLL_PREFIX = "!c poll "
 
 RoleRE = re.compile(r"^.*<@&(\d+)>")
 
+
 async def Poll(message):
     content = message.content.split(" ")[2]
     try:
@@ -41,7 +42,8 @@ async def Poll(message):
             await message.channel.send(embed=emb)
     else:
         await sendHelp(message)
-    #elif content == "edit": #TODO add an edit command?
+    # elif content == "edit": #TODO add an edit command?
+
 
 async def sendHelp(message):
     emb = discord.Embed()
@@ -81,11 +83,12 @@ async def sendHelp(message):
     dm_channel = message.author.dm_channel
     if dm_channel == None:
         dm_channel = await message.author.create_dm()
-    
+
     emb.description = txt1
     await dm_channel.send(embed=emb)
     emb.description = txt2
     await dm_channel.send(embed=emb)
+
 
 async def startBasicPoll(message):
     # Command structure:
@@ -97,7 +100,7 @@ async def startBasicPoll(message):
 
     prefix = _POLL_PREFIX + "new "
     emb = discord.Embed()
-    args = message.content[len(prefix):].split(";")
+    args = message.content[len(prefix) :].split(";")
     title = args[0]
     titleStatus = 0
     del args[0]
@@ -106,21 +109,25 @@ async def startBasicPoll(message):
         titleStatus = 1
 
     if len(args) <= 1 or message.content.find(";") == -1:
-        #help command
+        # help command
         emb.description = "You gave less than 2 options or you are missing separators. For correct use of the command, use ```!c poll help```"
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
-    elif len(args) <=20:
-        poll_txt = "React with the emojis listed below to vote on this poll!\n\n**Options:**\n"
+    elif len(args) <= 20:
+        poll_txt = (
+            "React with the emojis listed below to vote on this poll!\n\n**Options:**\n"
+        )
         emoji_list = selectReactionEmoji(len(args), indexes=True)
         i = 0
         for option in args:
             emoji = _EMOJIS[emoji_list[i]]
-            poll_txt += emoji +": " + option.strip() + "\n"
+            poll_txt += emoji + ": " + option.strip() + "\n"
             i += 1
 
         if len(poll_txt) >= 2048:
-            emb.description = "Poll character limit exceeded! Try reducing some characters."
+            emb.description = (
+                "Poll character limit exceeded! Try reducing some characters."
+            )
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
             conn.close()
@@ -141,7 +148,9 @@ async def startBasicPoll(message):
         dm_channel = message.author.dm_channel
         if dm_channel == None:
             dm_channel = await message.author.create_dm()
-        txt = "Your basic poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(message.channel.name, message.guild.name, str(msg.id))
+        txt = "Your basic poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(
+            message.channel.name, message.guild.name, str(msg.id)
+        )
         txt2 = "```{}```".format(message.content)
 
         emoji_str = ""
@@ -149,8 +158,18 @@ async def startBasicPoll(message):
             emoji_str += str(i) + ","
         if titleStatus == 1:
             title = None
-        
-        c.execute("INSERT INTO BasicPolls VALUES (?,?,?,?,?,?)", (msg.id, message.channel.id, message.guild.id, message.author.id, emoji_str, title))
+
+        c.execute(
+            "INSERT INTO BasicPolls VALUES (?,?,?,?,?,?)",
+            (
+                msg.id,
+                message.channel.id,
+                message.guild.id,
+                message.author.id,
+                emoji_str,
+                title,
+            ),
+        )
         conn.commit()
         logging.info("Added poll {} into BasicPolls database table.".format(msg.id))
         await dm_channel.send(txt)
@@ -161,6 +180,7 @@ async def startBasicPoll(message):
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
     conn.close()
+
 
 async def pollEndHelper(poll, message):
     emb = discord.Embed()
@@ -176,7 +196,7 @@ async def pollEndHelper(poll, message):
     originalEmojis = poll[4][:-1].split(",")
 
     emojis = []
-    for i in originalEmojis: 
+    for i in originalEmojis:
         emojis.append(_EMOJIS[int(i)])
 
     pollName = poll[5]
@@ -192,7 +212,7 @@ async def pollEndHelper(poll, message):
 
     txt = ""
     i = 0
-    for keypair in sorted(results.items(),key=lambda x:x[1], reverse=True):
+    for keypair in sorted(results.items(), key=lambda x: x[1], reverse=True):
         if i == 0:
             txt += f"{keypair[0]}** : _{keypair[1]-1}_**\n"
         else:
@@ -202,11 +222,12 @@ async def pollEndHelper(poll, message):
     emb.description = txt
     return emb
 
+
 async def endBasicPoll(message):
     # Command structure:
     # !c poll end [poll_ID]
 
-    #TODO Consolidate RolePoll and BasicPoll ending under this function
+    # TODO Consolidate RolePoll and BasicPoll ending under this function
 
     db_file = CURR_DIR + "\\databases.db"
     conn = sqlite3.connect(db_file)
@@ -216,7 +237,10 @@ async def endBasicPoll(message):
     emb = discord.Embed()
 
     if len(message.content.split(" ")) == 3:
-        c.execute("SELECT * FROM BasicPolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+        c.execute(
+            "SELECT * FROM BasicPolls WHERE Author_ID=? AND Ch_ID=?",
+            (message.author.id, message.channel.id),
+        )
         polls = c.fetchall()
         if len(polls) == 0:
             emb.description = "There are no polls running that have been initiated by you on this channel."
@@ -227,45 +251,64 @@ async def endBasicPoll(message):
             for poll in polls:
                 emb = await pollEndHelper(poll, message)
                 await message.channel.send(embed=emb)
-            c.execute("DELETE FROM BasicPolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+            c.execute(
+                "DELETE FROM BasicPolls WHERE Author_ID=? AND Ch_ID=?",
+                (message.author.id, message.channel.id),
+            )
             conn.commit()
-            logging.info(f"{len(polls)} poll(s) by {message.author.name} succesfully ended in {message.channel.name}")
+            logging.info(
+                f"{len(polls)} poll(s) by {message.author.name} succesfully ended in {message.channel.name}"
+            )
     else:
         try:
             arg = int(message.content.split(" ")[3])
         except Exception:
-            logging.exception("Something went wrong when trying to convert poll ID to int")
+            logging.exception(
+                "Something went wrong when trying to convert poll ID to int"
+            )
             txt = "\N{no entry} Invalid poll ID!"
             await message.channel.send(txt)
             conn.close()
             return
-        
-        c.execute("SELECT * FROM BasicPolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?", (message.author.id, message.channel.id, arg))
+
+        c.execute(
+            "SELECT * FROM BasicPolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?",
+            (message.author.id, message.channel.id, arg),
+        )
         poll = c.fetchall()
         if len(poll) == 0:
-            emb.color= get_hex_colour(error=True)
+            emb.color = get_hex_colour(error=True)
             emb.description = f"Unable to find poll with ID '{arg}'"
             await message.channel.send(embed=emb)
         else:
             emb = await pollEndHelper(poll[0], message)
             await message.channel.send(embed=emb)
-            c.execute("DELETE FROM BasicPolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?", (message.author.id, message.channel.id, arg))
+            c.execute(
+                "DELETE FROM BasicPolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?",
+                (message.author.id, message.channel.id, arg),
+            )
             conn.commit()
-            logging.info(f"Poll by {message.author.name} succesfully ended in {message.channel.name}")
+            logging.info(
+                f"Poll by {message.author.name} succesfully ended in {message.channel.name}"
+            )
     await message.delete()
     conn.close()
 
-# ######################################################################################################## #   
+
+# ######################################################################################################## #
+
 
 async def recordRoles(message):
     # Command format
     # !c poll setroles [role]:[voteamount],[role]:[voteamount] : ...
     prefix = _POLL_PREFIX + "setroles "
     emb = discord.Embed()
-    args = message.content[len(prefix):].split(",")
+    args = message.content[len(prefix) :].split(",")
 
     if args == 0:
-        emb.description = "You did not give any arguments. Use '!c poll help' for the correct syntax."
+        emb.description = (
+            "You did not give any arguments. Use '!c poll help' for the correct syntax."
+        )
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
         return
@@ -310,11 +353,17 @@ async def recordRoles(message):
 
         roleT = (role_int,)
         if roleT in RolesInDB:
-            c.execute("UPDATE RolesMaxVotes SET MaxVotes=? WHERE Role_ID=?", (amount, role_int))
+            c.execute(
+                "UPDATE RolesMaxVotes SET MaxVotes=? WHERE Role_ID=?",
+                (amount, role_int),
+            )
             updated[role_int] = amount
         else:
             try:
-                c.execute("INSERT INTO RolesMaxVotes VALUES (?,?,?)", (role_int, message.guild.id, amount))
+                c.execute(
+                    "INSERT INTO RolesMaxVotes VALUES (?,?,?)",
+                    (role_int, message.guild.id, amount),
+                )
             except sqlite3.IntegrityError:
                 emb.description = "Error adding roles to database. Aborting."
                 emb.color = get_hex_colour(error=True)
@@ -349,15 +398,18 @@ async def recordRoles(message):
     conn.commit()
     conn.close()
 
+
 async def delRoles(message):
     # Command format
     # !c poll setroles [role],[role], ...
     prefix = _POLL_PREFIX + "setroles "
     emb = discord.Embed()
-    args = message.content[len(prefix):].split(",")
+    args = message.content[len(prefix) :].split(",")
 
     if args == 0:
-        emb.description = "You did not give any arguments. Use '!c poll help' for the correct syntax."
+        emb.description = (
+            "You did not give any arguments. Use '!c poll help' for the correct syntax."
+        )
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
         return
@@ -365,6 +417,7 @@ async def delRoles(message):
     db_file = CURR_DIR + "\\databases.db"
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
+
 
 async def startRolePoll(message):
     # Command structure:
@@ -386,7 +439,7 @@ async def startRolePoll(message):
 
     prefix = _POLL_PREFIX + "new -r "
 
-    args = message.content[len(prefix):].split(";")
+    args = message.content[len(prefix) :].split(";")
     title = args[0]
     titleStatus = 0
     del args[0]
@@ -395,11 +448,11 @@ async def startRolePoll(message):
         titleStatus = 1
 
     if len(args) <= 1 or message.content.find(";") == -1:
-        #help command
+        # help command
         emb.description = "You gave less than 2 options or you are missing separators. For correct use of the command, use ```!c poll help```"
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
-    elif len(args) <=20:
+    elif len(args) <= 20:
         poll_txt = "Use '!c vote' -command to vote in this poll! See '!c vote help' for more.\n\n**Options:**\n"
         option_str = ""
         i = 0
@@ -409,7 +462,9 @@ async def startRolePoll(message):
             i += 1
 
         if len(poll_txt) >= 2048:
-            emb.description = "Poll character limit exceeded! Try reducing some characters."
+            emb.description = (
+                "Poll character limit exceeded! Try reducing some characters."
+            )
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
             conn.close()
@@ -427,13 +482,25 @@ async def startRolePoll(message):
         dm_channel = message.author.dm_channel
         if dm_channel == None:
             dm_channel = await message.author.create_dm()
-        txt = "Your advanced poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(message.channel.name, message.guild.name, str(msg.id))
+        txt = "Your advanced poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(
+            message.channel.name, message.guild.name, str(msg.id)
+        )
         txt2 = "```{}```".format(message.content)
 
         if titleStatus == 1:
             title = None
-        
-        c.execute("INSERT INTO RolePolls VALUES (?,?,?,?,?,?)", (msg.id, message.channel.id, message.guild.id, message.author.id, option_str, title))
+
+        c.execute(
+            "INSERT INTO RolePolls VALUES (?,?,?,?,?,?)",
+            (
+                msg.id,
+                message.channel.id,
+                message.guild.id,
+                message.author.id,
+                option_str,
+                title,
+            ),
+        )
         conn.commit()
         logging.info("Added poll {} into RolePolls database table.".format(msg.id))
         await dm_channel.send(txt)
@@ -446,11 +513,14 @@ async def startRolePoll(message):
         await message.channel.send(embed=emb)
     conn.close()
 
+
 async def rolePollEndHelper():
     pass
 
+
 async def vote(message):
     pass
+
 
 async def voteHelp(message):
     emb = discord.Embed()
@@ -465,6 +535,6 @@ async def voteHelp(message):
     dm_channel = message.author.dm_channel
     if dm_channel == None:
         dm_channel = await message.author.create_dm()
-    
+
     await dm_channel.send(embed=emb)
     await message.delete()
