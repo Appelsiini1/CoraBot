@@ -3,8 +3,9 @@ import logging
 import sqlite3
 import re
 
-from modules.common import get_hex_colour, selectReactionEmoji, CURR_DIR
+from modules.common import get_hex_colour, selectReactionEmoji
 from modules.emoji_list import _EMOJIS
+from constants import DB_F
 
 _POLL_PREFIX = "!c poll "
 
@@ -24,6 +25,14 @@ async def Poll(message):
         await startBasicPoll(message)
     elif content == "end":
         await endBasicPoll(message)
+    elif content == "roles":
+        if message.author.guild_permissions.administrator:
+            await showRoles(message)
+        else:
+            emb = discord.Embed()
+            emb.description = "You do not have the permissions to use this."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
     elif content == "new" and arg == "-r":
         if message.author.guild_permissions.administrator:
             await startRolePoll(message)
@@ -40,6 +49,14 @@ async def Poll(message):
             emb.description = "You do not have the permissions to use this."
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
+    elif content == "delroles":
+        if message.author.guild_permissions.administrator:
+            await delRoles(message)
+        else:
+            emb = discord.Embed()
+            emb.description = "You do not have the permissions to use this."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
     else:
         await sendHelp(message)
     # elif content == "edit": #TODO add an edit command?
@@ -47,7 +64,7 @@ async def Poll(message):
 
 async def sendHelp(message):
     emb = discord.Embed()
-    emb.title = "How to use polls"
+    emb.title = "How to use polls 1/2"
     emb.color = get_hex_colour()
     txt1 = "Command usage: ```!c poll [new|end|help]```\n\
         **Adding a new basic poll:**\n\
@@ -78,7 +95,8 @@ async def sendHelp(message):
         Note, that if you change anything in the role you do not need to add or edit the role in the bot's database unless you delete and create a new role in the server settings.\
         If you wish to delete a role, use\n\
         ```!c poll delrole [role], [role], ...```\n\
-        Note that you can delete all roles with the keyword 'all', as in\n\
+        where [role] is a role ID or a role mention.\n\
+        Note that you can also delete all roles with the keyword 'all', as in\n\
         ```!c poll delrole all```"
     dm_channel = message.author.dm_channel
     if dm_channel == None:
@@ -87,6 +105,7 @@ async def sendHelp(message):
     emb.description = txt1
     await dm_channel.send(embed=emb)
     emb.description = txt2
+    emb.title = "How to use polls 2/2"
     await dm_channel.send(embed=emb)
 
 
@@ -94,8 +113,7 @@ async def startBasicPoll(message):
     # Command structure:
     # !c poll new [title]; [option1]; [option2]; ... ; [option20]
 
-    db_file = CURR_DIR + "\\databases.db"
-    with sqlite3.connect(db_file) as conn:
+    with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
 
         prefix = _POLL_PREFIX + "new "
@@ -114,9 +132,7 @@ async def startBasicPoll(message):
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
         elif len(args) <= 20:
-            poll_txt = (
-                "React with the emojis listed below to vote on this poll!\n\n**Options:**\n"
-            )
+            poll_txt = "React with the emojis listed below to vote on this poll!\n\n**Options:**\n"
             emoji_list = selectReactionEmoji(len(args), indexes=True)
             i = 0
             for option in args:
@@ -227,8 +243,7 @@ async def endBasicPoll(message):
 
     # TODO Consolidate RolePoll and BasicPoll ending under this function
 
-    db_file = CURR_DIR + "\\databases.db"
-    with sqlite3.connect(db_file) as conn:
+    with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
 
         prefix = _POLL_PREFIX + "end "
@@ -309,15 +324,20 @@ async def recordRoles(message):
         await message.channel.send(embed=emb)
         return
 
-    db_file = CURR_DIR + "\\databases.db"
-    with sqlite3.connect(db_file) as conn:
+    with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
 
-        c.execute(f"SELECT Role_ID FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}")
+        c.execute(
+            f"SELECT Role_ID FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}"
+        )
         RolesInDB = c.fetchall()
 
         added = {}
         updated = {}
+        roles = message.guild.roles
+        roles_dic = {}
+        for r in roles:
+            roles_dic[r.id] = r.name
 
         for arg in args:
             try:
@@ -348,15 +368,15 @@ async def recordRoles(message):
             roleT = (role_int,)
             if roleT in RolesInDB:
                 c.execute(
-                    "UPDATE RolesMaxVotes SET MaxVotes=? WHERE Role_ID=?",
-                    (amount, role_int),
+                    "UPDATE RolesMaxVotes SET MaxVotes=?, Role_name=? WHERE Role_ID=?",
+                    (amount, roles_dic[role_int], role_int),
                 )
                 updated[role_int] = amount
             else:
                 try:
                     c.execute(
-                        "INSERT INTO RolesMaxVotes VALUES (?,?,?)",
-                        (role_int, message.guild.id, amount),
+                        "INSERT INTO RolesMaxVotes VALUES (?,?,?,?)",
+                        (role_int, roles_dic[role_int], message.guild.id, amount),
                     )
                 except sqlite3.IntegrityError:
                     emb.description = "Error adding roles to database. Aborting."
@@ -367,28 +387,51 @@ async def recordRoles(message):
         txt1 = "**Following roles & vote amounts were set:**\n"
         txt2 = "**Following roles & vote amounts were updated:**\n"
         comb = ""
-        roles = await message.guild.fetch_roles()
 
         if len(added) > 0:
-            for role in roles:
-                if role.id in added:
-                    # TODO Add SyntaxError check for illegal Unicode emojis
-                    txt1 += f"'{role.name}' : {added[role.id]}\n"
+            for role in added.items():
+                txt1 += f"{roles_dic[role[0]]} : {role[1]}\n"
             comb += txt1
 
         if len(updated) > 0:
-            for role in roles:
-                if role.id in updated:
-                    txt2 += f"'{role.name}' : {updated[role.id]}\n"
+            for role in updated.items():
+                txt2 += f"{roles_dic[role[0]]} : {role[1]}\n"
             if len(comb) > 0:
                 comb += f"\n{txt2}"
             else:
                 comb += txt2
 
         # TODO Add checks for message length
+        conn.commit()
         emb.description = comb
         emb.colour = get_hex_colour()
         await message.channel.send(embed=emb)
+
+
+async def showRoles(message):
+    # Command format
+    # !c poll roles
+
+    emb = discord.Embed()
+
+    with sqlite3.connect(DB_F) as conn:
+        c = conn.cursor()
+        c.execute(
+            f"SELECT Role_name, MaxVotes FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}"
+        )
+        onRecord = c.fetchall()
+        if len(onRecord) == 0:
+            txt = "You do not have any roles on database for this server."
+        else:
+            txt = ""
+            for role in onRecord:
+                txt += f"{role[0]} : {role[1]}\n"
+
+        # TODO Add text lenght check
+        emb.description = txt
+        emb.title = "Following roles & vote amounts are in the database:"
+        emb.color = get_hex_colour()
+    await message.channel.send(embed=emb)
 
 
 async def delRoles(message):
@@ -398,25 +441,51 @@ async def delRoles(message):
     emb = discord.Embed()
     args = message.content[len(prefix) :].split(",")
 
-    if args == 0:
-        emb.description = (
-            "You did not give any arguments. Use '!c poll help' for the correct syntax."
-        )
+    if args[0].strip() == "":
+        emb.description = "**You did not give any arguments. Use '!c poll help' for the correct syntax.**"
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
         return
 
-    db_file = CURR_DIR + "\\databases.db"
-    with sqlite3.connect(db_file) as conn:
+    i = 0
+    with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
+
+        if args[0].strip() == "all":
+            c.execute(f"DELETE FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}")
+            i = -1
+        else:
+            for arg in args:
+                match = RoleRE.match(arg)
+                if match:
+                    role_id = match.group(1).strip()
+                else:
+                    role_id = arg.strip()
+                try:
+                    role_int = int(role_id)
+                except ValueError:
+                    emb.description = "Invalid arguments, role must be an ID integer or a mention. \nAlso make sure you have commas in the right place."
+                    emb.color = get_hex_colour(error=True)
+                    await message.channel.send(embed=emb)
+                    return
+                c.execute(
+                    "DELETE FROM RolesMaxVotes WHERE Role_ID=? AND Guild_ID=?",
+                    (role_int, message.guild.id),
+                )
+                i += 1
+        conn.commit()
+        if i == -1:
+            i = "all"
+        emb.description = f"Deleted {i} roles from database."
+        emb.color = get_hex_colour(cora_eye=True)
+        await message.channel.send(embed=emb)
 
 
 async def startRolePoll(message):
     # Command structure:
     # !c poll new -r [title]; [option1]; [option2]; ... ; [option20]
 
-    db_file = CURR_DIR + "\\databases.db"
-    with sqlite3.connect(db_file) as conn:
+    with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
         g_id = message.guild.id
         c.execute(f"SELECT * FROM RolesMaxVotes WHERE Guild_ID={g_id}")
