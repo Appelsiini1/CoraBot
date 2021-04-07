@@ -5,8 +5,7 @@ import logging
 from modules.emoji_list import _EMOJIS
 import sqlite3
 import os
-
-CURR_DIR = os.path.dirname(os.path.realpath(__file__))
+from constants import DB_F
 
 
 def get_hex_colour(cora_blonde=False, cora_eye=False, error=False):
@@ -25,17 +24,6 @@ def get_hex_colour(cora_blonde=False, cora_eye=False, error=False):
         color = discord.Colour(value=random_n)
 
     return color
-
-
-def get_tokens():
-    """Gets environment variables. Returns a list."""
-    try:
-        with open(".env", "r") as f:
-            tokens = f.readlines()
-    except Exception:
-        logging.exception("Could not acquire environment variables. Stopping.")
-        sys.exit(1)
-    return tokens
 
 
 def selectReactionEmoji(n, indexes=False):
@@ -64,8 +52,7 @@ async def sendEmoji(message):
 
 
 def initializeDatabase():
-    db_file = CURR_DIR + "\\databases.db"
-    with sqlite3.connect(db_file) as conn:
+    with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
         # BasicPolls Table
         c.execute(
@@ -97,6 +84,7 @@ def initializeDatabase():
         c.execute(
             """CREATE TABLE IF NOT EXISTS RolesMaxVotes(
             Role_ID INT UNIQUE,
+            Role_name TEXT,
             Guild_ID INT,
             MaxVotes INT,
             PRIMARY KEY (Role_ID)
