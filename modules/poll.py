@@ -8,6 +8,8 @@ from modules.emoji_list import _EMOJIS
 
 _POLL_PREFIX = "!c poll "
 
+RoleRE = re.compile(r"^.*<@&(\d+)>")
+
 async def Poll(message):
     content = message.content.split(" ")[2]
     try:
@@ -271,7 +273,7 @@ async def recordRoles(message):
     db_file = CURR_DIR + "\\databases.db"
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
-    reg = re.compile(r"^.*<@&(\d+)>")
+    
     results = {}
 
     for arg in args:
@@ -286,7 +288,7 @@ async def recordRoles(message):
             return
 
         # parse mention
-        match = reg.match(role)
+        match = RoleRE.match(role)
         if match:
             role_id = match.group(1).strip()
         else:
@@ -321,7 +323,6 @@ async def recordRoles(message):
     await message.channel.send(embed=emb)
     conn.commit()
     conn.close()
-
 
 async def startRolePoll(message):
     # Command structure:
