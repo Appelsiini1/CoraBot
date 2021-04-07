@@ -1,17 +1,15 @@
 import discord
 import logging
-import os
 
 # import tweepy
 
 # import scripts
+from constants import *
 from modules import common
 from modules import quote
 from modules import insult
 from modules import commands
 from modules import choose
-
-# from modules import get_tweet
 from modules import giveaway
 from modules import pressF
 from modules import vaccine
@@ -19,12 +17,6 @@ from modules import tirsk
 from modules import poll
 
 # TODO Commit viestin lähetystä ennen
-# TODO Sqlite connectit with:in kanssa
-
-PREFIX = "!c "
-
-AUTHOR = "This bot is maintained by Appelsiini1"
-GIT = "Source code for this bot can be found at https://github.com/Appelsiini1/CoraBot"
 
 logging.basicConfig(
     filename="Coralog.txt",
@@ -33,11 +25,6 @@ logging.basicConfig(
     datefmt="%d/%m/%Y %H:%M:%S",
 )
 client = discord.Client()
-tokens = common.get_tokens()
-discordToken = tokens[0].lstrip("TOKEN").strip()[1:]
-Twit_API_key = tokens[1].lstrip("API_KEY").strip()[1:]
-Twit_API_secret = tokens[2].lstrip("API_SECRET").strip()[1:]
-
 common.initializeDatabase()
 
 # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
@@ -101,4 +88,4 @@ async def on_message(message):
         await message.channel.send("What was that?")
 
 
-client.run(discordToken)
+client.run(DISCORD_TOKEN)
