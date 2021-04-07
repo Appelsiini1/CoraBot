@@ -65,77 +65,76 @@ async def sendEmoji(message):
 
 def initializeDatabase():
     db_file = CURR_DIR + "\\databases.db"
-    conn = sqlite3.connect(db_file)
-    c = conn.cursor()
-    # BasicPolls Table
-    c.execute(
-        """CREATE TABLE IF NOT EXISTS BasicPolls(
-        Poll_ID INT UNIQUE,
-        Ch_ID INT,  
-        Guild_ID INT,
-        Author_ID INT,
-        Emojis TEXT,
-        PollName TEXT,
-        PRIMARY KEY (Poll_ID)
-    );"""
-    )
+    with sqlite3.connect(db_file) as conn:
+        c = conn.cursor()
+        # BasicPolls Table
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS BasicPolls(
+            Poll_ID INT UNIQUE,
+            Ch_ID INT,  
+            Guild_ID INT,
+            Author_ID INT,
+            Emojis TEXT,
+            PollName TEXT,
+            PRIMARY KEY (Poll_ID)
+        );"""
+        )
 
-    # RolePolls Table
-    c.execute(
-        """CREATE TABLE IF NOT EXISTS RolePolls(
-        Poll_ID INT UNIQUE,
-        Ch_ID INT,
-        Guild_ID INT,
-        Author_ID INT,
-        Options TEXT,
-        PollName TEXT,
-        PRIMARY KEY (Poll_ID)
-    );"""
-    )
+        # RolePolls Table
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS RolePolls(
+            Poll_ID INT UNIQUE,
+            Ch_ID INT,
+            Guild_ID INT,
+            Author_ID INT,
+            Options TEXT,
+            PollName TEXT,
+            PRIMARY KEY (Poll_ID)
+        );"""
+        )
 
-    # MaxVotes
-    c.execute(
-        """CREATE TABLE IF NOT EXISTS RolesMaxVotes(
-        Role_ID INT UNIQUE,
-        Guild_ID INT,
-        MaxVotes INT,
-        PRIMARY KEY (Role_ID)
-    );"""
-    )
+        # MaxVotes
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS RolesMaxVotes(
+            Role_ID INT UNIQUE,
+            Guild_ID INT,
+            MaxVotes INT,
+            PRIMARY KEY (Role_ID)
+        );"""
+        )
 
-    # Votes for RolePolls Table
-    c.execute(
-        """CREATE TABLE IF NOT EXISTS RolePolls_Votes(
-        Vote_ID INT UNIQUE,
-        Poll_ID INT,
-        Voter_ID INT,
-        option1 INT,
-        option2 INT,
-        option3 INT,
-        option4 INT,
-        option5 INT,
-        option6 INT,
-        option7 INT,
-        option8 INT,
-        option9 INT,
-        option10 INT,
-        option11 INT,
-        option12 INT,
-        option13 INT,
-        option14 INT,
-        option15 INT,
-        option16 INT,
-        option17 INT,
-        option18 INT,
-        option19 INT,
-        option20 INT,
-        PRIMARY KEY (Vote_ID)
-        FOREIGN KEY (Poll_ID) REFERENCES RolePolls(Poll_ID)
-            ON DELETE CASCADE
-    );"""
-    )
+        # Votes for RolePolls Table
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS RolePolls_Votes(
+            Vote_ID INT UNIQUE,
+            Poll_ID INT,
+            Voter_ID INT,
+            option1 INT,
+            option2 INT,
+            option3 INT,
+            option4 INT,
+            option5 INT,
+            option6 INT,
+            option7 INT,
+            option8 INT,
+            option9 INT,
+            option10 INT,
+            option11 INT,
+            option12 INT,
+            option13 INT,
+            option14 INT,
+            option15 INT,
+            option16 INT,
+            option17 INT,
+            option18 INT,
+            option19 INT,
+            option20 INT,
+            PRIMARY KEY (Vote_ID)
+            FOREIGN KEY (Poll_ID) REFERENCES RolePolls(Poll_ID)
+                ON DELETE CASCADE
+        );"""
+        )
 
-    # other databases here
+        # other databases here
 
-    conn.commit()
-    conn.close()
+        conn.commit()
