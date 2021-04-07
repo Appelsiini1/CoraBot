@@ -31,7 +31,7 @@ async def Poll(message):
             emb.description = "You do not have the permissions to use this."
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
-    elif content == "setrole":
+    elif content == "setroles":
         if message.author.guild_permissions.administrator:
             await recordRoles(message)
         else:
@@ -60,8 +60,8 @@ async def sendHelp(message):
     txt2 = "_**Advanced polls**_\n\
         Please note that advanced polls require administrator permissions to use.\
         With advanced polls you can set different maximum vote amounts for different roles. Voting will be done via a command as opposed to reactions in the basic polls. You can end advanced polls the same command as basic polls.\n\
-        To add roles into the bot's database, use \n```!c poll setroles [role]:[voteamount],[role]:[voteamount], ...```\n\
-        You can add as many roles as you need. Input the role as a mention (@role) or a role ID (you can get a role ID by enabling Discord's Developer mode. Then go to 'Server Settings' -> 'Roles' and copy the ID by right clicking on the role and selecting 'Copy ID'. To enable Developer mode, see https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).\
+        To add or edit roles in(to) the bot's database, use \n```!c poll setroles [role]:[voteamount],[role]:[voteamount], ...```\n\
+        You can add as many roles as you need. Input the role as a mention (@role) or a role ID if you don't want to mention the role (you can get a role ID by enabling Discord's Developer mode. Then go to 'Server Settings' -> 'Roles' and copy the ID by right clicking on the role and selecting 'Copy ID'. To enable Developer mode, see https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).\
         'voteamount' should be an integer.\n\
         \n\
         **Adding a new advanced poll:**\
@@ -260,7 +260,7 @@ async def endBasicPoll(message):
 async def recordRoles(message):
     # Command format
     # !c poll setroles [role]:[voteamount],[role]:[voteamount] : ...
-    prefix = _POLL_PREFIX + "setrole "
+    prefix = _POLL_PREFIX + "setroles "
     emb = discord.Embed()
     args = message.content[len(prefix):].split(",")
 
@@ -273,13 +273,19 @@ async def recordRoles(message):
     db_file = CURR_DIR + "\\databases.db"
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
-    
-    results = {}
+
+    c.execute(f"SELECT Role_ID FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}")
+    RolesInDB = c.fetchall()
+
+    added = {}
+    updated = {}
 
     for arg in args:
         try:
             role = arg.split(":")[0].strip()
             amount = int(arg.split(":")[1])
+            if len(role) == 0:
+                continue
         except ValueError:
             emb.description = "Invalid arguments, role must be an ID or a mention and amount must be an integer. \nAlso make sure you have commas and colons in the right place."
             emb.color = get_hex_colour(error=True)
@@ -302,27 +308,63 @@ async def recordRoles(message):
             conn.close()
             return
 
-        try:
-            c.execute("INSERT INTO RolesMaxVotes VALUES (?,?,?)", (role_int, message.guild.id, amount))
-        except sqlite3.IntegrityError:
-            emb.description = "One or more roles are already in the database. To edit roles use '!c poll editrole'."
-            emb.color = get_hex_colour(error=True)
-            await message.channel.send(embed=emb)
-            return
-        results[role_int] = amount
-    txt = "**Following roles & vote amounts were set:**\n"
+        roleT = (role_int,)
+        if roleT in RolesInDB:
+            c.execute("UPDATE RolesMaxVotes SET MaxVotes=? WHERE Role_ID=?", (amount, role_int))
+            updated[role_int] = amount
+        else:
+            try:
+                c.execute("INSERT INTO RolesMaxVotes VALUES (?,?,?)", (role_int, message.guild.id, amount))
+            except sqlite3.IntegrityError:
+                emb.description = "Error adding roles to database. Aborting."
+                emb.color = get_hex_colour(error=True)
+                await message.channel.send(embed=emb)
+                return
+            added[role_int] = amount
+    txt1 = "**Following roles & vote amounts were set:**\n"
+    txt2 = "**Following roles & vote amounts were updated:**\n"
+    comb = ""
     roles = await message.guild.fetch_roles()
 
-    for role in roles:
-        if role.id in results:
-            # TODO Add SyntaxError check for illegal Unicode emojis
-            txt += f"'{role.name}' : {results[role.id]}"
+    if len(added) > 0:
+        for role in roles:
+            if role.id in added:
+                # TODO Add SyntaxError check for illegal Unicode emojis
+                txt1 += f"'{role.name}' : {added[role.id]}\n"
+        comb += txt1
 
-    emb.description = txt
+    if len(updated) > 0:
+        for role in roles:
+            if role.id in updated:
+                txt2 += f"'{role.name}' : {updated[role.id]}\n"
+        if len(comb) > 0:
+            comb += f"\n{txt2}"
+        else:
+            comb += txt2
+
+    # TODO Add checks for message length
+    emb.description = comb
     emb.colour = get_hex_colour()
     await message.channel.send(embed=emb)
     conn.commit()
     conn.close()
+
+async def delRoles(message):
+    # Command format
+    # !c poll setroles [role],[role], ...
+    prefix = _POLL_PREFIX + "setroles "
+    emb = discord.Embed()
+    args = message.content[len(prefix):].split(",")
+
+    if args == 0:
+        emb.description = "You did not give any arguments. Use '!c poll help' for the correct syntax."
+        emb.color = get_hex_colour(error=True)
+        await message.channel.send(embed=emb)
+        return
+
+    db_file = CURR_DIR + "\\databases.db"
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
 
 async def startRolePoll(message):
     # Command structure:
