@@ -8,6 +8,7 @@ from modules.emoji_list import _EMOJIS
 from constants import DB_F
 
 _POLL_PREFIX = "!c poll "
+MAX_OPTIONS = 20
 
 RoleRE = re.compile(r"^.*<@&(\d+)>")
 
@@ -513,13 +514,13 @@ async def startRolePoll(message):
             emb.description = "You gave less than 2 options or you are missing separators. For correct use of the command, use ```!c poll help```"
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
-        elif len(args) <= 20:
+        elif len(args) <= MAX_OPTIONS:
             poll_txt = "Use '!c vote' -command to vote in this poll! See '!c vote help' for more.\n\n**Options:**\n"
             option_str = ""
-            i = 0
+            i = 1
             for option in args:
                 option_str += option.strip() + ";"
-                poll_txt += f"**{str(i+1)}**: {option.strip()}\n"
+                poll_txt += f"**{str(i)}**: {option.strip()}\n"
                 i += 1
 
             if len(poll_txt) >= 2048:
@@ -562,38 +563,18 @@ async def startRolePoll(message):
                 ),
             )
             conn.commit()
-            logging.info("Added poll {} into RolePolls database table.".format(msg.id))
+            logging.info(f"Added poll {msg.id} into RolePolls database table.")
             await dm_channel.send(txt)
             await dm_channel.send(txt2)
             await message.delete()
 
         else:
-            emb.description = "Exceeded maximum option amount of 20 options for polls!"
+            emb.description = (
+                f"Exceeded maximum option amount of {MAX_OPTIONS} options for polls!"
+            )
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
 
 
 async def rolePollEndHelper():
     pass
-
-
-async def vote(message):
-    pass
-
-
-async def voteHelp(message):
-    emb = discord.Embed()
-    emb.color = get_hex_colour()
-    emb.title = "Voting in polls"
-    emb.description = "You can vote in the _basic polls_ by reacting to the corresponding emote.\n\
-    The vote command can be used in _advanced polls_ (indicated by the poll having numbers before the options instead of emotes).\
-    **Vote command usage:**\n\
-    ```!c vote [Poll ID] [option number]:[amount of votes], [option number]:[amount of votes], ...```\n\
-    _NOTE!_ Poll ID can be found in the footer under the poll. You do not need to type the brackets."
-
-    dm_channel = message.author.dm_channel
-    if dm_channel == None:
-        dm_channel = await message.author.create_dm()
-
-    await dm_channel.send(embed=emb)
-    await message.delete()
