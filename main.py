@@ -3,7 +3,7 @@ import logging
 
 # import tweepy
 
-# import scripts
+# scripts, functions & constants
 from constants import *
 from modules import common
 from modules import quote
@@ -15,6 +15,7 @@ from modules import pressF
 from modules import vaccine
 from modules import tirsk
 from modules import poll
+from modules import vote
 
 # TODO Commit viestin lähetystä ennen
 
@@ -83,6 +84,8 @@ async def on_message(message):
         await tirsk.tirskCount(message)
     elif cmd == "poll":
         await poll.Poll(message)
+    elif cmd == "vote":
+        await vote.vote(message)
 
     else:
         await message.channel.send("What was that?")
