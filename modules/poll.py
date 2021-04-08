@@ -25,7 +25,7 @@ async def Poll(message):
     elif content == "new" and arg != "-r":
         await startBasicPoll(message)
     elif content == "end":
-        await endBasicPoll(message)
+        await endPolls(message)
     elif content == "roles":
         if message.author.guild_permissions.administrator:
             await showRoles(message)
@@ -197,7 +197,7 @@ async def startBasicPoll(message):
             await message.channel.send(embed=emb)
 
 
-async def pollEndHelper(poll, message):
+async def BasicPollEndHelper(poll, message):
     emb = discord.Embed()
     emb.color = get_hex_colour()
     # Poll_ID INT UNIQUE, 0
@@ -238,7 +238,10 @@ async def pollEndHelper(poll, message):
     return emb
 
 
-async def endBasicPoll(message):
+# ######################################################################################################## #
+
+
+async def endPolls(message):
     # Command structure:
     # !c poll end [poll_ID]
 
@@ -249,6 +252,7 @@ async def endBasicPoll(message):
 
         prefix = _POLL_PREFIX + "end "
         emb = discord.Embed()
+        success = 0
 
         if len(message.content.split(" ")) == 3:
             c.execute(
@@ -257,22 +261,33 @@ async def endBasicPoll(message):
             )
             polls = c.fetchall()
             if len(polls) == 0:
-                emb.description = "There are no polls running that have been initiated by you on this channel."
-                emb.color = get_hex_colour(error=True)
-                await message.channel.send(embed=emb)
+                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+                poll = c.fetchall()
+                if len(poll) == 0:   
+                    emb.description = "There are no polls running that have been initiated by you on this channel."
+                    emb.color = get_hex_colour(error=True)
+                    await message.channel.send(embed=emb)
+                else:
+                    success = await rolePollEndHelper(message, c, conn, polls=poll)
 
             else:
                 for poll in polls:
-                    emb = await pollEndHelper(poll, message)
+                    emb = await BasicPollEndHelper(poll, message)
                     await message.channel.send(embed=emb)
                 c.execute(
                     "DELETE FROM BasicPolls WHERE Author_ID=? AND Ch_ID=?",
                     (message.author.id, message.channel.id),
                 )
+                # TODO Error handling for basic poll end helper
                 conn.commit()
                 logging.info(
                     f"{len(polls)} poll(s) by {message.author.name} succesfully ended in {message.channel.name}"
                 )
+                success = 1
+                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+                poll = c.fetchall()
+                if len(poll) != 0:
+                    success = await rolePollEndHelper(message, c, conn, polls=poll)
         else:
             try:
                 arg = int(message.content.split(" ")[3])
@@ -290,11 +305,16 @@ async def endBasicPoll(message):
             )
             poll = c.fetchall()
             if len(poll) == 0:
-                emb.color = get_hex_colour(error=True)
-                emb.description = f"Unable to find poll with ID '{arg}'"
-                await message.channel.send(embed=emb)
+                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?")
+                poll = c.fetchall()
+                if len(poll) == 0:
+                    emb.color = get_hex_colour(error=True)
+                    emb.description = f"Unable to find poll with ID '{arg}'.\nPlease check that you gave the right ID and you are on the same channel as the poll."
+                    await message.channel.send(embed=emb)
+                else:
+                    success = await rolePollEndHelper(message, c, conn, poll=poll)
             else:
-                emb = await pollEndHelper(poll[0], message)
+                emb = await BasicPollEndHelper(poll[0], message)
                 await message.channel.send(embed=emb)
                 c.execute(
                     "DELETE FROM BasicPolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?",
@@ -304,7 +324,16 @@ async def endBasicPoll(message):
                 logging.info(
                     f"Poll by {message.author.name} succesfully ended in {message.channel.name}"
                 )
-        await message.delete()
+                success = 1
+                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+                poll = c.fetchall()
+                if len(poll) != 0:
+                    success = await rolePollEndHelper(message, c, conn, polls=poll)
+    if success == 1:
+        try:
+            await message.delete()
+        except Exception as e:
+            logging.exception("Poll ending command message deletion failed.")
 
 
 # ######################################################################################################## #
@@ -576,5 +605,78 @@ async def startRolePoll(message):
             await message.channel.send(embed=emb)
 
 
-async def rolePollEndHelper():
-    pass
+async def rolePollEndHelper(message, c, conn, poll=None, polls=None):
+    emb = discord.Embed()
+    if poll != None:
+        poll_id = poll[0][0]
+        poll_options = poll[0][4][:-1].split(";")
+        option_amount = len(poll_options)
+        poll_name = poll[0][5]
+
+        c.execute(f"SELECT * FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
+        votes = c.fetchall()
+        if len(votes) == 0:
+            emb.title = f"No votes for '{poll_name}'."
+            emb.color = get_hex_colour(cora_blonde=True)
+            await message.channel.send(embed=emb)
+            return 1
+        vote_sums = []
+        for i in range(option_amount):
+            vote_sums.append(0)
+        for vote in votes:
+            vote_str = vote[3][:-1].split(";")
+            i = 0
+            for option in vote_str:
+                vote_sums[i] += int(option)
+                i += 1
+
+        i = 0
+        txt = ""
+        for option in vote_sums:
+            txt += f"**{poll_options[i]}**: {option}\n"
+            i += 1
+        c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+        conn.commit()
+        emb.description = txt
+        emb.title = f"Results for '{poll_name}'"
+        emb.color = get_hex_colour(cora_eye=True)
+        await message.channel.send(embed=emb)
+        return 1
+
+    elif polls != None:
+        for poll in polls:
+            poll_id = poll[0]
+            poll_options = poll[4][:-1].split(";")
+            option_amount = len(poll_options)
+            poll_name = poll[5]
+
+            c.execute(f"SELECT * FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
+            votes = c.fetchall()
+            if len(votes) == 0:
+                emb.title = f"No votes for '{poll_name}'."
+                emb.color = get_hex_colour(cora_blonde=True)
+                await message.channel.send(embed=emb)
+                return 1
+            vote_sums = []
+            for i in range(option_amount):
+                vote_sums.append(0)
+            for vote in votes:
+                vote_str = vote[3][:-1].split(";")
+                i = 0
+                for option in vote_str:
+                    vote_sums[i] += int(option)
+                    i += 1
+
+            i = 0
+            txt = ""
+            for option in vote_sums:
+                txt += f"**{poll_options[i]}**: {option}\n"
+                i += 1
+            c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+            conn.commit()
+            emb.description = txt
+            emb.title = f"Results for '{poll_name}'"
+            emb.color = get_hex_colour(cora_eye=True)
+            await message.channel.send(embed=emb)
+            return 1
+    return 0
