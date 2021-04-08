@@ -30,7 +30,7 @@ async def vote(message):
         try:
             poll_id = int(arg.strip().lstrip("[").rstrip("]"))
         except ValueError:
-            voteErrorHandler(message, dm_channel, 1)  # invalid Poll ID
+            await voteErrorHandler(message, dm_channel, 1)  # invalid Poll ID
             return
 
         with sqlite3.connect(DB_F) as conn:
@@ -44,7 +44,7 @@ async def vote(message):
             )
             poll = c.fetchall()
             if len(poll) == 0:
-                voteErrorHandler(message, dm_channel, 2)  # no poll exists with poll ID
+                await voteErrorHandler(message, dm_channel, 2)  # no poll exists with poll ID
                 return
             else:
                 c.execute(
@@ -62,8 +62,8 @@ async def vote(message):
                     if role[0] in roleIDList:
                         foundRoles.append(role)
                 if len(foundRoles) == 0:
-                    voteErrorHandler(
-                        message, dm_channel, 3, poll_id=poll_id
+                    await voteErrorHandler(
+                        message, dm_channel, 3, poll_name=poll[0][5]
                     )  # user does not have roles that can vote
                     return
                 else:
@@ -72,7 +72,7 @@ async def vote(message):
                         if role[3] > maxvoteint:
                             maxvoteint = role[3]
                     if maxvoteint == 0:
-                        voteErrorHandler(message, dm_channel, 4)  # user has zero votes
+                        await voteErrorHandler(message, dm_channel, 4)  # user has zero votes
                         return
             c.execute(
                 "SELECT * FROM RolePolls_Votes WHERE Voter_ID=? AND Poll_ID=?",
@@ -82,17 +82,17 @@ async def vote(message):
             if len(previousVotes) > 0:
                 prevVotesInt = 0
                 for vote in previousVotes:
-                    vote_amount = sum(vote[3][:-1].split(";"))
-                    prevVotesInt += vote_amount
+                    vote_amount = vote[3][:-1].split(";")
+                    for x in vote_amount:
+                        prevVotesInt += int(x)
                 if prevVotesInt == maxvoteint:
-                    voteErrorHandler(
-                        message, dm_channel, 8, poll_id=poll_id
+                    await voteErrorHandler(
+                        message, dm_channel, 8, poll_name=poll[0][5]
                     )  # user has already voted maximum amount
                     return
                 else:
                     maxvoteint = prevVotesInt
-
-            optionsCount = len(poll.split(";"))
+            optionsCount = len(poll[0][4].split(";"))
             votes = []
             totalVotes = 0
             for i in range(optionsCount - 1):
@@ -104,32 +104,37 @@ async def vote(message):
                 try:
                     option_no = int(options[0].strip().lstrip("[").rstrip("]"))
                     vote_amount = int(options[1].strip().lstrip("[").rstrip("]"))
-                except ValueError:
-                    voteErrorHandler(message, dm_channel, 6)
+                except Exception:
+                    await voteErrorHandler(message, dm_channel, 6)
                     return
                 if option_no == 0 or option_no < 0:
-                    voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6)
                     return
                 elif option_no > optionsCount:
-                    voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6)
                     return
                 votes[option_no - 1] = vote_amount
-                totalVotes += 1
-                
+                totalVotes += vote_amount
+
             if totalVotes > maxvoteint:
-                voteErrorHandler(message, dm_channel, 5, maxvotes=maxvoteint)
+                await voteErrorHandler(message, dm_channel, 5, maxvotes=maxvoteint)
+                return
             vote_str = ""
             for vote in votes:
                 vote_str += f"{vote};"
 
             c.execute("SELECT Vote_ID FROM RolePolls_Votes ORDER BY Vote_ID DESC")
             maxid = c.fetchone()
+            if maxid == None:
+                maxid = 1
+            else:
+                maxid = maxid[0]
             i = 0
             success = 0
             while i < 5:
                 try:
                     c.execute(
-                        "INSER INTO RolePolls_Votes VALUES (?,?,?,?)",
+                        "INSERT INTO RolePolls_Votes VALUES (?,?,?,?)",
                         (maxid + 1, poll_id, message.author.id, vote_str),
                     )
                     success = 1
@@ -139,7 +144,7 @@ async def vote(message):
                     i += 1
                     continue
             if success != 1:
-                voteErrorHandler(
+                await voteErrorHandler(
                     message, dm_channel, 7
                 )  # unable to record the vote to database
                 logging.error(
@@ -147,41 +152,44 @@ async def vote(message):
                 )
                 return
             conn.commit()
-            pollOptions = poll[4][:-1].split(";")
+            pollOptions = poll[0][4][:-1].split(";")
             txt = ""
             i = 0
             for v in votes:
-                txt += f"{pollOptions[i]}: {v}"
+                txt += f"**{pollOptions[i]}**: {v}\n"
                 i += 1
             emb.description = txt
-            emb.title = "Your votes were:"
+            emb.title = f"Your votes for '{poll[0][5]}' were:"
             emb.set_footer(
                 text=f"If these are incorrect, you can use '!c vote delete {poll_id}' to delete your vote(s) and try again."
             )
+            emb.color = get_hex_colour(cora_eye=True)
+            await dm_channel.send(embed=emb)
+            await message.delete()
 
 
-async def voteErrorHandler(message, dm_channel, err_type, poll_id=0, maxvotes=0):
+async def voteErrorHandler(message, dm_channel, err_type, poll_name="", maxvotes=0):
     emb = discord.Embed()
     if err_type == 1:
-        emb.description = f"**Invalid poll ID. Please give the ID as an integer.**\
+        emb.description = f"\N{no entry} **Invalid poll ID. Please give the ID as an integer.**\
             Your command was: ```{message.content}```"
     elif err_type == 2:
-        emb.description = f"**No poll found with given poll ID on '{message.guild.name}'**\
+        emb.description = f"\N{no entry} **No poll found with given poll ID on '{message.guild.name}'**\
             Your command was: ```{message.content}```"
     elif err_type == 3:
-        emb.description = f"**You do not have a role that can vote in the poll with ID {poll_id} in '{message.guild.name}'**"
+        emb.description = f"\N{no entry} **You do not have a role that can vote in the poll '{poll_name}' in '{message.guild.name}'**"
     elif err_type == 4:
-        emb.description = f"**You cannot vote in the poll with ID {poll_id} in '{message.guild.name}'**"
+        emb.description = f"\N{no entry} **You cannot vote in the poll with ID '{poll_name}' in '{message.guild.name}'**"
     elif err_type == 5:
-        emb.description = f"**You gave too many votes. You can still give a maximum of {maxvotes}.\n\
+        emb.description = f"\N{no entry} **You gave too many votes for poll '{poll_name}'. You can still give a maximum of {maxvotes}.\n\
             Your command was:** ```{message.content}```"
     elif err_type == 6:
-        emb.description = f"**Invalid option number or vote amount. Please give them as an integer and make sure they are within the poll options.**"
+        emb.description = f"\N{no entry} **Invalid option number or vote amount. Please give them as an integer and make sure they are within the poll options.**"
     elif err_type == 7:
-        emb.description = f"**Unable to record the vote. Please try again.**\n\
+        emb.description = f"\N{no entry} **Unable to record the vote. Please try again.**\n\
             Your command was: ```{message.content}```"
     elif err_type == 8:
-        emb.description = f"**You have already given maximum amount of votes into the poll {poll_id}.**"
+        emb.description = f"\N{no entry} **You have already given maximum amount of votes into the poll '{poll_name}'.**"
     else:
         emb.description = "Something went wrong in voting."
 
@@ -224,9 +232,9 @@ async def delVotes(message):
         dm_channel = await message.author.create_dm()
     arg = message.content.split(" ")[3]
     try:
-        poll_id = int(arg.strip().lstrip("[").rstrip("]"))
+        poll_id = int(arg.strip().lstrip("[").rstrip("'").rstrip("]"))
     except ValueError:
-        voteErrorHandler(message, dm_channel, 1)  # invalid Poll ID
+        await voteErrorHandler(message, dm_channel, 1)  # invalid Poll ID
         return
 
     with sqlite3.connect(DB_F) as conn:
@@ -238,6 +246,6 @@ async def delVotes(message):
         )
         conn.commit()
         emb.title = f"Your votes were deleted from poll with ID {poll_id}"
-        emb.color = get_hex_colour()
+        emb.color = get_hex_colour(cora_eye=True)
         await dm_channel.send(embed=emb)
         await message.delete()
