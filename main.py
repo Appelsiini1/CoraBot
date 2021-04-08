@@ -1,3 +1,8 @@
+# CoraBot
+# V1.10.0
+# Copyright 2021 (c) Appelsiini1
+
+
 import discord
 import logging
 
