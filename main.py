@@ -1,5 +1,5 @@
 # CoraBot
-# V1.10.0
+# V1.10.1
 # Copyright 2021 (c) Appelsiini1
 
 
