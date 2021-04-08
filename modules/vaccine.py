@@ -5,34 +5,43 @@ import discord
 from modules.common import get_hex_colour
 import logging
 
-ALUEET = {"518327": "Ahvenanmaa",
-"518294": "Etelä-Karjalan SHP",
-"518309": "Etelä-Pohjanmaan SHP",
-"518306": "Etelä-Savon SHP",
-"518320": "Helsingin ja Uudenmaan SHP",
-"518377": "Itä-Savon SHP",
-"518303": "Kainuun SHP",
-"518340": "Kanta-Hämeen SHP",
-"518369": "Keski-Pohjanmaan SHP",
-"518295": "Keski-Suomen SHP",
-"518335": "Kymenlaakson SHP",
-"518322": "Lapin SHP",
-"518353": "Länsi-Pohjan SHP",
-"518298": "Pirkanmaan SHP",
-"518343": "Pohjois-Karjalan SHP",
-"518354": "Pohjois-Pohjanmaan SHP",
-"518351": "Pohjois-Savon SHP",
-"518300": "Päijät-Hämeen SHP",
-"518366": "Satakunnan SHP",
-"518323": "Vaasan SHP",
-"518349": "Varsinais-Suomen SHP",
-"518333": "Muut alueet",
-"518362": "Kaikki alueet",
-"184144": "Lappeenranta"}
+ALUEET = {
+    "518327": "Ahvenanmaa",
+    "518294": "Etelä-Karjalan SHP",
+    "518309": "Etelä-Pohjanmaan SHP",
+    "518306": "Etelä-Savon SHP",
+    "518320": "Helsingin ja Uudenmaan SHP",
+    "518377": "Itä-Savon SHP",
+    "518303": "Kainuun SHP",
+    "518340": "Kanta-Hämeen SHP",
+    "518369": "Keski-Pohjanmaan SHP",
+    "518295": "Keski-Suomen SHP",
+    "518335": "Kymenlaakson SHP",
+    "518322": "Lapin SHP",
+    "518353": "Länsi-Pohjan SHP",
+    "518298": "Pirkanmaan SHP",
+    "518343": "Pohjois-Karjalan SHP",
+    "518354": "Pohjois-Pohjanmaan SHP",
+    "518351": "Pohjois-Savon SHP",
+    "518300": "Päijät-Hämeen SHP",
+    "518366": "Satakunnan SHP",
+    "518323": "Vaasan SHP",
+    "518349": "Varsinais-Suomen SHP",
+    "518333": "Muut alueet",
+    "518362": "Kaikki alueet",
+    "184144": "Lappeenranta",
+}
+
 
 def getVaccineInfo(param):
-    response = requests.get(f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-533170&row=area-{param}", headers={'User-Agent': "Appelsiini1:n Discord Botti"})
-    response2 = requests.get(f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-533164&row=area-{param}", headers={'User-Agent': "Appelsiini1:n Discord Botti"})
+    response = requests.get(
+        f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-533170&row=area-{param}",
+        headers={"User-Agent": "Appelsiini1:n Discord Botti"},
+    )
+    response2 = requests.get(
+        f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-533164&row=area-{param}",
+        headers={"User-Agent": "Appelsiini1:n Discord Botti"},
+    )
     if response.status_code == 200 and response2.status_code == 200:
         json_data = json.loads(response.text)
         vacc_data = json_data["dataset"]["value"].items()
@@ -47,17 +56,20 @@ def getVaccineInfo(param):
         return one_dose, two_doses
 
     else:
-        msg = "Could not fetch vaccination data, server responded with code {0} and {1}.".format(response.status_code, response2.status_code)
+        msg = "Could not fetch vaccination data, server responded with code {0} and {1}.".format(
+            response.status_code, response2.status_code
+        )
         logging.error(msg)
-        msg2= f"PARAM = {param}"
+        msg2 = f"PARAM = {param}"
         logging.error(msg2)
         logging.error(response.content)
         return msg, msg2
 
+
 def makeEmbed(one_dose, two_doses, emb, areaCode="Finland"):
     if two_doses.startswith("PARAM"):
-        emb.description=one_dose
-        emb.color=get_hex_colour(error=True)
+        emb.description = one_dose
+        emb.color = get_hex_colour(error=True)
     else:
         if areaCode != "Finland":
             area = ALUEET[areaCode]
@@ -69,8 +81,11 @@ def makeEmbed(one_dose, two_doses, emb, areaCode="Finland"):
         emb.set_footer(text=f"Source: THL.fi")
     return emb
 
+
 async def sendVaccInfo(message):
-    emb = discord.Embed(description="_Getting latest vaccine data from THL..._", color=get_hex_colour())
+    emb = discord.Embed(
+        description="_Getting latest vaccine data from THL..._", color=get_hex_colour()
+    )
     s_msg = await message.channel.send(embed=emb)
     if len(message.content.split(" ")) == 2:
         one_dose, two_doses = getVaccineInfo("518362")
@@ -80,24 +95,23 @@ async def sendVaccInfo(message):
     elif len(message.content.split(" ")) > 2:
         param = message.content[7:].strip()
         if param == "help":
-            emb.title="Available areas:"
+            emb.title = "Available areas:"
             txt = ""
             for keypair in ALUEET.items():
                 txt = txt + keypair[0] + ": " + keypair[1] + "\n"
-            emb.description=txt
+            emb.description = txt
             await s_msg.edit(embed=emb)
             return
-        
+
         else:
             try:
                 ALUEET[param]
             except KeyError:
-                emb.description="Area code does not match any known areas. Please provide a valid code or leave empty for all areas.\
+                emb.description = "Area code does not match any known areas. Please provide a valid code or leave empty for all areas.\
                 \nType '!c vacc help' for all currently available areas."
-                emb.color=get_hex_colour(error=True)
+                emb.color = get_hex_colour(error=True)
                 await s_msg.edit(embed=emb)
                 return
             one_dose, two_doses = getVaccineInfo(param)
             emb = makeEmbed(one_dose, two_doses, emb, areaCode=param)
             await s_msg.edit(embed=emb)
-

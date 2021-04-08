@@ -4,12 +4,18 @@ from modules.common import get_hex_colour
 from datetime import datetime
 import re
 
+MentionRE = re.compile(r"^.*<@!(\d+)>")
+
+
 async def tirskCount(message):
     logging.info("Started quote counting in {}".format(message.channel.name))
-    emb = discord.Embed(description="_Counting quotes... (this could take a while)_", color=get_hex_colour())
+    emb = discord.Embed(
+        description="_Counting quotes... (this could take a while)_",
+        color=get_hex_colour(),
+    )
     msgID = await message.channel.send(embed=emb)
     counter = {}
-    reg = re.compile(r"^.*<@!(\d+)>")
+
     async for msg in message.channel.history(limit=None):
         mentions = msg.mentions
         if len(mentions) == 0:
@@ -23,7 +29,7 @@ async def tirskCount(message):
         elif len(mentions) >= 2:
             # pos = msg.content.rfind("<")
             # user_id = msg.content[pos:].strip()[3:][:-1]
-            match = reg.match(msg.content)
+            match = MentionRE.match(msg.content)
             if match:
                 user_id = match.group(1)
                 user = await message.guild.fetch_member(int(user_id))
@@ -35,7 +41,7 @@ async def tirskCount(message):
 
     txt = ""
     time = datetime.today().strftime("%d.%m.%Y")
-    for keypair in sorted(counter.items(),key=lambda x:x[1], reverse=True):
+    for keypair in sorted(counter.items(), key=lambda x: x[1], reverse=True):
         name = await message.guild.fetch_member(keypair[0])
         if name:
             name = name.display_name
