@@ -113,6 +113,8 @@ async def vote(message):
                 elif option_no > optionsCount:
                     await voteErrorHandler(message, dm_channel, 6)
                     return
+                elif vote_amount < 0:
+                    await voteErrorHandler(message, dm_channel, 6)
                 votes[option_no - 1] = vote_amount
                 totalVotes += vote_amount
 
