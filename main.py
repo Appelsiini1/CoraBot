@@ -1,5 +1,5 @@
 # CoraBot
-# V1.10.5
+# V1.11.0
 # Copyright 2021 (c) Appelsiini1
 
 
@@ -21,8 +21,7 @@ from modules import vaccine
 from modules import tirsk
 from modules import poll
 from modules import vote
-
-# TODO Commit viestin lähetystä ennen
+from modules import pop
 
 logging.basicConfig(
     filename="Coralog.txt",
@@ -49,7 +48,7 @@ async def on_message(message):
         return
     elif (
         message.channel.type != discord.ChannelType.text
-        or message.channel.type != discord.ChannelType.news
+        and message.channel.type != discord.ChannelType.news
     ):
         return
     elif (
@@ -96,6 +95,8 @@ async def on_message(message):
         await poll.Poll(message)
     elif cmd == "vote":
         await vote.vote(message)
+    elif cmd == "pop":
+        await pop.pop(message)
 
     else:
         await message.channel.send("What was that?")
