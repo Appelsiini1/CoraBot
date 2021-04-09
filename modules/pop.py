@@ -6,7 +6,7 @@ async def pop(message):
     # !c pop [integer]
     emb = Embed()
     try:
-        arg = int(message.content.split(" ")[2])
+        arg = int(message.content.split(" ")[2].strip().lstrip("[").rstrip("]"))
     except Exception:
         emb.description = "Invalid argument. Argument must be an integer."
         emb.color = get_hex_colour(error=True)

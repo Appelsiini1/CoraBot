@@ -10,7 +10,7 @@ from constants import DB_F
 _POLL_PREFIX = "!c poll "
 MAX_OPTIONS = 20
 
-RoleRE = re.compile(r"^.*<@&(\d+)>")
+RoleRE1 = re.compile(r"^.*<@&(\d+)>")
 
 
 async def Poll(message):
@@ -290,7 +290,7 @@ async def endPolls(message):
                     success = await rolePollEndHelper(message, c, conn, polls=poll)
         else:
             try:
-                arg = int(message.content.split(" ")[3])
+                arg = int(message.content.split(" ")[3].strip().lstrip("[").rstrip("]"))
             except Exception:
                 logging.exception(
                     "Something went wrong when trying to convert poll ID to int"
@@ -371,18 +371,18 @@ async def recordRoles(message):
 
         for arg in args:
             try:
-                role = arg.split(":")[0].strip()
-                amount = int(arg.split(":")[1])
+                role = arg.split(":")[0].strip().lstrip("[").rstrip("]")
+                amount = int(arg.split(":")[1].strip().lstrip("[").rstrip("]"))
                 if len(role) == 0:
                     continue
-            except ValueError:
+            except Exception:
                 emb.description = "Invalid arguments, role must be an ID or a mention and amount must be an integer. \nAlso make sure you have commas and colons in the right place."
                 emb.color = get_hex_colour(error=True)
                 await message.channel.send(embed=emb)
                 return
 
             # parse mention
-            match = RoleRE.match(role)
+            match = RoleRE1.match(role)
             if match:
                 role_id = match.group(1).strip()
             else:
@@ -481,16 +481,17 @@ async def delRoles(message):
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
 
-        if args[0].strip() == "all":
+        if args[0].strip().lstrip("[").rstrip("]") == "all":
             c.execute(f"DELETE FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}")
             i = -1
         else:
             for arg in args:
-                match = RoleRE.match(arg)
+                match = RoleRE1.match(arg)
                 if match:
                     role_id = match.group(1).strip()
                 else:
                     role_id = arg.strip()
+
                 try:
                     role_int = int(role_id)
                 except ValueError:
@@ -531,10 +532,10 @@ async def startRolePoll(message):
         prefix = _POLL_PREFIX + "new -r "
 
         args = message.content[len(prefix) :].split(";")
-        title = args[0]
+        title = args[0].strip().lstrip("[").rstrip("]")
         titleStatus = 0
         del args[0]
-        if title.strip() == "":
+        if title.strip().lstrip("[").rstrip("]") == "":
             title = f"A poll by {message.author.name}"
             titleStatus = 1
 
@@ -547,9 +548,10 @@ async def startRolePoll(message):
             poll_txt = "Use '!c vote' -command to vote in this poll! See '!c vote help' for more.\n\n**Options:**\n"
             option_str = ""
             i = 1
-            for option in args:
-                option_str += option.strip() + ";"
-                poll_txt += f"**{str(i)}**: {option.strip()}\n"
+            for o in args:
+                option = o.strip().lstrip("[").rstrip("]")
+                option_str += option + ";"
+                poll_txt += f"**{str(i)}**: {option}\n"
                 i += 1
 
             if len(poll_txt) >= 2048:
