@@ -1,5 +1,5 @@
 # CoraBot
-# V1.10.1
+# V1.10.2
 # Copyright 2021 (c) Appelsiini1
 
 
@@ -46,6 +46,11 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if message.author == client.user:
+        return
+    elif (
+        message.channel.type != discord.ChannelType.text
+        or message.channel.type != discord.ChannelType.news
+    ):
         return
     elif (
         message.content.find("sairasta") != -1
