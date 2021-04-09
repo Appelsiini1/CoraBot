@@ -115,7 +115,10 @@ async def vote(message):
                     return
                 elif vote_amount < 0:
                     await voteErrorHandler(message, dm_channel, 6)
-                votes[option_no - 1] = vote_amount
+                try:
+                    votes[option_no - 1] = vote_amount
+                except IndexError:
+                    await voteErrorHandler(message, dm_channel, 6)
                 totalVotes += vote_amount
 
             if totalVotes > maxvoteint:
