@@ -101,6 +101,18 @@ def initializeDatabase():
         );"""
         )
 
+        # Nitro boosts
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS NitroBoosts(
+            Boost_ID INT UNIQUE,
+            User_ID INT,
+            Guild_ID INT,
+            Boost_Time TEXT,
+            Boosts INT,
+            PRIMARY KEY (Boost_ID)
+        );"""
+        )
+
         # other databases here
 
         conn.commit()
