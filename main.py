@@ -1,5 +1,4 @@
 # CoraBot
-# V1.11.0
 # Copyright 2021 (c) Appelsiini1
 
 
@@ -37,8 +36,8 @@ common.initializeDatabase()
 
 @client.event
 async def on_ready():
-    print("{0.user} is online & ready.".format(client))
-    logging.info("{0.user} is online & ready.".format(client))
+    print(f"{client.user} {VERSION} is online & ready.")
+    logging.info(f"{client.user} {VERSION} is online & ready.")
 
 
 # main event, parses commands
