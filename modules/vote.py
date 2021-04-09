@@ -123,6 +123,7 @@ async def vote(message):
             for vote in votes:
                 vote_str += f"{vote};"
 
+            remainingVotes = maxvoteint - totalVotes
             c.execute("SELECT Vote_ID FROM RolePolls_Votes ORDER BY Vote_ID DESC")
             maxid = c.fetchone()
             if maxid == None:
@@ -161,7 +162,8 @@ async def vote(message):
             emb.description = txt
             emb.title = f"Your votes for '{poll[0][5]}' were:"
             emb.set_footer(
-                text=f"If these are incorrect, you can use '!c vote delete {poll_id}' to delete your vote(s) and try again."
+                text=f"You have {remainingVotes} votes left in this poll.\n\
+                    If these are incorrect, you can use '!c vote delete {poll_id}' to delete your vote(s) and try again."
             )
             emb.color = get_hex_colour(cora_eye=True)
             await dm_channel.send(embed=emb)
