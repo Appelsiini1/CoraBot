@@ -14,11 +14,13 @@ choose [option1 | option2 | ...]
 vacc [Area code (or empty for all areas) | help]
 poll [new|end|help]
 vote help
+pop [number between 1-14]
 
 Admin commands:
 giveaway
 endgiveaway [GiveawayID]
-poll [set|edit|del]role
+poll [set|del]roles
+poll roles
 poll new -r
 """
     emb = discord.Embed(

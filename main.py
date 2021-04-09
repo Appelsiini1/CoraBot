@@ -1,5 +1,4 @@
 # CoraBot
-# V1.10.0
 # Copyright 2021 (c) Appelsiini1
 
 
@@ -21,8 +20,7 @@ from modules import vaccine
 from modules import tirsk
 from modules import poll
 from modules import vote
-
-# TODO Commit viestin lähetystä ennen
+from modules import pop
 
 logging.basicConfig(
     filename="Coralog.txt",
@@ -38,14 +36,19 @@ common.initializeDatabase()
 
 @client.event
 async def on_ready():
-    print("{0.user} is online & ready.".format(client))
-    logging.info("{0.user} is online & ready.".format(client))
+    print(f"{client.user} {VERSION} is online & ready.")
+    logging.info(f"{client.user} {VERSION} is online & ready.")
 
 
 # main event, parses commands
 @client.event
 async def on_message(message):
     if message.author == client.user:
+        return
+    elif (
+        message.channel.type != discord.ChannelType.text
+        and message.channel.type != discord.ChannelType.news
+    ):
         return
     elif (
         message.content.find("sairasta") != -1
@@ -91,6 +94,8 @@ async def on_message(message):
         await poll.Poll(message)
     elif cmd == "vote":
         await vote.vote(message)
+    elif cmd == "pop":
+        await pop.pop(message)
 
     else:
         await message.channel.send("What was that?")

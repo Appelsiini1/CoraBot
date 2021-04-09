@@ -113,6 +113,8 @@ async def vote(message):
                 elif option_no > optionsCount:
                     await voteErrorHandler(message, dm_channel, 6)
                     return
+                elif vote_amount < 0:
+                    await voteErrorHandler(message, dm_channel, 6)
                 votes[option_no - 1] = vote_amount
                 totalVotes += vote_amount
 
@@ -123,6 +125,7 @@ async def vote(message):
             for vote in votes:
                 vote_str += f"{vote};"
 
+            remainingVotes = maxvoteint - totalVotes
             c.execute("SELECT Vote_ID FROM RolePolls_Votes ORDER BY Vote_ID DESC")
             maxid = c.fetchone()
             if maxid == None:
@@ -161,7 +164,8 @@ async def vote(message):
             emb.description = txt
             emb.title = f"Your votes for '{poll[0][5]}' were:"
             emb.set_footer(
-                text=f"If these are incorrect, you can use '!c vote delete {poll_id}' to delete your vote(s) and try again."
+                text=f"You have {remainingVotes} votes left in this poll.\n\
+                    If these are incorrect, you can use '!c vote delete {poll_id}' to delete your vote(s) and try again."
             )
             emb.color = get_hex_colour(cora_eye=True)
             await dm_channel.send(embed=emb)
@@ -171,7 +175,7 @@ async def vote(message):
 async def voteErrorHandler(message, dm_channel, err_type, poll_name="", maxvotes=0):
     emb = discord.Embed()
     if err_type == 1:
-        emb.description = f"\N{no entry} **Invalid poll ID. Please give the ID as an integer.**\
+        emb.description = f"\N{no entry} **Invalid poll ID. Please give the ID as an integer. See '!c vote help' for more help.**\
             Your command was: ```{message.content}```"
     elif err_type == 2:
         emb.description = f"\N{no entry} **No poll found with given poll ID on '{message.guild.name}'**\
@@ -184,7 +188,8 @@ async def voteErrorHandler(message, dm_channel, err_type, poll_name="", maxvotes
         emb.description = f"\N{no entry} **You gave too many votes for poll '{poll_name}'. You can still give a maximum of {maxvotes}.\n\
             Your command was:** ```{message.content}```"
     elif err_type == 6:
-        emb.description = f"\N{no entry} **Invalid option number or vote amount. Please give them as an integer and make sure they are within the poll options.**"
+        emb.description = f"\N{no entry} **Invalid option number or vote amount. Please give them as an integer and make sure they are within the poll options.\n\
+            See '!c vote help' for more help.**"
     elif err_type == 7:
         emb.description = f"\N{no entry} **Unable to record the vote. Please try again.**\n\
             Your command was: ```{message.content}```"
