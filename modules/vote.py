@@ -175,7 +175,7 @@ async def vote(message):
 async def voteErrorHandler(message, dm_channel, err_type, poll_name="", maxvotes=0):
     emb = discord.Embed()
     if err_type == 1:
-        emb.description = f"\N{no entry} **Invalid poll ID. Please give the ID as an integer.**\
+        emb.description = f"\N{no entry} **Invalid poll ID. Please give the ID as an integer. See '!c vote help' for more help.**\
             Your command was: ```{message.content}```"
     elif err_type == 2:
         emb.description = f"\N{no entry} **No poll found with given poll ID on '{message.guild.name}'**\
@@ -188,7 +188,8 @@ async def voteErrorHandler(message, dm_channel, err_type, poll_name="", maxvotes
         emb.description = f"\N{no entry} **You gave too many votes for poll '{poll_name}'. You can still give a maximum of {maxvotes}.\n\
             Your command was:** ```{message.content}```"
     elif err_type == 6:
-        emb.description = f"\N{no entry} **Invalid option number or vote amount. Please give them as an integer and make sure they are within the poll options.**"
+        emb.description = f"\N{no entry} **Invalid option number or vote amount. Please give them as an integer and make sure they are within the poll options.\n\
+            See '!c vote help' for more help.**"
     elif err_type == 7:
         emb.description = f"\N{no entry} **Unable to record the vote. Please try again.**\n\
             Your command was: ```{message.content}```"

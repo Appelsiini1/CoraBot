@@ -18,7 +18,8 @@ vote help
 Admin commands:
 giveaway
 endgiveaway [GiveawayID]
-poll [set|edit|del]role
+poll [set|del]roles
+poll roles
 poll new -r
 """
     emb = discord.Embed(
