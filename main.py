@@ -21,6 +21,7 @@ from modules import tirsk
 from modules import poll
 from modules import vote
 from modules import pop
+from modules import nitro
 
 logging.basicConfig(
     filename="Coralog.txt",
@@ -96,6 +97,8 @@ async def on_message(message):
         await vote.vote(message)
     elif cmd == "pop":
         await pop.pop(message)
+    elif cmd == "test":
+        await nitro.test(message)
 
     else:
         await message.channel.send("What was that?")
