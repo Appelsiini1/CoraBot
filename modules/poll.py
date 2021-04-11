@@ -1,3 +1,4 @@
+import random
 import discord
 import logging
 import sqlite3
@@ -535,6 +536,8 @@ async def startRolePoll(message):
         roles = c.fetchall()
 
         emb = discord.Embed()
+        emb2 = discord.Embed()
+        poll_colour = get_hex_colour()
         if len(roles) < 1:
             emb.description = "You have not set the maximum vote amounts for roles. See '!c poll help' for more."
             emb.color = get_hex_colour(error=True)
@@ -551,20 +554,32 @@ async def startRolePoll(message):
             title = f"A poll by {message.author.name}"
             titleStatus = 1
 
+        c.execute("SELECT Poll_ID FROM RolePolls ORDER BY Poll_ID DESC")
+        prevPollID = c.fetchone()
+
+        if prevPollID == None:
+            poll_id = 100
+        else:
+            poll_id = prevPollID + 1
+
         if len(args) <= 1 or message.content.find(";") == -1:
             # help command
             emb.description = "You gave less than 2 options or you are missing separators. For correct use of the command, use ```!c poll help```"
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
         elif len(args) <= MAX_OPTIONS:
-            poll_txt = "Use '!c vote' -command to vote in this poll! See '!c vote help' for more.\n\n**Options:**\n"
+            poll_txt = "Use '!c vote' -command to vote in this poll! See below the poll for an example.\n\n**Options:**\n"
             option_str = ""
+            
             i = 1
             for o in args:
                 option = o.strip().lstrip("[").rstrip("]")
+                if option == "":
+                    continue
                 option_str += option + ";"
                 poll_txt += f"**{str(i)}**: {option}\n"
                 i += 1
+            numberOfOptions = i
 
             if len(poll_txt) >= 2048:
                 emb.description = (
@@ -575,38 +590,70 @@ async def startRolePoll(message):
                 return
 
             emb.description = poll_txt
-            emb.color = get_hex_colour()
+            emb.color = poll_colour
             emb.title = title
-            msg = await message.channel.send(embed=emb)
-            footer = "Poll ID: " + str(msg.id)
+            footer = "Poll ID: " + str(poll_id)
             emb.set_footer(text=footer)
-
-            await msg.edit(embed=emb)
 
             dm_channel = message.author.dm_channel
             if dm_channel == None:
                 dm_channel = await message.author.create_dm()
-            txt = "Your advanced poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(
-                message.channel.name, message.guild.name, str(msg.id)
-            )
-            txt2 = "```{}```".format(message.content)
 
             if titleStatus == 1:
                 title = None
 
-            c.execute(
-                "INSERT INTO RolePolls VALUES (?,?,?,?,?,?)",
-                (
-                    msg.id,
-                    message.channel.id,
-                    message.guild.id,
-                    message.author.id,
-                    option_str,
-                    title,
-                ),
+            i = 0
+            success = 0
+            while i < 5:
+                try:
+                    c.execute(
+                        "INSERT INTO RolePolls VALUES (?,?,?,?,?,?)",
+                        (
+                            poll_id,
+                            message.channel.id,
+                            message.guild.id,
+                            message.author.id,
+                            option_str,
+                            title,
+                        ),
+                    )
+                    success = 1
+                    break
+                except sqlite3.IntegrityError:
+                    poll_id += 1
+                    i += 1
+                    emb.set_footer(text=f"Poll ID: {poll_id}")
+                    continue
+            if success != 1:
+                emb2.title = (
+                    "Poll creation failed due to a database error. Please try again."
+                )
+                emb2.description = f"Your command was: ```{message.content}```"
+                emb2.color = get_hex_colour(error=True)
+                await dm_channel.send(embed=emb2)
+                return
+
+            txt = "Your advanced poll in channel '{0}' of '{1}' with ID {2} was succesfully created with command:".format(
+                message.channel.name, message.guild.name, poll_id
             )
+            txt2 = "```{}```".format(message.content)
+            txt3 = "Here's an example of a vote command that gives {0} votes to option number \
+                {1} and {2} votes to option number {3} in this poll.\
+                ```!c vote {4} {1}:{0}, {3}:{2}```\
+                \nFor more help, use '!c vote help'".format(
+                random.randint(1, 5),
+                random.randint(1, numberOfOptions),
+                random.randint(1, 5),
+                random.randint(1, numberOfOptions),
+                poll_id,
+            )
+            emb2.title = "How to vote in this poll:"
+            emb2.description = txt3
+            emb2.color = poll_colour
+
             conn.commit()
-            logging.info(f"Added poll {msg.id} into RolePolls database table.")
+            await message.channel.send(embed=emb)
+            logging.info(f"Added poll {poll_id} into RolePolls database table.")
             await dm_channel.send(txt)
             await dm_channel.send(txt2)
             await message.delete()

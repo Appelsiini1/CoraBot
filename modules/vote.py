@@ -44,7 +44,9 @@ async def vote(message):
             )
             poll = c.fetchall()
             if len(poll) == 0:
-                await voteErrorHandler(message, dm_channel, 2)  # no poll exists with poll ID
+                await voteErrorHandler(
+                    message, dm_channel, 2
+                )  # no poll exists with poll ID
                 return
             else:
                 c.execute(
@@ -72,7 +74,9 @@ async def vote(message):
                         if role[3] > maxvoteint:
                             maxvoteint = role[3]
                     if maxvoteint == 0:
-                        await voteErrorHandler(message, dm_channel, 4)  # user has zero votes
+                        await voteErrorHandler(
+                            message, dm_channel, 4
+                        )  # user has zero votes
                         return
             c.execute(
                 "SELECT * FROM RolePolls_Votes WHERE Voter_ID=? AND Poll_ID=?",
@@ -105,20 +109,23 @@ async def vote(message):
                     option_no = int(options[0].strip().lstrip("[").rstrip("]"))
                     vote_amount = int(options[1].strip().lstrip("[").rstrip("]"))
                 except Exception:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
                     return
                 if option_no == 0 or option_no < 0:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
                     return
                 elif option_no > optionsCount:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
                     return
                 elif vote_amount < 0:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
                 try:
                     votes[option_no - 1] = vote_amount
                 except IndexError:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
+                    logging.error(
+                        f"Unknown exception handled in '!c vote'. The command was: {message.content}"
+                    )
                 totalVotes += vote_amount
 
             if totalVotes > maxvoteint:
@@ -190,10 +197,11 @@ async def voteErrorHandler(message, dm_channel, err_type, poll_name="", maxvotes
         emb.description = f"\N{no entry} **You gave too many votes for poll '{poll_name}'. You can still give a maximum of {maxvotes}.\n\
             Your command was:** ```{message.content}```"
     elif err_type == 6:
-        emb.description = f"\N{no entry} **Invalid option number or vote amount. Please give them as an integer and make sure they are within the poll options.\n\
-            See '!c vote help' for more help.**"
+        emb.description = f"\N{no entry} **Invalid option number or vote amount in poll {poll_name}. Please give them as an integer and make sure they are within the poll options.\n\
+            See '!c vote help' for more help.**\n\
+            Your command was:** ```{message.content}```"
     elif err_type == 7:
-        emb.description = f"\N{no entry} **Unable to record the vote. Please try again.**\n\
+        emb.description = f"\N{no entry} **Unable to record the vote due to a database error. Please try again.**\n\
             Your command was: ```{message.content}```"
     elif err_type == 8:
         emb.description = f"\N{no entry} **You have already given maximum amount of votes into the poll '{poll_name}'.**"
