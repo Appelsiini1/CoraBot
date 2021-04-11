@@ -21,6 +21,7 @@ from modules import tirsk
 from modules import poll
 from modules import vote
 from modules import pop
+from modules import nitro
 
 logging.basicConfig(
     filename="Coralog.txt",
@@ -60,6 +61,13 @@ async def on_message(message):
         return
     elif message.content.startswith(PREFIX) == False:
         return
+    elif message.type in [
+        discord.MessageType.premium_guild_subscription,
+        discord.MessageType.premium_guild_tier_1,
+        discord.MessageType.premium_guild_tier_2,
+        discord.MessageType.premium_guild_tier_3,
+    ]:
+        nitro.trackNitro(message)
 
     cmd = message.content.split(" ")[1]
 
@@ -96,6 +104,10 @@ async def on_message(message):
         await vote.vote(message)
     elif cmd == "pop":
         await pop.pop(message)
+    elif cmd == "test":
+        await nitro.test(message)
+    elif cmd == "mood":
+        await message.channel.send("https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4")
 
     else:
         await message.channel.send("What was that?")

@@ -261,9 +261,12 @@ async def endPolls(message):
             )
             polls = c.fetchall()
             if len(polls) == 0:
-                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+                c.execute(
+                    "SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?",
+                    (message.author.id, message.channel.id),
+                )
                 poll = c.fetchall()
-                if len(poll) == 0:   
+                if len(poll) == 0:
                     emb.description = "There are no polls running that have been initiated by you on this channel."
                     emb.color = get_hex_colour(error=True)
                     await message.channel.send(embed=emb)
@@ -284,7 +287,10 @@ async def endPolls(message):
                     f"{len(polls)} poll(s) by {message.author.name} succesfully ended in {message.channel.name}"
                 )
                 success = 1
-                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+                c.execute(
+                    "SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?",
+                    (message.author.id, message.channel.id),
+                )
                 poll = c.fetchall()
                 if len(poll) != 0:
                     success = await rolePollEndHelper(message, c, conn, polls=poll)
@@ -305,7 +311,10 @@ async def endPolls(message):
             )
             poll = c.fetchall()
             if len(poll) == 0:
-                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?")
+                c.execute(
+                    "SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?",
+                    (message.author.id, message.channel.id, arg),
+                )
                 poll = c.fetchall()
                 if len(poll) == 0:
                     emb.color = get_hex_colour(error=True)
@@ -325,7 +334,10 @@ async def endPolls(message):
                     f"Poll by {message.author.name} succesfully ended in {message.channel.name}"
                 )
                 success = 1
-                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?", (message.author.id, message.channel.id))
+                c.execute(
+                    "SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=?",
+                    (message.author.id, message.channel.id),
+                )
                 poll = c.fetchall()
                 if len(poll) != 0:
                     success = await rolePollEndHelper(message, c, conn, polls=poll)
