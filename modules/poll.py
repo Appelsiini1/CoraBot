@@ -305,7 +305,7 @@ async def endPolls(message):
             )
             poll = c.fetchall()
             if len(poll) == 0:
-                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?")
+                c.execute("SELECT * FROM RolePolls WHERE Author_ID=? AND Ch_ID=? AND Poll_ID=?", ())
                 poll = c.fetchall()
                 if len(poll) == 0:
                     emb.color = get_hex_colour(error=True)
