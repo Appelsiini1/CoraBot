@@ -16,4 +16,6 @@ async def get_tweet(message, auth):
     for i in range(0, random_n):
         tweet = cursor.next()
 
+    #time = datetime.datetime.today().strftime("%d.%m.%Y")
+
     

@@ -61,6 +61,13 @@ async def on_message(message):
         return
     elif message.content.startswith(PREFIX) == False:
         return
+    elif message.type in [
+        discord.MessageType.premium_guild_subscription,
+        discord.MessageType.premium_guild_tier_1,
+        discord.MessageType.premium_guild_tier_2,
+        discord.MessageType.premium_guild_tier_3,
+    ]:
+        nitro.trackNitro(message)
 
     cmd = message.content.split(" ")[1]
 
