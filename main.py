@@ -106,6 +106,8 @@ async def on_message(message):
         await pop.pop(message)
     elif cmd == "test":
         await nitro.test(message)
+    elif cmd == "mood":
+        await message.channel.send("https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4")
 
     else:
         await message.channel.send("What was that?")
