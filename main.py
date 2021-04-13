@@ -79,6 +79,8 @@ async def on_message(message):
         await message.channel.send(AUTHOR)
     elif cmd == "git":
         await message.channel.send(GIT)
+    elif cmd == "version":
+        await message.channel.send(f"CoraBot {VERSION}")
     elif cmd == "inspire":
         await quote.get_quote(message)
     elif cmd == "insult":
@@ -104,10 +106,19 @@ async def on_message(message):
         await vote.vote(message)
     elif cmd == "pop":
         await pop.pop(message)
-    elif cmd == "test":
-        await nitro.test(message)
+    # elif cmd == "test":
+    #     await nitro.test(message)
     elif cmd == "mood":
         await message.channel.send("https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4")
+    elif cmd == "nitro":
+        try:
+            arg2 = message.content.split(" ")[2]
+            if arg2.strip() in ["start", "stop", "notice"]:
+                await nitro.Tracking(message)
+            else:
+                await message.channel.send("What was that?")
+        except IndexError:
+            await message.channel.send("Unknown argument. Use '!c nitro help' for correct syntax.")
 
     else:
         await message.channel.send("What was that?")

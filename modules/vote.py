@@ -44,7 +44,9 @@ async def vote(message):
             )
             poll = c.fetchall()
             if len(poll) == 0:
-                await voteErrorHandler(message, dm_channel, 2)  # no poll exists with poll ID
+                await voteErrorHandler(
+                    message, dm_channel, 2
+                )  # no poll exists with poll ID
                 return
             else:
                 c.execute(
@@ -72,7 +74,9 @@ async def vote(message):
                         if role[3] > maxvoteint:
                             maxvoteint = role[3]
                     if maxvoteint == 0:
-                        await voteErrorHandler(message, dm_channel, 4)  # user has zero votes
+                        await voteErrorHandler(
+                            message, dm_channel, 8, poll_name=poll[0][5]
+                        )  # user has zero votes
                         return
             c.execute(
                 "SELECT * FROM RolePolls_Votes WHERE Voter_ID=? AND Poll_ID=?",
@@ -105,24 +109,27 @@ async def vote(message):
                     option_no = int(options[0].strip().lstrip("[").rstrip("]"))
                     vote_amount = int(options[1].strip().lstrip("[").rstrip("]"))
                 except Exception:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
                     return
                 if option_no == 0 or option_no < 0:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
                     return
                 elif option_no > optionsCount:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
                     return
                 elif vote_amount < 0:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
                 try:
                     votes[option_no - 1] = vote_amount
                 except IndexError:
-                    await voteErrorHandler(message, dm_channel, 6)
+                    await voteErrorHandler(message, dm_channel, 6, poll_name=poll[0][5])
+                    logging.error(
+                        f"Unknown exception handled in '!c vote'. The command was: {message.content}"
+                    )
                 totalVotes += vote_amount
 
             if totalVotes > maxvoteint:
-                await voteErrorHandler(message, dm_channel, 5, maxvotes=maxvoteint)
+                await voteErrorHandler(message, dm_channel, 5, maxvotes=maxvoteint, poll_name=poll[0][5])
                 return
             vote_str = ""
             for vote in votes:
@@ -167,7 +174,7 @@ async def vote(message):
             emb.description = txt
             emb.title = f"Your votes for '{poll[0][5]}' were:"
             emb.set_footer(
-                text=f"You have {remainingVotes} votes left in this poll.\nIf these are incorrect, you can use '!c vote delete {poll_id}' to delete your vote(s) and try again."
+                text=f"You have {remainingVotes} votes left in this poll.\nIf your votes look incorrect, you can use '!c vote delete {poll_id}' to delete your vote(s) and try again."
             )
             emb.color = get_hex_colour(cora_eye=True)
             await dm_channel.send(embed=emb)
@@ -178,22 +185,25 @@ async def voteErrorHandler(message, dm_channel, err_type, poll_name="", maxvotes
     emb = discord.Embed()
     if err_type == 1:
         emb.description = f"\N{no entry} **Invalid poll ID. Please give the ID as an integer. See '!c vote help' for more help.**\
-            Your command was: ```{message.content}```"
+            \nYour command was: ```{message.content}```"
     elif err_type == 2:
         emb.description = f"\N{no entry} **No poll found with given poll ID on '{message.guild.name}'**\
-            Your command was: ```{message.content}```"
+            \nYour command was: ```{message.content}```"
     elif err_type == 3:
         emb.description = f"\N{no entry} **You do not have a role that can vote in the poll '{poll_name}' in '{message.guild.name}'**"
-    elif err_type == 4:
+
+    elif err_type == 4: # depricated, use err_type 8 instead.
         emb.description = f"\N{no entry} **You cannot vote in the poll with ID '{poll_name}' in '{message.guild.name}'**"
+
     elif err_type == 5:
-        emb.description = f"\N{no entry} **You gave too many votes for poll '{poll_name}'. You can still give a maximum of {maxvotes}.\n\
-            Your command was:** ```{message.content}```"
+        emb.description = f"\N{no entry} **You gave too many votes for poll '{poll_name}'. You can still give a maximum of {maxvotes}.**\n\
+            Your command was: ```{message.content}```"
     elif err_type == 6:
-        emb.description = f"\N{no entry} **Invalid option number or vote amount. Please give them as an integer and make sure they are within the poll options.\n\
-            See '!c vote help' for more help.**"
+        emb.description = f"\N{no entry} **Invalid option number or vote amount in poll {poll_name}. Please give them as an integer and make sure they are within the poll options.\n\
+            See '!c vote help' for more help.**\n\
+            Your command was: ```{message.content}```"
     elif err_type == 7:
-        emb.description = f"\N{no entry} **Unable to record the vote. Please try again.**\n\
+        emb.description = f"\N{no entry} **Unable to record the vote due to a database error. Please try again.**\n\
             Your command was: ```{message.content}```"
     elif err_type == 8:
         emb.description = f"\N{no entry} **You have already given maximum amount of votes into the poll '{poll_name}'.**"
@@ -202,15 +212,18 @@ async def voteErrorHandler(message, dm_channel, err_type, poll_name="", maxvotes
 
     emb.color = get_hex_colour(error=True)
     await dm_channel.send(embed=emb)
-    await message.delete()
+    try:
+        await message.delete()
+    except discord.errors.NotFound:
+        logging.exception("Could not delete vote command message. Message not found.")
 
 
 async def voteHelp(message):
     emb = discord.Embed()
     emb.color = get_hex_colour()
     emb.title = "Voting in polls"
-    emb.description = "You can vote in the _basic polls_ by reacting to the corresponding emote.\n\
-    The vote command can be used in _advanced polls_ (indicated by the poll having numbers before the options instead of emotes).\
+    emb.description = "You can vote in the _basic polls_ by reacting to the corresponding emote.\n\n\
+    The vote command can be used in _advanced polls_ (indicated by the poll having numbers before the options instead of emotes).\n\
     **Vote command usage:**\n\
     ```!c vote [Poll ID] [option number]:[amount of votes], [option number]:[amount of votes], ...```\n\
     _NOTE!_ Poll ID can be found in the footer under the poll. You do not need to type the brackets.\n\
@@ -226,7 +239,10 @@ async def voteHelp(message):
         dm_channel = await message.author.create_dm()
 
     await dm_channel.send(embed=emb)
-    await message.delete()
+    try:
+        await message.delete()
+    except discord.errors.NotFound:
+        logging.exception("Could not delete vote help command message. Message not found.")
 
 
 async def delVotes(message):

@@ -108,8 +108,18 @@ def initializeDatabase():
             User_ID INT,
             Guild_ID INT,
             Boost_Time TEXT,
+            LatestBoost TEXT,
             Boosts INT,
             PRIMARY KEY (Boost_ID)
+        );"""
+        )
+
+        # Servers to track Nitro
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS NitroTrack(
+            Guild_ID INT,
+            Track_YN INT,
+            PRIMARY KEY (Guild_ID)
         );"""
         )
 
