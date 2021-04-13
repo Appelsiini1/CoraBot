@@ -7,6 +7,7 @@ async def cmds(message):
 help
 author
 git
+version
 inspire
 insult [user]
 f (alias: F)

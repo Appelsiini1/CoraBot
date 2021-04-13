@@ -79,6 +79,8 @@ async def on_message(message):
         await message.channel.send(AUTHOR)
     elif cmd == "git":
         await message.channel.send(GIT)
+    elif cmd == "version":
+        await message.channel.send(f"CoraBot {VERSION}")
     elif cmd == "inspire":
         await quote.get_quote(message)
     elif cmd == "insult":
