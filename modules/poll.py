@@ -191,7 +191,10 @@ async def startBasicPoll(message):
             logging.info("Added poll {} into BasicPolls database table.".format(msg.id))
             await dm_channel.send(txt)
             await dm_channel.send(txt2)
-            await message.delete()
+            try:
+                await message.delete()
+            except discord.errors.NotFound:
+                logging.exception("Could not delete message when creating a basic poll. Message was not found.")
         else:
             emb.description = "Exceeded maximum option amount of 20 options for polls!"
             emb.color = get_hex_colour(error=True)
@@ -272,7 +275,14 @@ async def endPolls(message):
                     emb.color = get_hex_colour(error=True)
                     await message.channel.send(embed=emb)
                 else:
-                    success = await rolePollEndHelper(message, c, conn, polls=poll)
+                    polls = await rolePollEndHelper(message, c, polls=poll)
+                    if polls != 0:
+                        for poll_id in polls:
+                            c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                        conn.commit()
+                        success = 1
+                    else:
+                        success = 0
 
             else:
                 for poll in polls:
@@ -294,7 +304,14 @@ async def endPolls(message):
                 )
                 poll = c.fetchall()
                 if len(poll) != 0:
-                    success = await rolePollEndHelper(message, c, conn, polls=poll)
+                    polls = await rolePollEndHelper(message, c, polls=poll)
+                    if polls != 0:
+                        for poll_id in polls:
+                            c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                        conn.commit()
+                        success = 1
+                    else:
+                        success = 0
         else:
             try:
                 arg = int(message.content.split(" ")[3].strip().lstrip("[").rstrip("]"))
@@ -322,7 +339,14 @@ async def endPolls(message):
                     emb.description = f"Unable to find poll with ID '{arg}'.\nPlease check that you gave the right ID and you are on the same channel as the poll."
                     await message.channel.send(embed=emb)
                 else:
-                    success = await rolePollEndHelper(message, c, conn, poll=poll)
+                    polls = await rolePollEndHelper(message, c, poll=poll)
+                    if polls != 0:
+                        for poll_id in polls:
+                            c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                        conn.commit()
+                        success = 1
+                    else:
+                        success = 0
             else:
                 emb = await BasicPollEndHelper(poll[0], message)
                 await message.channel.send(embed=emb)
@@ -341,7 +365,14 @@ async def endPolls(message):
                 )
                 poll = c.fetchall()
                 if len(poll) != 0:
-                    success = await rolePollEndHelper(message, c, conn, polls=poll)
+                    polls = await rolePollEndHelper(message, c, polls=poll)
+                    if polls != 0:
+                        for poll_id in polls:
+                            c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                        conn.commit()
+                        success = 1
+                    else:
+                        success = 0
     if success == 1:
         try:
             await message.delete()
@@ -560,7 +591,7 @@ async def startRolePoll(message):
         if prevPollID == None:
             poll_id = 100
         else:
-            poll_id = prevPollID + 1
+            poll_id = prevPollID[0] + 1
 
         if len(args) <= 1 or message.content.find(";") == -1:
             # help command
@@ -579,7 +610,7 @@ async def startRolePoll(message):
                 option_str += option + ";"
                 poll_txt += f"**{str(i)}**: {option}\n"
                 i += 1
-            numberOfOptions = i
+            numberOfOptions = i-1
 
             if len(poll_txt) >= 2048:
                 emb.description = (
@@ -637,14 +668,29 @@ async def startRolePoll(message):
                 message.channel.name, message.guild.name, poll_id
             )
             txt2 = "```{}```".format(message.content)
-            txt3 = "Here's an example of a vote command that gives {0} votes to option number \
-                {1} and {2} votes to option number {3} in this poll.\
+
+            if numberOfOptions == 2:
+                option1 = 1
+                option2 = 2
+            else:
+                option1 = random.randint(1, numberOfOptions)
+                option2 = random.randint(1, numberOfOptions)
+                if option2 == option1 and option2 != numberOfOptions:
+                    option2 += 1
+                elif option2 == option1 and option1-1 != 0:
+                    option2 -= 1
+                else:
+                    option1 = 1
+                    option2 = 2
+
+            txt3 = "Here's an example of a vote command that gives {0} vote(s) to option number \
+                {1} and {2} vote(s) to option number {3} in this poll.\
                 ```!c vote {4} {1}:{0}, {3}:{2}```\
                 \nFor more help, use '!c vote help'".format(
                 random.randint(1, 5),
-                random.randint(1, numberOfOptions),
+                option1,
                 random.randint(1, 5),
-                random.randint(1, numberOfOptions),
+                option2,
                 poll_id,
             )
             emb2.title = "How to vote in this poll:"
@@ -653,6 +699,7 @@ async def startRolePoll(message):
 
             conn.commit()
             await message.channel.send(embed=emb)
+            await message.channel.send(embed=emb2)
             logging.info(f"Added poll {poll_id} into RolePolls database table.")
             await dm_channel.send(txt)
             await dm_channel.send(txt2)
@@ -666,8 +713,9 @@ async def startRolePoll(message):
             await message.channel.send(embed=emb)
 
 
-async def rolePollEndHelper(message, c, conn, poll=None, polls=None):
+async def rolePollEndHelper(message, c, poll=None, polls=None):
     emb = discord.Embed()
+    poll_ids = []
     if poll != None:
         poll_id = poll[0][0]
         poll_options = poll[0][4][:-1].split(";")
@@ -680,7 +728,8 @@ async def rolePollEndHelper(message, c, conn, poll=None, polls=None):
             emb.title = f"No votes for '{poll_name}'."
             emb.color = get_hex_colour(cora_blonde=True)
             await message.channel.send(embed=emb)
-            return 1
+            poll_ids.append(poll_id)
+            return poll_ids
         vote_sums = []
         for i in range(option_amount):
             vote_sums.append(0)
@@ -696,13 +745,12 @@ async def rolePollEndHelper(message, c, conn, poll=None, polls=None):
         for option in vote_sums:
             txt += f"**{poll_options[i]}**: {option}\n"
             i += 1
-        c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
-        conn.commit()
+        poll_ids.append(poll_id)
         emb.description = txt
         emb.title = f"Results for '{poll_name}'"
         emb.color = get_hex_colour(cora_eye=True)
         await message.channel.send(embed=emb)
-        return 1
+        return poll_ids
 
     elif polls != None:
         for poll in polls:
@@ -717,7 +765,8 @@ async def rolePollEndHelper(message, c, conn, poll=None, polls=None):
                 emb.title = f"No votes for '{poll_name}'."
                 emb.color = get_hex_colour(cora_blonde=True)
                 await message.channel.send(embed=emb)
-                return 1
+                poll_ids.append(poll_id)
+                continue
             vote_sums = []
             for i in range(option_amount):
                 vote_sums.append(0)
@@ -733,11 +782,10 @@ async def rolePollEndHelper(message, c, conn, poll=None, polls=None):
             for option in vote_sums:
                 txt += f"**{poll_options[i]}**: {option}\n"
                 i += 1
-            c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
-            conn.commit()
+            poll_ids.append(poll_id)
             emb.description = txt
             emb.title = f"Results for '{poll_name}'"
             emb.color = get_hex_colour(cora_eye=True)
             await message.channel.send(embed=emb)
-            return 1
+        return poll_ids
     return 0
