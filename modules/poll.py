@@ -15,7 +15,10 @@ RoleRE1 = re.compile(r"^.*<@&(\d+)>")
 
 
 async def Poll(message):
-    content = message.content.split(" ")[2]
+    try:
+        content = message.content.split(" ")[2]
+    except IndexError:
+        content = ""
     try:
         arg = message.content.split(" ")[3]
     except IndexError:
