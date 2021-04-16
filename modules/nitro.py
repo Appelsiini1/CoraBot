@@ -1,7 +1,9 @@
+import re
 import discord
 import logging
 import sqlite3
 import datetime
+
 from modules.common import get_hex_colour
 from constants import DB_F
 
@@ -9,6 +11,8 @@ EMOJI = "\N{PARTY POPPER}"
 EMOJI2 = "\N{CONFETTI BALL}"
 HEART_EMOTE = "\N{SPARKLING HEART}"
 SURPRISE_EMOTE = "\N{FACE WITH OPEN MOUTH}"
+
+MENTION_RE = re.compile(r"^.*<@!(\d+)>")
 
 
 def constructEmbed(message, boosts):
@@ -35,6 +39,9 @@ def constructEmbed(message, boosts):
             )
             HeartEmote = HEART_EMOTE
             SurpriseEmote = SURPRISE_EMOTE
+    else:
+        HeartEmote = HEART_EMOTE
+        SurpriseEmote = SURPRISE_EMOTE
 
     if boosts == 1:
         txt = f"{HeartEmote}  {message.guild.name} just got a New Boost by **{message.author.display_name}**!  {HeartEmote}"
@@ -62,7 +69,7 @@ async def trackNitro(message):
         c = conn.cursor()
         guild_id = message.guild.id
         booster_id = message.author.id
-        time = datetime.datetime.today().strftime("%d.%m.%Y %H:%M:%S")
+        time = datetime.datetime.now().strftime("%d.%m.%Y")
         emb = discord.Embed()
 
         try:
@@ -72,11 +79,9 @@ async def trackNitro(message):
 
         c.execute(f"SELECT * FROM NitroTrack WHERE Guild_ID={guild_id}")
         track = c.fetchone()
-        # print(track)
         if track == None:
-            print("Here")
             return
-        elif track[1] == 2:  # TODO Only post a notice of the boost but do not track
+        elif track[1] == 2: # Only notice, no tracking.
             emb = constructEmbed(message, boostAmount)
             try:
                 await message.channel.send(embed=emb)
@@ -269,8 +274,44 @@ async def Tracking(message):
 
 
 async def addNitro(message):
-    pass
+    # command structure
+    # !c nitro add [@user or id], [amount], [time ONLY DATE!! as DD.MM.YYYY]
+    # if time is omitted, use current time
+    prefix = "!c nitro add "
+    args = message.content[len(prefix):].split(" ")
 
+    emb = discord.Embed()
+
+    try:
+        user_raw = args[0]
+        boosts = int(args[1])
+    except Exception:
+        emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
+        emb.color = get_hex_colour(error=True)
+        await message.channel.send(embed=emb)
+        return
+
+    match = MENTION_RE.match(user_raw)
+    if match:
+        user_id = match.group(1)
+        user = message.guild.get_member(int(user_id))
+    else:
+        try:
+            user_id = int(user_raw)
+            user  = message.guild.get_member(user_id)
+        except Exception:            
+            emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
+            return
+    
+    try:
+        time = args[2]
+        boostTime = datetime.datetime.strptime(time, "%d.%m.%Y")
+    except Exception:
+        boostTime = datetime.datetime.today().strftime("%d.%m.%Y")
+
+    
 
 async def parseNitroAddition(message):
     pass
