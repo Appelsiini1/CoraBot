@@ -3,6 +3,7 @@ import logging
 from modules.common import get_hex_colour
 from datetime import datetime
 import re
+import time
 
 MentionRE = re.compile(r"^.*<@!(\d+)>")
 
@@ -38,6 +39,7 @@ async def tirskCount(message):
                     counter[auth] += 1
                 else:
                     counter[auth] = 1
+        time.sleep(0.07)
 
     txt = ""
     time = datetime.today().strftime("%d.%m.%Y")
