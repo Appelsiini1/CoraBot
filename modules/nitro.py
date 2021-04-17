@@ -18,7 +18,7 @@ MENTION_RE = re.compile(r"^.*<@!(\d+)>")
 def constructEmbed(message, boosts):
     emb = discord.Embed()
 
-    if message.guild.id == 181079344611852288: # TinyCactus easter egg
+    if message.guild.id == 181079344611852288:  # TinyCactus easter egg
         emote_name = "cheart"
         emote_name2 = "cacsurp2"
         succ = 0
@@ -81,7 +81,7 @@ async def trackNitro(message):
         track = c.fetchone()
         if track == None:
             return
-        elif track[1] == 2: # Only notice, no tracking.
+        elif track[1] == 2:  # Only notice, no tracking.
             emb = constructEmbed(message, boostAmount)
             try:
                 await message.channel.send(embed=emb)
@@ -278,13 +278,13 @@ async def addNitro(message):
     # !c nitro add [@user or id], [amount], [time ONLY DATE!! as DD.MM.YYYY]
     # if time is omitted, use current time
     prefix = "!c nitro add "
-    args = message.content[len(prefix):].split(" ")
+    args = message.content[len(prefix) :].split(" ")
 
     emb = discord.Embed()
 
     try:
         user_raw = args[0]
-        boosts = int(args[1])
+        boostAmount = int(args[1])
     except Exception:
         emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
         emb.color = get_hex_colour(error=True)
@@ -298,24 +298,152 @@ async def addNitro(message):
     else:
         try:
             user_id = int(user_raw)
-            user  = message.guild.get_member(user_id)
-        except Exception:            
-            emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
+            user = await message.guild.fetch_member(user_id)
+        except Exception:
+            emb.title = "Invalid user ID, boost amount or user not found. Give user as an ID or a mention. Boost amount should be an integer."
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
             return
-    
+    noTime = 0
     try:
         time = args[2]
-        boostTime = datetime.datetime.strptime(time, "%d.%m.%Y")
     except Exception:
         boostTime = datetime.datetime.today().strftime("%d.%m.%Y")
+        noTime = 1
+    try:
+        boostTime = datetime.datetime.strptime(time, "%d.%m.%Y")
+    except ValueError:
+        if noTime == 0:
+            emb.title = (
+                "Invalid timeformat. Please give boost time in the format 'DD.MM.YYYY'."
+            )
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
+            return
+        else:
+            pass
 
-    
+    guild_id = message.guild.id
+    with sqlite3.connect(DB_F) as conn:
+        c = conn.cursor()
+        c.execute(
+            "SELECT * FROM NitroBoosts WHERE Guild_ID=? AND User_ID=?",
+            (guild_id, user.id),
+        )
+        previousBoosts = c.fetchone()
+        if previousBoosts == None:
+            c.execute("SELECT Boost_ID FROM NitroBoosts ORDER BY Boost_ID DESC")
+            lastID = c.fetchone()
+            if lastID == None:
+                lastID = 1
+            else:
+                lastID = lastID[0] + 1
 
-async def parseNitroAddition(message):
-    pass
+            # Boost_ID INT UNIQUE,
+            # User_ID INT,
+            # Guild_ID INT,
+            # Boost_Time TEXT,
+            # LatestBoost TEXT,
+            # Boosts INT,
+            i = 0
+            success = 0
+            while i < 10:
+                try:
+                    c.execute(
+                        "INSERT INTO NitroBoosts VALUES (?,?,?,?,?,?)",
+                        (lastID, user.id, guild_id, boostTime, boostTime, boostAmount),
+                    )
+                    success = 1
+                    break
+                except sqlite3.IntegrityError:
+                    i += 1
+                    lastID += 1
+            if success != 1:
+                logging.error("Could not add boost to database.")
+                emb.title = f"There was a database error adding a boost by '{user.display_name}'. Please try again later."
+                emb.color = get_hex_colour(error=True)
+                await message.channel.send(embed=emb)
+                return
+            emb.description = (
+                f"Added {boostAmount} boost(s) by {user.display_name} into database."
+            )
+            emb.color = get_hex_colour(cora_eye=True)
+            conn.commit()
+            await message.channel.send(embed=emb)
+
+        else:
+            c.execute(
+                "SELECT * FROM NitroBoosts WHERE Guild_ID=? AND User_ID=?",
+                (guild_id, user.id),
+            )
+            boost = c.fetchone()
+            boosts = boost[5]
+            newValue = boosts + boostAmount
+            # TODO Compare the times of boosts and only update if necessary (either latest or first boost)
+            c.execute(
+                "UPDATE NitroBoosts SET Boosts=?, LatestBoost=? WHERE Guild_ID=? AND User_ID=?",
+                (newValue, time, guild_id, user.id),
+            )
+            emb.description = (
+                f"Added {boostAmount} boost(s) by {user.display_name} into database."
+            )
+            emb.color = get_hex_colour(cora_eye=True)
+            conn.commit()
+            await message.channel.send(embed=emb)
 
 
 async def delNitro(message):
     pass
+
+
+async def nitroHelp(message):
+    emb = discord.Embed()
+    emb.title = "Nitro Tracking"
+    emb.color = get_hex_colour(cora_blonde=True)
+    txt = "**General info**\n\
+        This is the best implementation of nitro tracking that is possible within Discord limitations.\n\
+        It can track boost amount, times, and boosters. HOWEVER, it cannot continuously check if the boosts are valid. Checks are made either \n\
+        automatically when '!c nitro spin' command is used or when using '!c nitro check' manually. These commands however can only see overall Nitro status of the user.\n\
+        It cannot see wheter individual boosts have expired, only if all of them have. Please see these commands below for more info.\n\
+        **NOTE!!** All commands below require administrator priviledges.\n\
+        \n**Enabling/Disabling nitro tracking on server**\n\
+        To enable nitro tracking on your server, use\n\
+        ```!c nitro start```\n\
+        To ONLY show boost announcements but not track boosts, use\n\
+        ```!c nitro notice```\n\
+        To stop tracking or announcements, use\n\
+        ```!c nitro stop```\n\n\
+        **Adding boosts manually**\n\
+        If you have older boosts active on the server, or an error occured during tracking, you can add them manually to the bot's database by using\n\
+        ```!c nitro add [user], [amount], [date]```\n\
+        _Arguments:_\n\
+        _user_: Spesifies who the booster is. This can be a mention (@user) or a user ID as an integer.\n\
+        _amount_: The amount of boosts to add as an integer.\n\
+        _date_: The date of the boost(s). This argument is optional. If it is not given, current date will be used.\n\
+        \tIf the user is not in the database, this will be added to both the latest and first boost dates. Otherwise the date is compared to the dates\n\
+        already in the database and figure out which one to update.\n\
+        "
+    await message.channel.send(embed=emb)
+
+
+async def nitroJunction(message):
+    if message.author.guild_permissions.administrator:
+        try:
+            arg2 = message.content.split(" ")[2]
+            if arg2.strip() in ["start", "stop", "notice"]:
+                await Tracking(message)
+            elif arg2.strip() == "add":
+                await addNitro(message)
+            else:
+                await message.channel.send(
+                    "Unknown argument. Use '!c nitro help' for correct syntax."
+                )
+        except IndexError:
+            await message.channel.send(
+                "No arguments given. Use '!c nitro help' for correct syntax."
+            )
+    else:
+        emb = discord.Embed()
+        emb.description = "You do not have the permissions to use this."
+        emb.color = get_hex_colour(error=True)
+        await message.channel.send(embed=emb)
