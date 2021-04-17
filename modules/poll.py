@@ -9,6 +9,8 @@ from modules.emoji_list import _EMOJIS
 from constants import DB_F
 
 _POLL_PREFIX = "!c poll "
+
+# only affects rolepolls
 MAX_OPTIONS = 20
 
 RoleRE1 = re.compile(r"^.*<@&(\d+)>")
@@ -197,7 +199,9 @@ async def startBasicPoll(message):
             try:
                 await message.delete()
             except discord.errors.NotFound:
-                logging.exception("Could not delete message when creating a basic poll. Message was not found.")
+                logging.exception(
+                    "Could not delete message when creating a basic poll. Message was not found."
+                )
         else:
             emb.description = "Exceeded maximum option amount of 20 options for polls!"
             emb.color = get_hex_colour(error=True)
@@ -604,7 +608,7 @@ async def startRolePoll(message):
         elif len(args) <= MAX_OPTIONS:
             poll_txt = "Use '!c vote' -command to vote in this poll! See below the poll for an example.\n\n**Options:**\n"
             option_str = ""
-            
+
             i = 1
             for o in args:
                 option = o.strip().lstrip("[").rstrip("]")
@@ -613,7 +617,7 @@ async def startRolePoll(message):
                 option_str += option + ";"
                 poll_txt += f"**{str(i)}**: {option}\n"
                 i += 1
-            numberOfOptions = i-1
+            numberOfOptions = i - 1
 
             if len(poll_txt) >= 2048:
                 emb.description = (
@@ -680,7 +684,7 @@ async def startRolePoll(message):
                 option2 = random.randint(1, numberOfOptions)
                 if option2 == option1 and option2 != numberOfOptions:
                     option2 += 1
-                elif option2 == option1 and option1-1 != 0:
+                elif option2 == option1 and option1 - 1 != 0:
                     option2 -= 1
                 else:
                     option1 = 1
