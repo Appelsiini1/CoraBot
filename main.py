@@ -55,7 +55,6 @@ async def on_message(message):
         message.content.find("sairasta") != -1
         or message.content.find("ei oo normaalii") != -1
     ):
-        print("sairasta")
         msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
         await message.channel.send(msg)
         return

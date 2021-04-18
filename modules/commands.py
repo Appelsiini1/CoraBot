@@ -11,7 +11,7 @@ version
 inspire
 insult [user]
 f (alias: F)
-choose [option1 | option2 | ...]
+choose option1 | option2 | ... 
 vacc [Area code (or empty for all areas) | help]
 poll [new|end|help]
 vote help
@@ -23,6 +23,7 @@ endgiveaway [GiveawayID]
 poll [set|del]roles
 poll roles
 poll new -r
+nitro [add|del|start|stop|notice]
 """
     emb = discord.Embed(
         title="List of available commands:",

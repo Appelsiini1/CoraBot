@@ -393,7 +393,91 @@ async def addNitro(message):
 
 
 async def delNitro(message):
-    pass
+    # Command structure
+    # !c nitro del @person (amount / 'all')
+
+    prefix = "!c nitro del "
+    args = message.content[len(prefix) :].split(" ")
+
+    emb = discord.Embed()
+
+    try:
+        user_raw = args[0]
+        boostAmount = int(args[1])
+    except IndexError:
+        emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
+        emb.color = get_hex_colour(error=True)
+        await message.channel.send(embed=emb)
+        return
+    except ValueError:
+        if args[1].strip().lower() == "all":
+            boostAmount = 99999
+        else:
+            emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
+            return
+
+    match = MENTION_RE.match(user_raw)
+    if match:
+        user_id = match.group(1)
+        user = message.guild.get_member(int(user_id))
+    else:
+        try:
+            user_id = int(user_raw)
+            user = await message.guild.fetch_member(user_id)
+        except Exception:
+            emb.title = "Invalid user ID or user not found. Give user as an ID or a mention. Boost amount should be an integer."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
+            return
+
+    guild_id = message.guild.id
+    with sqlite3.connect(DB_F) as conn:
+        c = conn.cursor()
+        c.execute(
+            "SELECT * FROM NitroBoosts WHERE Guild_ID=? AND User_ID=?",
+            (guild_id, user.id),
+        )
+        previousBoosts = c.fetchone()
+        if previousBoosts == None:
+            emb.title = "User has no boosts on record to delete."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(emebed=emb)
+            return
+        else:
+            c.execute(
+                "SELECT * FROM NitroBoosts WHERE Guild_ID=? AND User_ID=?",
+                (guild_id, user.id),
+            )
+            boost = c.fetchone()
+            boosts = boost[5]
+            newValue = boosts - boostAmount
+            try:
+                if boostAmount == 99999 or newValue <= 0:
+                    c.execute(
+                        "DELETE FROM NitroBoosts WHERE Guild_ID=? AND User_ID=?",
+                        (guild_id, user.id),
+                    )
+                    emb.description = f"Deleted all ({boosts}) boosts by {user.display_name} from the database."
+
+                else:
+                    c.execute(
+                        "UPDATE NitroBoosts SET Boosts=? WHERE Guild_ID=? AND User_ID=?",
+                        (newValue, guild_id, user.id),
+                    )
+                    emb.description = f"Deleted {boostAmount} boost(s) by {user.display_name} from the database."
+
+            except Exception:
+                logging.exception("Error updating database in 'nitro del' command.")
+                emb.title = "Something went wrong updating database. Please try again."
+                emb.color = get_hex_colour(error=True)
+                await message.channel.send(embed=emb)
+                return
+
+            emb.color = get_hex_colour(cora_eye=True)
+            conn.commit()
+            await message.channel.send(embed=emb)
 
 
 async def nitroHelp(message):
@@ -421,8 +505,12 @@ async def nitroHelp(message):
         _amount_: The amount of boosts to add as an integer.\n\
         _date_: The date of the boost(s). This argument is optional. If it is not given, current date will be used.\n\
         \tIf the user is not in the database, this will be added to both the latest and first boost dates. Otherwise the date is compared to the dates\n\
-        already in the database and figure out which one to update.\n\
-        "
+        \talready in the database and figure out which one to update.\n\
+        \n**Deleting boosts from database**\n\
+        The bot will delete expired boosts from database automatically if '!c nitro spin' command is issued. However, if you wish to delete boost(s) manually,\n\
+        you can use this command:\n\
+        ```!c nitro del [@user or user ID] [amount or 'all']```"
+    emb.description = txt
     await message.channel.send(embed=emb)
 
 
