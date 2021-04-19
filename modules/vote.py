@@ -137,11 +137,9 @@ async def vote(message):
 
             remainingVotes = maxvoteint - totalVotes
             c.execute("SELECT Vote_ID FROM RolePolls_Votes ORDER BY Vote_ID DESC")
-            maxid = c.fetchone()
-            if maxid == None:
-                maxid = 1
-            else:
-                maxid = maxid[0]
+            db_id = c.fetchone()
+            maxid = 1 if db_id == None else db_id[0]
+
             i = 0
             success = 0
             while i < 5:
@@ -167,10 +165,8 @@ async def vote(message):
             conn.commit()
             pollOptions = poll[0][4][:-1].split(";")
             txt = ""
-            i = 0
-            for v in votes:
+            for i, v in enumerate(votes):
                 txt += f"**{pollOptions[i]}**: {v}\n"
-                i += 1
             emb.description = txt
             emb.title = f"Your votes for '{poll[0][5]}' were:"
             emb.set_footer(

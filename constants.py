@@ -1,5 +1,5 @@
 import os
-from logging import exception
+import logging
 from sys import exit
 
 
@@ -9,7 +9,7 @@ def get_tokens():
         with open(".env", "r") as f:
             tokens = f.readlines()
     except Exception:
-        exception("Could not acquire environment variables. Stopping.")
+        logging.exception("Could not acquire environment variables. Stopping.")
         exit(1)
     return tokens
 
@@ -21,4 +21,4 @@ TOKENS = get_tokens()
 DISCORD_TOKEN = TOKENS[0].lstrip("TOKEN").strip()[1:]
 TWIT_API_KEY = TOKENS[1].lstrip("API_KEY").strip()[1:]
 TWIT_API_SECRET = TOKENS[2].lstrip("API_SECRET").strip()[1:]
-VERSION = "v1.11.7"
+VERSION = "v1.11.11"

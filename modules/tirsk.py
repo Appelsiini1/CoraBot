@@ -1,10 +1,11 @@
 import discord
 import logging
+import time
 from modules.common import get_hex_colour
 from datetime import datetime
 import re
 
-MentionRE = re.compile(r"^.*<@!(\d+)>")
+MENTION_RE = re.compile(r"^.*<@!(\d+)>")
 
 
 async def tirskCount(message):
@@ -15,8 +16,8 @@ async def tirskCount(message):
     )
     msgID = await message.channel.send(embed=emb)
     counter = {}
-
     async for msg in message.channel.history(limit=None):
+        time.sleep(0.07)
         mentions = msg.mentions
         if len(mentions) == 0:
             continue
@@ -29,7 +30,7 @@ async def tirskCount(message):
         elif len(mentions) >= 2:
             # pos = msg.content.rfind("<")
             # user_id = msg.content[pos:].strip()[3:][:-1]
-            match = MentionRE.match(msg.content)
+            match = MENTION_RE.match(msg.content)
             if match:
                 user_id = match.group(1)
                 user = await message.guild.fetch_member(int(user_id))
@@ -40,15 +41,16 @@ async def tirskCount(message):
                     counter[auth] = 1
 
     txt = ""
-    time = datetime.today().strftime("%d.%m.%Y")
+    c_time = datetime.today().strftime("%d.%m.%Y")
     for keypair in sorted(counter.items(), key=lambda x: x[1], reverse=True):
         name = await message.guild.fetch_member(keypair[0])
+        time.sleep(0.07)
         if name:
             name = name.display_name
         else:
             name = keypair[0]
         txt += f"{name}: {keypair[1]}\n"
-    emb.title = f"Quote Scoreboard {time}:"
+    emb.title = f"Quote Scoreboard {c_time}:"
     emb.description = txt
     await msgID.edit(embed=emb)
     logging.info("Quote counting in {} finished.".format(message.channel.name))

@@ -55,7 +55,6 @@ async def on_message(message):
         message.content.find("sairasta") != -1
         or message.content.find("ei oo normaalii") != -1
     ):
-        print("sairasta")
         msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
         await message.channel.send(msg)
         return
@@ -106,19 +105,10 @@ async def on_message(message):
         await vote.vote(message)
     elif cmd == "pop":
         await pop.pop(message)
-    # elif cmd == "test":
-    #     await nitro.test(message)
     elif cmd == "mood":
         await message.channel.send("https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4")
     elif cmd == "nitro":
-        try:
-            arg2 = message.content.split(" ")[2]
-            if arg2.strip() in ["start", "stop", "notice"]:
-                await nitro.Tracking(message)
-            else:
-                await message.channel.send("What was that?")
-        except IndexError:
-            await message.channel.send("Unknown argument. Use '!c nitro help' for correct syntax.")
+        await nitro.nitroJunction(message)
 
     else:
         await message.channel.send("What was that?")
