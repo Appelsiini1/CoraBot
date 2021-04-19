@@ -141,11 +141,9 @@ async def startBasicPoll(message):
         elif len(args) <= 20:
             poll_txt = "React with the emojis listed below to vote on this poll!\n\n**Options:**\n"
             emoji_list = selectReactionEmoji(len(args), indexes=True)
-            i = 0
-            for option in args:
+            for i, option in enumerate(args):
                 emoji = _EMOJIS[emoji_list[i]]
                 poll_txt += emoji + ": " + option.strip() + "\n"
-                i += 1
 
             if len(poll_txt) >= 2048:
                 emb.description = (
@@ -237,13 +235,13 @@ async def BasicPollEndHelper(poll, message):
         emb.title = f"Results for '{pollName}'"
 
     txt = ""
-    i = 0
-    for keypair in sorted(results.items(), key=lambda x: x[1], reverse=True):
+    for i, keypair in enumerate(
+        sorted(results.items(), key=lambda x: x[1], reverse=True)
+    ):
         if i == 0:
             txt += f"{keypair[0]}** : _{keypair[1]-1}_**\n"
         else:
             txt += f"{keypair[0]} : {keypair[1]-1}\n"
-        i += 1
 
     emb.description = txt
     return emb
@@ -528,15 +526,14 @@ async def delRoles(message):
         await message.channel.send(embed=emb)
         return
 
-    i = 0
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
 
         if args[0].strip().lstrip("[").rstrip("]") == "all":
             c.execute(f"DELETE FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}")
-            i = -1
+            amount = -1
         else:
-            for arg in args:
+            for i, arg in enumerate(args):
                 match = RoleRE1.match(arg)
                 if match:
                     role_id = match.group(1).strip()
@@ -554,10 +551,10 @@ async def delRoles(message):
                     "DELETE FROM RolesMaxVotes WHERE Role_ID=? AND Guild_ID=?",
                     (role_int, message.guild.id),
                 )
-                i += 1
+            amount = 1
         conn.commit()
-        if i == -1:
-            i = "all"
+        if amount == -1:
+            amount = "all"
         emb.description = f"Deleted {i} roles from database."
         emb.color = get_hex_colour(cora_eye=True)
         await message.channel.send(embed=emb)
@@ -594,11 +591,7 @@ async def startRolePoll(message):
 
         c.execute("SELECT Poll_ID FROM RolePolls ORDER BY Poll_ID DESC")
         prevPollID = c.fetchone()
-
-        if prevPollID == None:
-            poll_id = 100
-        else:
-            poll_id = prevPollID[0] + 1
+        poll_id = 100 if prevPollID == None else prevPollID[0] + 1
 
         if len(args) <= 1 or message.content.find(";") == -1:
             # help command
@@ -609,14 +602,12 @@ async def startRolePoll(message):
             poll_txt = "Use '!c vote' -command to vote in this poll! See below the poll for an example.\n\n**Options:**\n"
             option_str = ""
 
-            i = 1
-            for o in args:
+            for i, o in enumerate(args, start=1):
                 option = o.strip().lstrip("[").rstrip("]")
                 if option == "":
                     continue
                 option_str += option + ";"
                 poll_txt += f"**{str(i)}**: {option}\n"
-                i += 1
             numberOfOptions = i - 1
 
             if len(poll_txt) >= 2048:
@@ -640,9 +631,8 @@ async def startRolePoll(message):
             if titleStatus == 1:
                 title = None
 
-            i = 0
             success = 0
-            while i < 5:
+            for i in range(5):
                 try:
                     c.execute(
                         "INSERT INTO RolePolls VALUES (?,?,?,?,?,?)",
@@ -659,9 +649,8 @@ async def startRolePoll(message):
                     break
                 except sqlite3.IntegrityError:
                     poll_id += 1
-                    i += 1
                     emb.set_footer(text=f"Poll ID: {poll_id}")
-                    continue
+
             if success != 1:
                 emb2.title = (
                     "Poll creation failed due to a database error. Please try again."
@@ -694,7 +683,7 @@ async def startRolePoll(message):
                 {1} and {2} vote(s) to option number {3} in this poll.\
                 ```!c vote {4} {1}:{0}, {3}:{2}```\
                 \nFor more help, use '!c vote help'".format(
-                random.randint(1, 5),
+                random.randint(2, 5),
                 option1,
                 random.randint(1, 5),
                 option2,
@@ -742,16 +731,12 @@ async def rolePollEndHelper(message, c, poll=None, polls=None):
             vote_sums.append(0)
         for vote in votes:
             vote_str = vote[3][:-1].split(";")
-            i = 0
-            for option in vote_str:
+            for i, option in enumerate(vote_str):
                 vote_sums[i] += int(option)
-                i += 1
 
-        i = 0
         txt = ""
-        for option in vote_sums:
+        for i, option in enumerate(vote_sums):
             txt += f"**{poll_options[i]}**: {option}\n"
-            i += 1
         poll_ids.append(poll_id)
         emb.description = txt
         emb.title = f"Results for '{poll_name}'"
@@ -779,16 +764,12 @@ async def rolePollEndHelper(message, c, poll=None, polls=None):
                 vote_sums.append(0)
             for vote in votes:
                 vote_str = vote[3][:-1].split(";")
-                i = 0
-                for option in vote_str:
+                for i, option in enumerate(vote_str):
                     vote_sums[i] += int(option)
-                    i += 1
 
-            i = 0
             txt = ""
-            for option in vote_sums:
+            for i, option in enumerate(vote_sums):
                 txt += f"**{poll_options[i]}**: {option}\n"
-                i += 1
             poll_ids.append(poll_id)
             emb.description = txt
             emb.title = f"Results for '{poll_name}'"

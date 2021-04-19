@@ -106,10 +106,8 @@ async def trackNitro(message):
         if previousBoosts == None:
             c.execute("SELECT Boost_ID FROM NitroBoosts ORDER BY Boost_ID DESC")
             lastID = c.fetchone()
-            if lastID == None:
-                lastID = 1
-            else:
-                lastID = lastID[0] + 1
+            newID = 0
+            newID += 1 if lastID != None else 1
 
             # Boost_ID INT UNIQUE,
             # User_ID INT,
@@ -117,19 +115,18 @@ async def trackNitro(message):
             # Boost_Time TEXT,
             # LatestBoost TEXT,
             # Boosts INT,
-            i = 0
             success = 0
-            while i < 10:
+            for i in range(10):
                 try:
                     c.execute(
                         "INSERT INTO NitroBoosts VALUES (?,?,?,?,?,?)",
-                        (lastID, booster_id, guild_id, time, time, boostAmount),
+                        (newID, booster_id, guild_id, time, time, boostAmount),
                     )
                     success = 1
                     break
                 except sqlite3.IntegrityError:
-                    i += 1
-                    lastID += 1
+                    newID += 1
+
             if success != 1:
                 logging.error("Could not add boost to database.")
                 dm_channel = message.guild.owner.dm_channel
@@ -169,12 +166,23 @@ async def trackNitro(message):
             )
             emb = constructEmbed(message, boostAmount)
             try:
-                await message.channel.send(embed=emb)
                 conn.commit()
+                await message.channel.send(embed=emb)
             except discord.errors.Forbidden:
                 logging.error("Unable to send message due to 403 - Forbidden")
                 emb.clear_fields()
-                emb.description = f"Unable to send boost announcement to system message channel in '{message.guild.name}'. Please make sure I have the proper rights to post messages to that channel."
+                emb.description = f"Unable to send boost announcement to system message channel in '{message.guild.name}'. Please make sure I have the proper rights to post messages to that channel.\n\
+                The boost was succesfully recorded to database though."
+                emb.color = get_hex_colour(error=True)
+                dm_channel = message.guild.owner.dm_channel
+                if dm_channel == None:
+                    dm_channel = await message.guild.owner.create_dm()
+                await dm_channel.send(embed=emb)
+                return
+            except Exception:
+                logging.exception("Something went wrong committing database changes.")
+                emb.clear_fields()
+                emb.description = f"Something went wrong when trying to add latest boost in {message.guild.name} to the database. Please add it manually."
                 emb.color = get_hex_colour(error=True)
                 dm_channel = message.guild.owner.dm_channel
                 if dm_channel == None:
@@ -308,20 +316,18 @@ async def addNitro(message):
     try:
         time = args[2]
     except Exception:
-        boostTime = datetime.datetime.today().strftime("%d.%m.%Y")
+        boostTime = datetime.datetime.today()
         noTime = 1
-    try:
-        boostTime = datetime.datetime.strptime(time, "%d.%m.%Y")
-    except ValueError:
-        if noTime == 0:
+    if noTime == 0:
+        try:
+            boostTime = datetime.datetime.strptime(time, "%d.%m.%Y")
+        except ValueError:
             emb.title = (
                 "Invalid timeformat. Please give boost time in the format 'DD.MM.YYYY'."
             )
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
             return
-        else:
-            pass
 
     guild_id = message.guild.id
     with sqlite3.connect(DB_F) as conn:
@@ -334,30 +340,34 @@ async def addNitro(message):
         if previousBoosts == None:
             c.execute("SELECT Boost_ID FROM NitroBoosts ORDER BY Boost_ID DESC")
             lastID = c.fetchone()
-            if lastID == None:
-                lastID = 1
-            else:
-                lastID = lastID[0] + 1
+            newID = 0
+            newID = 1 if lastID != None else 1
 
-            # Boost_ID INT UNIQUE,
-            # User_ID INT,
-            # Guild_ID INT,
-            # Boost_Time TEXT,
-            # LatestBoost TEXT,
-            # Boosts INT,
-            i = 0
+            # Boost_ID INT UNIQUE, 0
+            # User_ID INT, 1
+            # Guild_ID INT, 2
+            # Boost_Time TEXT, 3
+            # LatestBoost TEXT, 4
+            # Boosts INT, 5
             success = 0
-            while i < 10:
+            for i in range(10):
                 try:
                     c.execute(
                         "INSERT INTO NitroBoosts VALUES (?,?,?,?,?,?)",
-                        (lastID, user.id, guild_id, boostTime, boostTime, boostAmount),
+                        (
+                            newID,
+                            user.id,
+                            guild_id,
+                            boostTime.strftime("%d.%m.%Y"),
+                            boostTime.strftime("%d.%m.%Y"),
+                            boostAmount,
+                        ),
                     )
                     success = 1
                     break
                 except sqlite3.IntegrityError:
-                    i += 1
-                    lastID += 1
+                    newID += 1
+
             if success != 1:
                 logging.error("Could not add boost to database.")
                 emb.title = f"There was a database error adding a boost by '{user.display_name}'. Please try again later."
@@ -378,12 +388,19 @@ async def addNitro(message):
             )
             boost = c.fetchone()
             boosts = boost[5]
+            oldBoostTime = datetime.datetime.strptime(boost[4], "%d.%m.%Y")
             newValue = boosts + boostAmount
-            # TODO Compare the times of boosts and only update if necessary (either latest or first boost)
-            c.execute(
-                "UPDATE NitroBoosts SET Boosts=?, LatestBoost=? WHERE Guild_ID=? AND User_ID=?",
-                (newValue, time, guild_id, user.id),
-            )
+            if boostTime < oldBoostTime:
+                if boostTime < oldBoostTime:
+                    c.execute(
+                        "UPDATE NitroBoosts SET Boosts=?, Boost_Time=? WHERE Guild_ID=? AND User_ID=?",
+                        (newValue, boostTime.strftime("%d.%m.%Y"), guild_id, user.id),
+                    )
+            else:
+                c.execute(
+                    "UPDATE NitroBoosts SET Boosts=?, LatestBoost=? WHERE Guild_ID=? AND User_ID=?",
+                    (newValue, boostTime.strftime("%d.%m.%Y"), guild_id, user.id),
+                )
             emb.description = (
                 f"Added {boostAmount} boost(s) by {user.display_name} into database."
             )

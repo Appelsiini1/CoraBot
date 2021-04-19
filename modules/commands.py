@@ -15,6 +15,7 @@ choose option1 | option2 | ...
 vacc [Area code (or empty for all areas) | help]
 poll [new|end|help]
 vote help
+vote [Poll ID] [option:votes], [option:votes], ...
 pop [number between 1-14]
 
 Admin commands:
