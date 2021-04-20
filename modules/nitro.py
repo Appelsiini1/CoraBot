@@ -238,7 +238,7 @@ async def Tracking(message):
                 return
 
             elif trackStatus[1] == 0:
-                emb.title = "The nitro tracking is already disabled on this server."
+                emb.title = "Nitro boost tracking is already disabled on this server."
                 emb.color = get_hex_colour(error=True)
                 await message.channel.send(embed=emb)
                 return
@@ -248,7 +248,7 @@ async def Tracking(message):
                     f"UPDATE NitroTrack SET Track_YN=0 WHERE Guild_ID={message.guild.id}"
                 )
                 conn.commit()
-                emb.title = "Nitro boost tracking has been enabled for this server."
+                emb.title = "Nitro boost tracking has been disabled for this server."
                 emb.color = get_hex_colour(cora_eye=True)
                 await message.channel.send(embed=emb)
                 return
@@ -286,7 +286,7 @@ async def addNitro(message):
     # !c nitro add [@user or id], [amount], [time ONLY DATE!! as DD.MM.YYYY]
     # if time is omitted, use current time
     prefix = "!c nitro add "
-    args = message.content[len(prefix) :].split(" ")
+    args = message.content[len(prefix) :].split(",")
 
     emb = discord.Embed()
 
@@ -302,7 +302,7 @@ async def addNitro(message):
     match = MENTION_RE.match(user_raw)
     if match:
         user_id = match.group(1)
-        user = message.guild.get_member(int(user_id))
+        user = await message.guild.fetch_member(int(user_id))
     else:
         try:
             user_id = int(user_raw)
@@ -320,7 +320,7 @@ async def addNitro(message):
         noTime = 1
     if noTime == 0:
         try:
-            boostTime = datetime.datetime.strptime(time, "%d.%m.%Y")
+            boostTime = datetime.datetime.strptime(time.strip().strip("'"), "%d.%m.%Y")
         except ValueError:
             emb.title = (
                 "Invalid timeformat. Please give boost time in the format 'DD.MM.YYYY'."
@@ -414,7 +414,7 @@ async def delNitro(message):
     # !c nitro del @person (amount / 'all')
 
     prefix = "!c nitro del "
-    args = message.content[len(prefix) :].split(" ")
+    args = message.content[len(prefix) :].split(",")
 
     emb = discord.Embed()
 
@@ -438,7 +438,7 @@ async def delNitro(message):
     match = MENTION_RE.match(user_raw)
     if match:
         user_id = match.group(1)
-        user = message.guild.get_member(int(user_id))
+        user = await message.guild.fetch_member(int(user_id))
     else:
         try:
             user_id = int(user_raw)
@@ -460,7 +460,7 @@ async def delNitro(message):
         if previousBoosts == None:
             emb.title = "User has no boosts on record to delete."
             emb.color = get_hex_colour(error=True)
-            await message.channel.send(emebed=emb)
+            await message.channel.send(embed=emb)
             return
         else:
             c.execute(
@@ -503,10 +503,10 @@ async def nitroHelp(message):
     emb.color = get_hex_colour(cora_blonde=True)
     txt = "**General info**\n\
         This is the best implementation of nitro tracking that is possible within Discord limitations.\n\
-        It can track boost amount, times, and boosters. HOWEVER, it cannot continuously check if the boosts are valid. Checks are made either \n\
+        It can track boost amount, times, and boosters. HOWEVER, it cannot continuously check if the boosts are valid. Checks are made either \
         automatically when '!c nitro spin' command is used or when using '!c nitro check' manually. These commands however can only see overall Nitro status of the user.\n\
         It cannot see wheter individual boosts have expired, only if all of them have. Please see these commands below for more info.\n\
-        **NOTE!!** All commands below require administrator priviledges.\n\
+        **NOTE!!** All commands (besides help) below require administrator priviledges.\n\
         \n**Enabling/Disabling nitro tracking on server**\n\
         To enable nitro tracking on your server, use\n\
         ```!c nitro start```\n\
@@ -518,15 +518,15 @@ async def nitroHelp(message):
         If you have older boosts active on the server, or an error occured during tracking, you can add them manually to the bot's database by using\n\
         ```!c nitro add [user], [amount], [date]```\n\
         _Arguments:_\n\
-        _user_: Spesifies who the booster is. This can be a mention (@user) or a user ID as an integer.\n\
-        _amount_: The amount of boosts to add as an integer.\n\
-        _date_: The date of the boost(s). This argument is optional. If it is not given, current date will be used.\n\
-        \tIf the user is not in the database, this will be added to both the latest and first boost dates. Otherwise the date is compared to the dates\n\
-        \talready in the database and figure out which one to update.\n\
+        _user:_ Spesifies who the booster is. This can be a mention (@user) or a user ID as an integer.\n\
+        _amount:_ The amount of boosts to add as an integer.\n\
+        _date:_ The date of the boost(s). Date should be in format 'DD.MM.YYYY'. This argument is optional. If it is not given, current date will be used.\
+        If the user is not in the database, this will be added to both the latest and first boost dates. Otherwise the date is compared to the dates\
+        already in the database and figure out which one to update.\n\
         \n**Deleting boosts from database**\n\
         The bot will delete expired boosts from database automatically if '!c nitro spin' command is issued. However, if you wish to delete boost(s) manually,\n\
         you can use this command:\n\
-        ```!c nitro del [@user or user ID] [amount or 'all']```"
+        ```!c nitro del [@user or user ID], [amount or 'all']```"
     emb.description = txt
     await message.channel.send(embed=emb)
 
@@ -539,6 +539,10 @@ async def nitroJunction(message):
                 await Tracking(message)
             elif arg2.strip() == "add":
                 await addNitro(message)
+            elif arg2.strip() == "del":
+                await delNitro(message)
+            elif arg2.strip() == "help":
+                await nitroHelp(message)
             else:
                 await message.channel.send(
                     "Unknown argument. Use '!c nitro help' for correct syntax."
