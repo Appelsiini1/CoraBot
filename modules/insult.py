@@ -1,6 +1,5 @@
 import requests
 import json
-import discord
 import logging
 
 
