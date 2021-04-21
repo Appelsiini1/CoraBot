@@ -3,6 +3,8 @@ import discord
 import logging
 import sqlite3
 import datetime
+import os
+from time import sleep
 
 from modules.common import get_hex_colour
 from constants import DB_F
@@ -196,10 +198,10 @@ async def Tracking(message):
     # "!c nitro track [start|stop|notice]"
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
-        arg = message.content.split(" ")[2]
+        arg = message.content.split(" ")[2].strip().lstrip("[").rstrip("]").lower()
         emb = discord.Embed()
         # print(arg)
-        if arg.strip() == "start":
+        if arg == "start":
             c.execute(f"SELECT * FROM NitroTrack WHERE Guild_ID={message.guild.id}")
             trackStatus = c.fetchone()
             if trackStatus == None:
@@ -226,7 +228,7 @@ async def Tracking(message):
                 await message.channel.send(embed=emb)
                 return
 
-        elif arg.strip() == "stop":
+        elif arg == "stop":
             c.execute(f"SELECT * FROM NitroTrack WHERE Guild_ID={message.guild.id}")
             trackStatus = c.fetchone()
             if trackStatus == None:
@@ -253,7 +255,7 @@ async def Tracking(message):
                 await message.channel.send(embed=emb)
                 return
 
-        elif arg.strip() == "notice":
+        elif arg == "notice":
             c.execute(f"SELECT * FROM NitroTrack WHERE Guild_ID={message.guild.id}")
             trackStatus = c.fetchone()
             if trackStatus == None:
@@ -291,10 +293,10 @@ async def addNitro(message):
     emb = discord.Embed()
 
     try:
-        user_raw = args[0]
-        boostAmount = int(args[1])
+        user_raw = args[0].strip().lstrip("[").rstrip("]")
+        boostAmount = int(args[1].strip().lstrip("[").rstrip("]"))
     except Exception:
-        emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
+        emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer. Also make sure you have commas in the right place"
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
         return
@@ -314,13 +316,13 @@ async def addNitro(message):
             return
     noTime = 0
     try:
-        time = args[2]
+        time = args[2].strip().lstrip("[").rstrip("]").strip("'")
     except Exception:
         boostTime = datetime.datetime.today()
         noTime = 1
     if noTime == 0:
         try:
-            boostTime = datetime.datetime.strptime(time.strip().strip("'"), "%d.%m.%Y")
+            boostTime = datetime.datetime.strptime(time, "%d.%m.%Y")
         except ValueError:
             emb.title = (
                 "Invalid timeformat. Please give boost time in the format 'DD.MM.YYYY'."
@@ -419,15 +421,15 @@ async def delNitro(message):
     emb = discord.Embed()
 
     try:
-        user_raw = args[0]
-        boostAmount = int(args[1])
+        user_raw = args[0].strip().lstrip("[").rstrip("]")
+        boostAmount = int(args[1].strip().lstrip("[").rstrip("]"))
     except IndexError:
         emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
         return
     except ValueError:
-        if args[1].strip().lower() == "all":
+        if args[1].strip().lstrip("[").rstrip("]").lower() == "all":
             boostAmount = 99999
         else:
             emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer."
@@ -499,11 +501,11 @@ async def delNitro(message):
 
 async def nitroHelp(message):
     emb = discord.Embed()
-    emb.title = "Nitro Tracking"
+    emb.title = "Nitro Tracking 1/2"
     emb.color = get_hex_colour(cora_blonde=True)
     txt = "**General info**\n\
         This is the best implementation of nitro tracking that is possible within Discord limitations.\n\
-        It can track boost amount, times, and boosters. HOWEVER, it cannot continuously check if the boosts are valid. Checks are made either \
+        It can track boost amounts, times, and boosters. HOWEVER, it cannot continuously check if the boosts are valid. Checks are made either \
         automatically when '!c nitro spin' command is used or when using '!c nitro check' manually. These commands however can only see overall Nitro status of the user.\n\
         It cannot see wheter individual boosts have expired, only if all of them have. Please see these commands below for more info.\n\
         **NOTE!!** All commands (besides help) below require administrator priviledges.\n\
@@ -522,27 +524,106 @@ async def nitroHelp(message):
         _amount:_ The amount of boosts to add as an integer.\n\
         _date:_ The date of the boost(s). Date should be in format 'DD.MM.YYYY'. This argument is optional. If it is not given, current date will be used.\
         If the user is not in the database, this will be added to both the latest and first boost dates. Otherwise the date is compared to the dates\
-        already in the database and figure out which one to update.\n\
-        \n**Deleting boosts from database**\n\
+        already in the database and figure out which one to update."
+    txt2 = "**Deleting boosts from database**\n\
         The bot will delete expired boosts from database automatically if '!c nitro spin' command is issued. However, if you wish to delete boost(s) manually,\n\
         you can use this command:\n\
-        ```!c nitro del [@user or user ID], [amount or 'all']```"
+        ```!c nitro del [@user or user ID], [amount or 'all']```\n\
+        **Exporting the boost database**\n\
+        This command can only be issued by server owners. This command compiles a CSV-file of all boosters currently in the database and sends it to you via a private message.\n\
+        To use this command type\n\
+        ```!c nitro export```"
     emb.description = txt
     await message.channel.send(embed=emb)
+    emb.title = "Nitro Tracking 2/2"
+    emb.description = txt2
+    await message.channel.send(embed=emb)
+
+
+async def exportNitro(message):
+    guildID = message.guild.id
+    time = datetime.datetime.now().strftime("%d.%m.%Y at %H:%M")
+    emb = discord.Embed()
+    emb.description = "_Compiling data, this could take a while._"
+    emb.color = get_hex_colour(cora_blonde=True)
+    msg = await message.channel.send(embed=emb)
+
+    with sqlite3.connect(DB_F) as conn:
+        c = conn.cursor()
+        c.execute(
+            f"SELECT * FROM NitroBoosts WHERE Guild_ID={guildID}",
+        )
+        boosts = c.fetchall()
+        
+        if len(boosts) == 0:
+            emb.description = ""
+            emb.title = "No boosts on record to export."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
+        else:
+            filename = f"export_{guildID}.csv"
+            with open(filename, "w", encoding='utf-8') as f:
+                f.write("DisplayName;EarliestBoost;LatestBoost;NumberOfBoosts\n")
+                for b in boosts:
+                    # Boost_ID INT UNIQUE,
+                    # User_ID INT,
+                    # Guild_ID INT,
+                    # Boost_Time TEXT,
+                    # LatestBoost TEXT,
+                    # Boosts INT,
+                    user = await message.guild.fetch_member(b[1])
+                    if user:
+                        user = user.display_name
+                    else:
+                        user = b[1]
+                    f.write(f"{user};{b[3]};{b[4]};{b[5]}\n")
+                    sleep(0.08)
+            fileToSend = discord.File(filename)
+            
+            emb.description = ""
+            emb.title = f"Here is a CSV-file containing all boosts on your server on the bot's database. This export was made on {time}."
+            emb.color = get_hex_colour(cora_blonde=True)
+
+            dm_channel = message.author.dm_channel
+            if dm_channel == None:
+                dm_channel = await message.author.create_dm()
+            try:
+                await dm_channel.send(file=fileToSend)
+                await dm_channel.send(embed=emb)
+                emb.title = ""
+                emb.description = "**Boost data succesfully compiled and sent to you.**"
+                emb.color = get_hex_colour(cora_eye=True)
+                await msg.edit(embed=emb)
+            except Exception:
+                logging.exception("Unable to send exported nitro boosts to server owner.")
+                await message.channel.send("Unable to send exported data due to an error. Please try again.")
+            try:
+                os.remove(filename)
+            except Exception as e:
+                logging.exception("Unable to delete the local copy of boost export CSV.")
+                print(e)
 
 
 async def nitroJunction(message):
     if message.author.guild_permissions.administrator:
         try:
-            arg2 = message.content.split(" ")[2]
-            if arg2.strip() in ["start", "stop", "notice"]:
+            arg2 = message.content.split(" ")[2].strip().lstrip("[").rstrip("]").lower()
+            if arg2 in ["start", "stop", "notice"]:
                 await Tracking(message)
-            elif arg2.strip() == "add":
+            elif arg2 == "add":
                 await addNitro(message)
-            elif arg2.strip() == "del":
+            elif arg2 == "del":
                 await delNitro(message)
-            elif arg2.strip() == "help":
+            elif arg2 == "help":
                 await nitroHelp(message)
+            elif arg2 == "export":
+                if message.author.id == message.guild.owner_id:
+                    await exportNitro(message)
+                else:
+                    emb = discord.Embed()
+                    emb.description = "You do not have the permissions to use this. Only server owners can use this command."
+                    emb.color = get_hex_colour(error=True)
+                    await message.channel.send(embed=emb)
             else:
                 await message.channel.send(
                     "Unknown argument. Use '!c nitro help' for correct syntax."
