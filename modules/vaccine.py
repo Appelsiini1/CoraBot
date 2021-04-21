@@ -93,7 +93,7 @@ async def sendVaccInfo(message):
         await s_msg.edit(embed=emb)
 
     elif len(message.content.split(" ")) > 2:
-        param = message.content[7:].strip()
+        param = message.content[7:].strip().lstrip("[").rstrip("]")
         if param == "help":
             emb.title = "Available areas:"
             txt = ""

@@ -68,7 +68,7 @@ async def on_message(message):
     ]:
         nitro.trackNitro(message)
 
-    cmd = message.content.split(" ")[1]
+    cmd = message.content.split(" ")[1].lower()
 
     if cmd == "hi" or cmd == "hello":
         await message.channel.send("Hello!")
