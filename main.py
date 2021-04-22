@@ -4,6 +4,7 @@
 
 import discord
 import logging
+from datetime import datetime
 
 # import tweepy
 
@@ -39,6 +40,12 @@ common.initializeDatabase()
 async def on_ready():
     print(f"{client.user} {VERSION} is online & ready.")
     logging.info(f"{client.user} {VERSION} is online & ready.")
+
+@client.event
+async def on_error(event, *args, **kwargs):
+    time = datetime.now().strftime("%d.%m.%Y at %H:%M")
+    logging.exception(f"An unhandled exception occured in {event}. \nMessage: {args[0]}\nMessage content: '{args[0].content}'\n**********")
+    print(f"{time} - An unhandled exception occured in {event}, see log for details.")
 
 
 # main event, parses commands
