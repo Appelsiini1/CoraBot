@@ -25,7 +25,7 @@ endgiveaway [GiveawayID]
 poll [set|del]roles
 poll roles
 poll new -r
-nitro [add|del|export|start|stop|notice|help]
+nitro [help|add|del|export|start|stop|notice|check]
 """
     emb = discord.Embed(
         title="List of available commands:",

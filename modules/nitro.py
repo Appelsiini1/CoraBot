@@ -531,13 +531,29 @@ async def nitroHelp(message):
         ```!c nitro del [@user or user ID], [amount or 'all']```\n\
         **Exporting the boost database**\n\
         This command can only be issued by server owners. This command compiles a CSV-file of all boosters currently in the database and sends it to you via a private message.\n\
+        _NOTE! You should take a regular backup of your servers nitro boost incase something goes wrong with the bots database._\n\
         To use this command type\n\
-        ```!c nitro export```"
+        ```!c nitro export```\n\
+        **Checking Nitro boost statuses**\n\
+        To check the validity of the nitro boosters in the database, use\n\
+        ```!c nitro check```\n\
+        _NOTE! As said before, this cannot check individual boost status, only wheter the user is still a nitro booster._\n\
+        **Nitro spins**\n\
+        The nitro spin command is basically a bot version of a spin wheel for nitro boosters. This command will pick a random person from the list of nitro boosters. In the basic version\
+        will give more chances for users with more boosts. Meaning, if a user has three boosts, they have three total chances to win.\n\
+        If you want everyone to have an equal chance of winning regardless of how many boosts they have, add the `-e` flag to the end.\n\
+        ```!c nitro spin [-e]```"
+
+    dm_channel = message.author.dm_channel
+    if dm_channel == None:
+        dm_channel = await message.author.create_dm()
+
     emb.description = txt
-    await message.channel.send(embed=emb)
+    await dm_channel.send(embed=emb)
     emb.title = "Nitro Tracking 2/2"
     emb.description = txt2
-    await message.channel.send(embed=emb)
+    await dm_channel.send(embed=emb)
+    await message.channel.send("Help message for Nitro commands has been sent via a private message.")
 
 
 async def exportNitro(message):
@@ -603,6 +619,66 @@ async def exportNitro(message):
                 logging.exception("Unable to delete the local copy of boost export CSV.")
                 print(e)
 
+async def checkNitro(message, checkType="normal"):
+    guild_id = message.guild.id
+    current_nitros = message.guild.premium_subscribers
+    emb = discord.Embed()
+    if checkType == "normal":
+        emb.description = "_Checking the status of nitro subscribers_"
+        emb.color = get_hex_colour(cora_blonde=True)
+        msg = await message.channel.send(embed=emb)
+    with sqlite3.connect(DB_F) as conn:
+        c = conn.cursor()
+        if len(current_nitros) == 0:
+            c.execute(f"DELETE FROM NitroBoosts WHERE Guild_ID={guild_id}")
+            if checkType == "normal":
+                emb.description = "No boosts were active so all boosts where deleted from the database."
+                emb.color = get_hex_colour(error=True)
+                conn.commit()
+                await msg.edit(embed=emb)
+                return
+            else:
+                conn.commit()
+                return []
+        c.execute(f"SELECT * FROM NitroBoosts WHERE Guild_ID={guild_id}")
+        db_subscribers = c.fetchall()
+        if len(db_subscribers) == 0:
+            if checkType == "normal":
+                emb.description = "No boosts currently in database."
+                emb.color = get_hex_colour(error=True)
+                await msg.edit(embed=emb)
+            elif checkType == "spin":
+                return []
+        else:
+            if len(db_subscribers) == len(current_nitros):
+                if checkType == "normal":
+                    emb.description = "All nitro boosters still have valid boosts."
+                    await msg.edit(embed=emb)
+                    return
+                else:
+                    return db_subscribers
+            results = []
+            notFound = []
+            for db_s in db_subscribers:
+                found = 0
+                for c_s in current_nitros:
+                    if c_s.id == db_s[1]:
+                        results.append(db_s)
+                        found = 1
+                if found == 0:
+                    notFound.append(db_s)
+            
+            amountDeleted = len(notFound)
+            for db_s in notFound:
+                c.execute("DELETE FROM NitroBoosts WHERE Guild_ID=? AND Boost_ID=?", (guild_id, db_s[0]))
+            if checkType == "normal":
+                emb.description = f"{amountDeleted} users with expired boosts were deleted from the database."
+                conn.commit()
+                await message.channel.send(embed=emb)
+            else:
+                conn.commit()
+                return results
+
 
 async def nitroJunction(message):
     if message.author.guild_permissions.administrator:
@@ -624,6 +700,8 @@ async def nitroJunction(message):
                     emb.description = "You do not have the permissions to use this. Only server owners can use this command."
                     emb.color = get_hex_colour(error=True)
                     await message.channel.send(embed=emb)
+            elif arg2 == "check":
+                await checkNitro(message)
             else:
                 await message.channel.send(
                     "Unknown argument. Use '!c nitro help' for correct syntax."
