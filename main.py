@@ -30,7 +30,8 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s - %(message)s",
     datefmt="%d/%m/%Y %H:%M:%S",
 )
-client = discord.Client()
+intents = discord.Intents().all()
+client = discord.Client(intents=intents)
 common.initializeDatabase()
 
 # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
@@ -41,10 +42,13 @@ async def on_ready():
     print(f"{client.user} {VERSION} is online & ready.")
     logging.info(f"{client.user} {VERSION} is online & ready.")
 
+
 @client.event
 async def on_error(event, *args, **kwargs):
     time = datetime.now().strftime("%d.%m.%Y at %H:%M")
-    logging.exception(f"An unhandled exception occured in {event}. \nMessage: {args[0]}\nMessage content: '{args[0].content}'\n**********")
+    logging.exception(
+        f"An unhandled exception occured in {event}. \nMessage: {args[0]}\nMessage content: '{args[0].content}'\n**********"
+    )
     print(f"{time} - An unhandled exception occured in {event}, see log for details.")
 
 
