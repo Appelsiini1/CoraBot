@@ -1,3 +1,4 @@
+import random
 import re
 import discord
 import logging
@@ -15,6 +16,8 @@ HEART_EMOTE = "\N{SPARKLING HEART}"
 SURPRISE_EMOTE = "\N{FACE WITH OPEN MOUTH}"
 
 MENTION_RE = re.compile(r"^.*<@!(\d+)>")
+
+SPIN_GIF_URL = "https://cdn.discordapp.com/attachments/816694548457324544/835656705844314122/spin_wheelV2.gif"
 
 
 def constructEmbed(message, boosts):
@@ -541,7 +544,7 @@ async def nitroHelp(message):
         **Nitro spins**\n\
         The nitro spin command is basically a bot version of a spin wheel for nitro boosters. This command will pick a random person from the list of nitro boosters. In the basic version\
         will give more chances for users with more boosts. Meaning, if a user has three boosts, they have three total chances to win.\n\
-        If you want everyone to have an equal chance of winning regardless of how many boosts they have, add the `-e` flag to the end.\n\
+        _NOTE!_ If you want everyone to have an equal chance of winning regardless of how many boosts they have, add the `-e` flag to the end.\n\
         ```!c nitro spin [-e]```"
 
     dm_channel = message.author.dm_channel
@@ -553,7 +556,9 @@ async def nitroHelp(message):
     emb.title = "Nitro Tracking 2/2"
     emb.description = txt2
     await dm_channel.send(embed=emb)
-    await message.channel.send("Help message for Nitro commands has been sent via a private message.")
+    await message.channel.send(
+        "Help message for Nitro commands has been sent via a private message."
+    )
 
 
 async def exportNitro(message):
@@ -570,7 +575,7 @@ async def exportNitro(message):
             f"SELECT * FROM NitroBoosts WHERE Guild_ID={guildID}",
         )
         boosts = c.fetchall()
-        
+
         if len(boosts) == 0:
             emb.description = ""
             emb.title = "No boosts on record to export."
@@ -578,7 +583,7 @@ async def exportNitro(message):
             await message.channel.send(embed=emb)
         else:
             filename = f"export_{guildID}.csv"
-            with open(filename, "w", encoding='utf-8') as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 f.write("DisplayName;EarliestBoost;LatestBoost;NumberOfBoosts\n")
                 for b in boosts:
                     # Boost_ID INT UNIQUE,
@@ -595,7 +600,7 @@ async def exportNitro(message):
                     f.write(f"{user};{b[3]};{b[4]};{b[5]}\n")
                     sleep(0.08)
             fileToSend = discord.File(filename)
-            
+
             emb.description = ""
             emb.title = f"Here is a CSV-file containing all boosts on your server on the bot's database. This export was made on {time}."
             emb.color = get_hex_colour(cora_blonde=True)
@@ -611,13 +616,20 @@ async def exportNitro(message):
                 emb.color = get_hex_colour(cora_eye=True)
                 await msg.edit(embed=emb)
             except Exception:
-                logging.exception("Unable to send exported nitro boosts to server owner.")
-                await message.channel.send("Unable to send exported data due to an error. Please try again.")
+                logging.exception(
+                    "Unable to send exported nitro boosts to server owner."
+                )
+                await message.channel.send(
+                    "Unable to send exported data due to an error. Please try again."
+                )
             try:
                 os.remove(filename)
             except Exception as e:
-                logging.exception("Unable to delete the local copy of boost export CSV.")
+                logging.exception(
+                    "Unable to delete the local copy of boost export CSV."
+                )
                 print(e)
+
 
 async def checkNitro(message, checkType="normal"):
     guild_id = message.guild.id
@@ -667,10 +679,13 @@ async def checkNitro(message, checkType="normal"):
                         found = 1
                 if found == 0:
                     notFound.append(db_s)
-            
+
             amountDeleted = len(notFound)
             for db_s in notFound:
-                c.execute("DELETE FROM NitroBoosts WHERE Guild_ID=? AND Boost_ID=?", (guild_id, db_s[0]))
+                c.execute(
+                    "DELETE FROM NitroBoosts WHERE Guild_ID=? AND Boost_ID=?",
+                    (guild_id, db_s[0]),
+                )
             if checkType == "normal":
                 emb.description = f"{amountDeleted} users with expired boosts were deleted from the database."
                 conn.commit()
@@ -680,38 +695,99 @@ async def checkNitro(message, checkType="normal"):
                 return results
 
 
-async def nitroJunction(message):
-    if message.author.guild_permissions.administrator:
-        try:
-            arg2 = message.content.split(" ")[2].strip().lstrip("[").rstrip("]").lower()
-            if arg2 in ["start", "stop", "notice"]:
-                await Tracking(message)
-            elif arg2 == "add":
-                await addNitro(message)
-            elif arg2 == "del":
-                await delNitro(message)
-            elif arg2 == "help":
-                await nitroHelp(message)
-            elif arg2 == "export":
-                if message.author.id == message.guild.owner_id:
-                    await exportNitro(message)
-                else:
-                    emb = discord.Embed()
-                    emb.description = "You do not have the permissions to use this. Only server owners can use this command."
-                    emb.color = get_hex_colour(error=True)
-                    await message.channel.send(embed=emb)
-            elif arg2 == "check":
-                await checkNitro(message)
-            else:
-                await message.channel.send(
-                    "Unknown argument. Use '!c nitro help' for correct syntax."
-                )
-        except IndexError:
-            await message.channel.send(
-                "No arguments given. Use '!c nitro help' for correct syntax."
-            )
-    else:
-        emb = discord.Embed()
-        emb.description = "You do not have the permissions to use this."
+async def nitroSpin(message):
+    # Command structure
+    # !c nitro spin [-e]
+    
+    nitroBoosts = await checkNitro(message, checkType="spin")
+
+    # For debug purposes
+    # with sqlite3.connect(DB_F) as conn:
+    #     c = conn.cursor()
+
+    #     c.execute(f"SELECT * FROM NitroBoosts WHERE Guild_ID={message.guild.id}")
+    #     nitroBoosts = c.fetchall()
+
+    flag = message.content.split(" ")[-1].strip().lstrip("[").rstrip("]").lower()
+    emb = discord.Embed()
+    if len(nitroBoosts) == 0:
+        emb.description = "No boosts to draw a winner from."
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
+        return
+
+    emb2 = discord.Embed()
+    emb2.description = "**_SPIIIIIIIIIIIIIIIIIIIIIIIN_**"
+    emb2.color = get_hex_colour()
+    emb2.set_image(url=SPIN_GIF_URL)
+
+    msg = await message.channel.send(embed=emb2)
+    sleep(0.5)
+    await message.channel.trigger_typing()
+    sleep(8.5)
+
+    if len(nitroBoosts) == 1:
+        winner_id = nitroBoosts[0][1]
+    else:
+        userPool = []
+        if flag == "-e":
+            for b in nitroBoosts:
+                userPool.append(b[1])
+        else:
+            for b in nitroBoosts:
+                if b[5] == 1:
+                    userPool.append(b[1])
+                else:
+                    for i in range(b[5]):
+                        userPool.append(b[1])
+        winnerIndex = random.randint(0, len(userPool) - 1)
+        winner_id = userPool[winnerIndex]
+
+    member = message.guild.get_member(winner_id)
+    emb.title = f"And the winner is..."
+    emb.description = f"{member.mention}!! {EMOJI} {EMOJI}\nGongratulations to the winner! {HEART_EMOTE}"
+    emb.color = get_hex_colour()
+
+    await message.channel.send(embed=emb)
+
+
+async def nitroJunction(message):
+    try:
+        arg2 = message.content.split(" ")[2].strip().lstrip("[").rstrip("]").lower()
+    except IndexError:
+        await message.channel.send(
+            "No arguments given. Use '!c nitro help' for correct syntax."
+        )
+    if message.author.guild_permissions.administrator:
+        if arg2 in ["start", "stop", "notice"]:
+            await Tracking(message)
+        elif arg2 == "add":
+            await addNitro(message)
+        elif arg2 == "del":
+            await delNitro(message)
+        elif arg2 == "help":
+            await nitroHelp(message)
+        elif arg2 == "export":
+            if message.author.id == message.guild.owner_id:
+                await exportNitro(message)
+            else:
+                emb = discord.Embed()
+                emb.description = "You do not have the permissions to use this. Only server owners can use this command."
+                emb.color = get_hex_colour(error=True)
+                await message.channel.send(embed=emb)
+        elif arg2 == "check":
+            await checkNitro(message)
+        elif arg2 == "spin":
+            await nitroSpin(message)
+        else:
+            await message.channel.send(
+                "Unknown argument. Use '!c nitro help' for correct syntax."
+            )
+    else:
+        if arg2 == "help":
+            await nitroHelp(message)
+        else:
+            emb = discord.Embed()
+            emb.description = "You do not have the permissions to use this."
+            emb.color = get_hex_colour(error=True)
+            await message.channel.send(embed=emb)
