@@ -31,7 +31,8 @@ logging.basicConfig(
     datefmt="%d/%m/%Y %H:%M:%S",
 )
 intents = discord.Intents().all()
-client = discord.Client(intents=intents)
+activ = discord.Game("!c help")
+client = discord.Client(intents=intents, activity=activ)
 common.initializeDatabase()
 
 # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
@@ -147,7 +148,7 @@ async def on_guild_join(guild):
             dm_channel = await guild.owner.create_dm()
         await dm_channel.send(embed=emb)
     except Exception:
-        logging.exception("Vould not send welcome message to server owner.")
+        logging.exception("Could not send welcome message to server owner.")
 
 
 client.run(DISCORD_TOKEN)
