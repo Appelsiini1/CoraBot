@@ -346,7 +346,7 @@ async def addNitro(message):
             c.execute("SELECT Boost_ID FROM NitroBoosts ORDER BY Boost_ID DESC")
             lastID = c.fetchone()
             newID = 0
-            newID += 1 if lastID != None else 1
+            newID = lastID + 1 if lastID != None else 1
 
             # Boost_ID INT UNIQUE, 0
             # User_ID INT, 1
