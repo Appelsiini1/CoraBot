@@ -700,13 +700,13 @@ async def nitroSpin(message):
     # Command structure
     # !c nitro spin [-e]
     
-    #nitroBoosts = await checkNitro(message, checkType="spin")
+    nitroBoosts = await checkNitro(message, checkType="spin")
 
     # For debug purposes
-    with sqlite3.connect(DB_F) as conn:
-        c = conn.cursor()
-        c.execute(f"SELECT * FROM NitroBoosts WHERE Guild_ID={message.guild.id}")
-        nitroBoosts = c.fetchall()
+    # with sqlite3.connect(DB_F) as conn:
+    #     c = conn.cursor()
+    #     c.execute(f"SELECT * FROM NitroBoosts WHERE Guild_ID={message.guild.id}")
+    #     nitroBoosts = c.fetchall()
 
     flag = message.content.split(" ")[-1].strip().lstrip("[").rstrip("]").lower()
     emb = discord.Embed()
