@@ -58,6 +58,13 @@ async def on_error(event, *args, **kwargs):
 async def on_message(message):
     if message.author == client.user:
         return
+    elif message.type in [
+        discord.MessageType.premium_guild_subscription,
+        discord.MessageType.premium_guild_tier_1,
+        discord.MessageType.premium_guild_tier_2,
+        discord.MessageType.premium_guild_tier_3,
+    ]:
+        nitro.trackNitro(message)
     elif (
         message.channel.type != discord.ChannelType.text
         and message.channel.type != discord.ChannelType.news
@@ -70,15 +77,10 @@ async def on_message(message):
         msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
         await message.channel.send(msg)
         return
+
     elif message.content.startswith(PREFIX) == False:
         return
-    elif message.type in [
-        discord.MessageType.premium_guild_subscription,
-        discord.MessageType.premium_guild_tier_1,
-        discord.MessageType.premium_guild_tier_2,
-        discord.MessageType.premium_guild_tier_3,
-    ]:
-        nitro.trackNitro(message)
+
 
     cmd = message.content.split(" ")[1].lower()
 
