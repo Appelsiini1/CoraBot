@@ -38,6 +38,4 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run a script
         run: |
-          tmux kill-session -t CoraBot
-          tmux new -t CoraBot
-          python3 main.py
+          ls
