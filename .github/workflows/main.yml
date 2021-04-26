@@ -30,7 +30,7 @@ jobs:
         with:
           source: "."
           target: "~/CoraBot"
-      - name: executing remote ssh commands using password
+      - name: executing remote ssh commands using key
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
