@@ -33,7 +33,7 @@ jobs:
           KEY: ${{ secrets.KEY }}
         with:
           source: "."
-          target: "/CoraBot"
+          target: "/home/CoraBot"
 
       # Runs a set of commands using the runners shell
       - name: Run a script
