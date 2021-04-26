@@ -39,5 +39,6 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd ~/CoraBot
-            ls
+            chmod 777 script.sh
+            ls -l
             ./script.sh
