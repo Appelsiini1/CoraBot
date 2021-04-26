@@ -37,4 +37,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-          script: systemctl restart corabot
+          script: |
+            cd ~/CoraBot
+            chmod +x script.sh
+            systemctl restart corabot
