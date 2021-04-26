@@ -4,6 +4,7 @@
 
 import discord
 import logging
+from datetime import datetime
 
 # import tweepy
 
@@ -29,7 +30,9 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s - %(message)s",
     datefmt="%d/%m/%Y %H:%M:%S",
 )
-client = discord.Client()
+intents = discord.Intents().all()
+activ = discord.Game("!c help")
+client = discord.Client(intents=intents, activity=activ)
 common.initializeDatabase()
 
 # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
@@ -39,6 +42,15 @@ common.initializeDatabase()
 async def on_ready():
     print(f"{client.user} {VERSION} is online & ready.")
     logging.info(f"{client.user} {VERSION} is online & ready.")
+
+
+@client.event
+async def on_error(event, *args, **kwargs):
+    time = datetime.now().strftime("%d.%m.%Y at %H:%M")
+    logging.exception(
+        f"An unhandled exception occured in {event}. \nMessage: {args[0]}\nMessage content: '{args[0].content}'\n**********"
+    )
+    print(f"{time} - An unhandled exception occured in {event}, see log for details.")
 
 
 # main event, parses commands
@@ -68,7 +80,7 @@ async def on_message(message):
     ]:
         nitro.trackNitro(message)
 
-    cmd = message.content.split(" ")[1]
+    cmd = message.content.split(" ")[1].lower()
 
     if cmd == "hi" or cmd == "hello":
         await message.channel.send("Hello!")
@@ -106,12 +118,37 @@ async def on_message(message):
     elif cmd == "pop":
         await pop.pop(message)
     elif cmd == "mood":
-        await message.channel.send("https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4")
+        await message.channel.send(
+            "https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4"
+        )
     elif cmd == "nitro":
         await nitro.nitroJunction(message)
 
     else:
         await message.channel.send("What was that?")
+
+
+@client.event
+async def on_guild_join(guild):
+    emb = discord.Embed()
+    emb.color = common.get_hex_colour(cora_blonde=True)
+    emb.title = "Hey there!"
+    emb.description = "Hi! Thanks for adding me to your server! <3\n\
+        You can use my features by typing commands with the prefix `!c`. To access a list of available commands, use `!c help`.\n\
+        \nPlease make sure I have the proper rights, especially to view the channels you want me to listen for commands in, send messages & embed links.\n\
+        \n\
+        Sincerely,\n\
+        ~ Cora ~"
+    emb.set_thumbnail(
+        url="https://media.discordapp.net/attachments/693166291468681227/834200862246043648/cora_pfp.png"
+    )
+    try:
+        dm_channel = guild.owner.dm_channel
+        if dm_channel == None:
+            dm_channel = await guild.owner.create_dm()
+        await dm_channel.send(embed=emb)
+    except Exception:
+        logging.exception("Could not send welcome message to server owner.")
 
 
 client.run(DISCORD_TOKEN)

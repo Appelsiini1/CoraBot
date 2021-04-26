@@ -33,10 +33,13 @@ async def end_giveaway(message, client_id):
             await message.channel.send(embed=emb)
             return
         prefix = "!c endgiveaway "
-        args = message.content[len(prefix) - 1 :].strip()
+        args = message.content[len(prefix) - 1 :].strip().lstrip("[").rstrip("]")
         react = await message.channel.fetch_message(args)
         list_user = await react.reactions[0].users().flatten()
         random_n = random.randint(0, len(list_user) - 1)
+        if len(list_user) == 1:
+            await message.channel.send("No entries to the giveaway :(")
+            return
         while True:
             winner_id = list_user[random_n].id
             if winner_id != client_id:

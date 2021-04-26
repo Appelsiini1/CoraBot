@@ -18,11 +18,11 @@ RoleRE1 = re.compile(r"^.*<@&(\d+)>")
 
 async def Poll(message):
     try:
-        content = message.content.split(" ")[2]
+        content = message.content.split(" ")[2].strip().lstrip("[").rstrip("]")
     except IndexError:
         content = ""
     try:
-        arg = message.content.split(" ")[3]
+        arg = message.content.split(" ")[3].strip().lstrip("[").rstrip("]")
     except IndexError:
         arg = ""
 
@@ -126,7 +126,7 @@ async def startBasicPoll(message):
         prefix = _POLL_PREFIX + "new "
         emb = discord.Embed()
         args = message.content[len(prefix) :].split(";")
-        title = args[0]
+        title = args[0].strip().lstrip("[").rstrip("]")
         titleStatus = 0
         del args[0]
         if title.strip() == "":
@@ -143,7 +143,7 @@ async def startBasicPoll(message):
             emoji_list = selectReactionEmoji(len(args), indexes=True)
             for i, option in enumerate(args):
                 emoji = _EMOJIS[emoji_list[i]]
-                poll_txt += emoji + ": " + option.strip() + "\n"
+                poll_txt += emoji + ": " + option.strip().lstrip("[").rstrip("]") + "\n"
 
             if len(poll_txt) >= 2048:
                 emb.description = (
