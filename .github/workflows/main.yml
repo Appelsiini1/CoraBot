@@ -39,4 +39,5 @@ jobs:
       - name: Run a script
         run: |
           ls
+          chmod 777 script.sh
           ./script.sh
