@@ -17,7 +17,7 @@ SURPRISE_EMOTE = "\N{FACE WITH OPEN MOUTH}"
 
 MENTION_RE = re.compile(r"^.*<@!(\d+)>")
 
-SPIN_GIF_URL = "https://cdn.discordapp.com/attachments/816694548457324544/835656705844314122/spin_wheelV2.gif"
+SPIN_GIF_URL = "https://imgur.com/maohyNQ"
 
 
 def constructEmbed(message, boosts):
@@ -346,7 +346,7 @@ async def addNitro(message):
             c.execute("SELECT Boost_ID FROM NitroBoosts ORDER BY Boost_ID DESC")
             lastID = c.fetchone()
             newID = 0
-            newID = 1 if lastID != None else 1
+            newID = lastID[0] + 1 if lastID != None else 1
 
             # Boost_ID INT UNIQUE, 0
             # User_ID INT, 1
@@ -372,6 +372,7 @@ async def addNitro(message):
                     break
                 except sqlite3.IntegrityError:
                     newID += 1
+                    logging.info(f"Insertion to database failed, new boost ID is {newID}")
 
             if success != 1:
                 logging.error("Could not add boost to database.")
@@ -704,7 +705,6 @@ async def nitroSpin(message):
     # For debug purposes
     # with sqlite3.connect(DB_F) as conn:
     #     c = conn.cursor()
-
     #     c.execute(f"SELECT * FROM NitroBoosts WHERE Guild_ID={message.guild.id}")
     #     nitroBoosts = c.fetchall()
 
@@ -719,9 +719,9 @@ async def nitroSpin(message):
     emb2 = discord.Embed()
     emb2.description = "**_SPIIIIIIIIIIIIIIIIIIIIIIIN_**"
     emb2.color = get_hex_colour()
-    emb2.set_image(url=SPIN_GIF_URL)
 
     msg = await message.channel.send(embed=emb2)
+    await message.channel.send(SPIN_GIF_URL)
     sleep(0.5)
     await message.channel.trigger_typing()
     sleep(8.5)
@@ -745,7 +745,7 @@ async def nitroSpin(message):
 
     member = message.guild.get_member(winner_id)
     emb.title = f"And the winner is..."
-    emb.description = f"{member.mention}!! {EMOJI} {EMOJI}\nGongratulations to the winner! {HEART_EMOTE}"
+    emb.description = f"{member.mention}!! {EMOJI} {EMOJI}\nCongratulations to the winner! {HEART_EMOTE}"
     emb.color = get_hex_colour()
 
     await message.channel.send(embed=emb)
