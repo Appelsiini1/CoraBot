@@ -729,8 +729,15 @@ async def rolePollEndHelper(message, c, poll=None, polls=None):
         vote_sums = []
         for i in range(option_amount):
             vote_sums.append(0)
+        voters = []
+        # Vote_ID INT UNIQUE,
+        # Poll_ID INT,
+        # Voter_ID INT,
+        # Votes TXT,
         for vote in votes:
             vote_str = vote[3][:-1].split(";")
+            if vote[2] not in voters:
+                voters.append(vote[2])
             for i, option in enumerate(vote_str):
                 vote_sums[i] += int(option)
 
@@ -738,6 +745,8 @@ async def rolePollEndHelper(message, c, poll=None, polls=None):
         for i, option in enumerate(vote_sums):
             txt += f"**{poll_options[i]}**: {option}\n"
         poll_ids.append(poll_id)
+        voter_amount = len(voters)
+        emb.set_footer(text=f"A total of {voter_amount} people voted in this poll.")
         emb.description = txt
         emb.title = f"Results for '{poll_name}'"
         emb.color = get_hex_colour(cora_eye=True)
@@ -762,8 +771,11 @@ async def rolePollEndHelper(message, c, poll=None, polls=None):
             vote_sums = []
             for i in range(option_amount):
                 vote_sums.append(0)
+            voters = []
             for vote in votes:
                 vote_str = vote[3][:-1].split(";")
+                if vote[2] not in voters:
+                    voters.append(vote[2])
                 for i, option in enumerate(vote_str):
                     vote_sums[i] += int(option)
 
@@ -771,6 +783,8 @@ async def rolePollEndHelper(message, c, poll=None, polls=None):
             for i, option in enumerate(vote_sums):
                 txt += f"**{poll_options[i]}**: {option}\n"
             poll_ids.append(poll_id)
+            voter_amount = len(voters)
+            emb.set_footer(text=f"A total of {voter_amount} people voted in this poll.")
             emb.description = txt
             emb.title = f"Results for '{poll_name}'"
             emb.color = get_hex_colour(cora_eye=True)
