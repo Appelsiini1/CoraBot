@@ -123,6 +123,28 @@ def initializeDatabase():
         );"""
         )
 
+        # Channels to track (other than Nitro)
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS Tracked(
+            Channel_ID INT,
+            Guild_ID INT,
+            Type INT,
+            PRIMARY KEY (Channel_ID)
+        );"""
+        )
+
+        # Quote table
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS Quotes(
+            Quote_ID INT UNIQUE,
+            User_ID INT,
+            Channel_ID INT,
+            Guild_ID INT,
+            Quote_text TEXT,
+            PRIMARY KEY (Quote_ID)
+        );"""
+        )
+
         # other databases here
 
         conn.commit()
