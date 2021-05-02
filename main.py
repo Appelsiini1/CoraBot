@@ -77,6 +77,9 @@ async def on_message(message):
         msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
         await message.channel.send(msg)
         return
+    elif message.channel.id in TRACKED_CHANNELS.channels and message.content.startswith(PREFIX) == False:
+        await tirsk.tirskTrack(message)
+        return
 
     elif message.content.startswith(PREFIX) == False:
         return
@@ -112,7 +115,7 @@ async def on_message(message):
     elif cmd == "vacc":
         await vaccine.sendVaccInfo(message)
     elif cmd == "tirsk":
-        await tirsk.tirskCount(message)
+        await tirsk.tirskJunction(message)
     elif cmd == "poll":
         await poll.Poll(message)
     elif cmd == "vote":
@@ -125,6 +128,10 @@ async def on_message(message):
         )
     elif cmd == "nitro":
         await nitro.nitroJunction(message)
+    elif cmd == "test":
+        au = message.guild.get_member(message.author.id)
+        print(au.id)
+        await message.add_reaction("\N{white heavy check mark}")
 
     else:
         await message.channel.send("What was that?")
