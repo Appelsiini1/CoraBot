@@ -372,7 +372,7 @@ async def addNitro(message):
                     break
                 except sqlite3.IntegrityError:
                     newID += 1
-                    logging.info(f"Insertion to database failed, new boost ID is {newID}")
+                    logging.warning(f"Insertion to database failed, new boost ID is {newID}")
 
             if success != 1:
                 logging.error("Could not add boost to database.")
@@ -569,6 +569,7 @@ async def exportNitro(message):
     emb.description = "_Compiling data, this could take a while._"
     emb.color = get_hex_colour(cora_blonde=True)
     msg = await message.channel.send(embed=emb)
+    await message.channel.trigger_typing()
 
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
@@ -581,7 +582,7 @@ async def exportNitro(message):
             emb.description = ""
             emb.title = "No boosts on record to export."
             emb.color = get_hex_colour(error=True)
-            await message.channel.send(embed=emb)
+            await msg.edit(embed=emb)
         else:
             filename = f"export_{guildID}.csv"
             with open(filename, "w", encoding="utf-8") as f:
@@ -629,7 +630,6 @@ async def exportNitro(message):
                 logging.exception(
                     "Unable to delete the local copy of boost export CSV."
                 )
-                print(e)
 
 
 async def checkNitro(message, checkType="normal"):
@@ -724,7 +724,7 @@ async def nitroSpin(message):
     await message.channel.send(SPIN_GIF_URL)
     sleep(0.5)
     await message.channel.trigger_typing()
-    sleep(8.5)
+    sleep(9.5)
 
     if len(nitroBoosts) == 1:
         winner_id = nitroBoosts[0][1]
