@@ -77,13 +77,16 @@ async def on_message(message):
         msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
         await message.channel.send(msg)
         return
-    elif message.channel.id in TRACKED_CHANNELS.channels and message.content.startswith(PREFIX) == False and message.author != client.user:
+    elif (
+        message.channel.id in TRACKED_CHANNELS.channels
+        and message.content.startswith(PREFIX) == False
+        and message.author != client.user
+    ):
         await tirsk.tirskTrack(message)
         return
 
     elif message.content.startswith(PREFIX) == False:
         return
-
 
     cmd = message.content.split(" ")[1].lower()
 
@@ -96,7 +99,7 @@ async def on_message(message):
     elif cmd == "git":
         await message.channel.send(GIT)
     elif cmd == "version":
-        await message.channel.send(f"CoraBot {VERSION}")
+        await message.channel.send(f"CoraBot `{VERSION}`")
     elif cmd == "inspire":
         await quote.get_quote(message)
     elif cmd == "insult":
@@ -128,10 +131,8 @@ async def on_message(message):
         )
     elif cmd == "nitro":
         await nitro.nitroJunction(message)
-    elif cmd == "test":
-        au = message.guild.get_member(message.author.id)
-        print(au.id)
-        await message.add_reaction("\N{white heavy check mark}")
+    # elif cmd == "test":
+        # await message.add_reaction("\N{white heavy check mark}")
 
     else:
         await message.channel.send("What was that?")

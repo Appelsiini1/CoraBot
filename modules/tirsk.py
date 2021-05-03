@@ -21,12 +21,15 @@ async def tirskCount(message):
     counter = {}
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
-        c.execute("SELECT * FROM Quotes WHERE Guild_ID=? AND Channel_ID=?", (message.guild.id, message.channel.id))
+        c.execute(
+            "SELECT * FROM Quotes WHERE Guild_ID=? AND Channel_ID=?",
+            (message.guild.id, message.channel.id),
+        )
         quotes = c.fetchall()
         for q in quotes:
             if q[1] in counter:
-                counter[q[1]] += 1  
-            else: 
+                counter[q[1]] += 1
+            else:
                 counter[q[1]] = 1
 
     txt = ""
@@ -72,7 +75,7 @@ async def countOldTirsk(message):
                 await tirskAdd(msg, c)
             else:
                 continue
-        
+
         emb.description = "Old quotes were counted. All messages with green check marks have been added to database. The ones that did not conform to the spesifications were ignored.\n\
         You can see the scoreboard by typing `!c tirsk score`"
         await msgID.edit(embed=emb)
@@ -306,6 +309,7 @@ async def tirskHelp(message):
     emb.color = get_hex_colour()
 
     await message.channel.send(embed=emb)
+
 
 async def tirskJunction(message):
     try:

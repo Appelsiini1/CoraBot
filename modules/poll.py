@@ -32,33 +32,16 @@ async def Poll(message):
         await startBasicPoll(message)
     elif content == "end":
         await endPolls(message)
-    elif content == "roles":
+    elif content in ["roles", "new", "setroles", "delroles"]:
         if message.author.guild_permissions.administrator:
-            await showRoles(message)
-        else:
-            emb = discord.Embed()
-            emb.description = "You do not have the permissions to use this."
-            emb.color = get_hex_colour(error=True)
-            await message.channel.send(embed=emb)
-    elif content == "new" and arg == "-r":
-        if message.author.guild_permissions.administrator:
-            await startRolePoll(message)
-        else:
-            emb = discord.Embed()
-            emb.description = "You do not have the permissions to use this."
-            emb.color = get_hex_colour(error=True)
-            await message.channel.send(embed=emb)
-    elif content == "setroles":
-        if message.author.guild_permissions.administrator:
-            await recordRoles(message)
-        else:
-            emb = discord.Embed()
-            emb.description = "You do not have the permissions to use this."
-            emb.color = get_hex_colour(error=True)
-            await message.channel.send(embed=emb)
-    elif content == "delroles":
-        if message.author.guild_permissions.administrator:
-            await delRoles(message)
+            if content == "roles":
+                await showRoles(message)
+            elif content == "new" and arg == "-r":
+                await startRolePoll(message)
+            elif content == "setroles":
+                await recordRoles(message)
+            elif content == "delroles":
+                await delRoles(message)
         else:
             emb = discord.Embed()
             emb.description = "You do not have the permissions to use this."
@@ -66,45 +49,44 @@ async def Poll(message):
             await message.channel.send(embed=emb)
     else:
         await sendHelp(message)
-    # elif content == "edit": #TODO add an edit command?
 
 
 async def sendHelp(message):
     emb = discord.Embed()
     emb.title = "How to use polls 1/2"
     emb.color = get_hex_colour()
-    txt1 = "Command usage: ```!c poll [new|end|help]```\n\
-        **Adding a new basic poll:**\n\
-        ```!c poll new [title]; [option1]; [option2]; ... [option20]```\n\
-        The command will select random emotes for reactions. You can leave the title empty, but in that case remember to put a ';' before the first option.\n\
-        Please note that the poll has a character limit of about ~1800 to ~1950 characters depending on how many options you have. Title is not counted into this amount.\n\
-        \n\
-        **Ending a poll:**\n\
-        ```!c poll end [Poll ID]```\n\
-        _NOTE!_ If you have multiple polls running (basic or advanced), you can end them all by leaving out the ID.\n\
-        The command will only end polls that have been iniated by you.\n"
+    txt1 = "**Basic polls**_\n\
+**Adding a new basic poll:**\n\
+```!c poll new [title]; [option1]; [option2]; ... [option20]```\n\
+The command will select random emotes for reactions. You can leave the title empty, but in that case remember to put a `;` before the first option.\n\
+Please note that the poll has a character limit of about ~1800 to ~1950 characters depending on how many options you have. Title is not counted into this amount.\n\
+\n\
+**Ending a poll:**\n\
+```!c poll end [Poll ID]```\n\
+_NOTE!_ If you have multiple polls running (basic or advanced), you can end them all by leaving out the ID.\n\
+The command will only end polls that have been iniated by you.\n"
     txt2 = "_**Advanced polls**_\n\
-        Please note that advanced polls require administrator permissions to use.\
-        With advanced polls you can set different maximum vote amounts for different roles. Voting will be done via a command as opposed to reactions in the basic polls. You can end advanced polls the same command as basic polls.\n\
-        To add or edit roles in(to) the bot's database, use \n```!c poll setroles [role]:[voteamount],[role]:[voteamount], ...```\n\
-        You can add as many roles as you need. Input the role as a mention (@role) or a role ID if you don't want to mention the role (you can get a role ID by enabling Discord's Developer mode. Then go to 'Server Settings' -> 'Roles' and copy the ID by right clicking on the role and selecting 'Copy ID'. To enable Developer mode, see https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).\
-        'voteamount' should be an integer.\n\
-        \n\
-        **Adding a new advanced poll:**\
-        ```!c poll new -r [title]; [option1]; [option2]; ... [option20]```\n\
-        Please note that the poll has a character limit of about ~1800 to ~1950 characters depending on how many options you have. Title is not counted into this amount.\n\
-        \n**For voting help, type:**\n\
-        ```!c vote help```\n\
-        \n\
-        **Editing or deleting roles from the database:**\n\
-        If you want to change how many votes a role has use:\n\
-        ```!c poll editrole [role]:[voteamount],[role]:[voteamount], ...```\n\
-        Note, that if you change anything in the role you do not need to add or edit the role in the bot's database unless you delete and create a new role in the server settings.\
-        If you wish to delete a role, use\n\
-        ```!c poll delrole [role], [role], ...```\n\
-        where [role] is a role ID or a role mention.\n\
-        Note that you can also delete all roles with the keyword 'all', as in\n\
-        ```!c poll delrole all```"
+Please note that advanced polls require administrator permissions to use.\
+With advanced polls you can set different maximum vote amounts for different roles. Voting will be done via a command as opposed to reactions in the basic polls. You can end advanced polls the same command as basic polls.\n\
+To add or edit roles in(to) the bot's database, use \n```!c poll setroles [role]:[voteamount],[role]:[voteamount], ...```\n\
+You can add as many roles as you need. Input the role as a mention (`@role`) or a role ID if you don't want to mention the role (you can get a role ID by enabling Discord's Developer mode. Then go to `Server Settings` -> `Roles` and copy the ID by right clicking on the role and selecting `Copy ID`. To enable Developer mode, see https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).\n\
+`voteamount` should be an integer.\n\
+\n\
+**Adding a new advanced poll:**\
+```!c poll new -r [title]; [option1]; [option2]; ... [option20]```\n\
+Please note that the poll has a character limit of about ~1850 to ~1950 characters depending on how many options you have. Title is not counted into this amount.\n\
+\n**For voting help, type:**\n\
+```!c vote help```\n\
+\n\
+**Editing or deleting roles from the database:**\n\
+If you want to change how many votes a role has use:\n\
+```!c poll editrole [role]:[voteamount],[role]:[voteamount], ...```\n\
+Note, that if you change anything in the role you do not need to add or edit the role in the bot's database unless you delete and create a new role in the server settings (i.e. you only need to re-add it if the ID of it changes).\
+If you wish to delete a role, use\n\
+```!c poll delrole [role], [role], ...```\n\
+where `role` is a role ID or a role mention.\n\
+Note that you can also delete all roles with the keyword `all`, as in\n\
+```!c poll delrole all```"
     dm_channel = message.author.dm_channel
     if dm_channel == None:
         dm_channel = await message.author.create_dm()
@@ -114,6 +96,7 @@ async def sendHelp(message):
     emb.description = txt2
     emb.title = "How to use polls 2/2"
     await dm_channel.send(embed=emb)
+    await message.add_reaction("\N{white heavy check mark}")
 
 
 async def startBasicPoll(message):
@@ -254,12 +237,9 @@ async def endPolls(message):
     # Command structure:
     # !c poll end [poll_ID]
 
-    # TODO Consolidate RolePoll and BasicPoll ending under this function
-
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
 
-        prefix = _POLL_PREFIX + "end "
         emb = discord.Embed()
         success = 0
 
@@ -397,7 +377,7 @@ async def recordRoles(message):
 
     if args == 0:
         emb.description = (
-            "You did not give any arguments. Use '!c poll help' for the correct syntax."
+            "You did not give any arguments. Use `!c poll help` for the correct syntax."
         )
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
@@ -458,7 +438,7 @@ async def recordRoles(message):
                         (role_int, roles_dic[role_int], message.guild.id, amount),
                     )
                 except sqlite3.IntegrityError:
-                    emb.description = "Error adding roles to database. Aborting."
+                    emb.description = "Error adding roles to database."
                     emb.color = get_hex_colour(error=True)
                     await message.channel.send(embed=emb)
                     return
@@ -521,7 +501,7 @@ async def delRoles(message):
     args = message.content[len(prefix) :].split(",")
 
     if args[0].strip() == "":
-        emb.description = "**You did not give any arguments. Use '!c poll help' for the correct syntax.**"
+        emb.description = "**You did not give any arguments. Use `!c poll help` for the correct syntax.**"
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
         return
@@ -574,7 +554,7 @@ async def startRolePoll(message):
         emb2 = discord.Embed()
         poll_colour = get_hex_colour()
         if len(roles) < 1:
-            emb.description = "You have not set the maximum vote amounts for roles. See '!c poll help' for more."
+            emb.description = "You have not set the maximum vote amounts for roles. See `!c poll help` for more."
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
             return
@@ -599,7 +579,7 @@ async def startRolePoll(message):
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
         elif len(args) <= MAX_OPTIONS:
-            poll_txt = "Use '!c vote' -command to vote in this poll! See below the poll for an example.\n\n**Options:**\n"
+            poll_txt = "Use `!c vote` -command to vote in this poll! See below the poll for an example.\n\n**Options:**\n"
             option_str = ""
 
             for i, o in enumerate(args, start=1):
@@ -682,7 +662,7 @@ async def startRolePoll(message):
             txt3 = "Here's an example of a vote command that gives {0} vote(s) to option number \
                 {1} and {2} vote(s) to option number {3} in this poll.\
                 ```!c vote {4} {1}:{0}, {3}:{2}```\
-                \nFor more help, use '!c vote help'".format(
+                \nFor more help, use `!c vote help`".format(
                 random.randint(2, 5),
                 option1,
                 random.randint(1, 5),

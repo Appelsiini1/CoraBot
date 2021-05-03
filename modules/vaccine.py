@@ -108,7 +108,7 @@ async def sendVaccInfo(message):
                 ALUEET[param]
             except KeyError:
                 emb.description = "Area code does not match any known areas. Please provide a valid code or leave empty for all areas.\
-                \nType '!c vacc help' for all currently available areas."
+                \nType `!c vacc help` for all currently available areas."
                 emb.color = get_hex_colour(error=True)
                 await s_msg.edit(embed=emb)
                 return
