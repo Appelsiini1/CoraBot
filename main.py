@@ -77,7 +77,7 @@ async def on_message(message):
         msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
         await message.channel.send(msg)
         return
-    elif message.channel.id in TRACKED_CHANNELS.channels and message.content.startswith(PREFIX) == False:
+    elif message.channel.id in TRACKED_CHANNELS.channels and message.content.startswith(PREFIX) == False and message.author != client.user:
         await tirsk.tirskTrack(message)
         return
 
