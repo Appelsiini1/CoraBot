@@ -15,7 +15,7 @@ with sqlite3.connect("Databases/database.db") as conn:
         );"""
         )
     # c.execute(
-    #     """ALTER TABLE Tracked
-    #     ADD COLUMN Type INT;"""
+    #     """ALTER TABLE Quotes
+    #     ADD COLUMN Quote_text TEXT;"""
     #     )
     conn.commit()
