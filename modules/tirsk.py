@@ -66,6 +66,10 @@ async def countOldTirsk(message):
         await message.channel.trigger_typing()
 
         async for msg in message.channel.history(limit=None):
+            if message.author.bot == True:
+                continue
+            elif message.content.startswith("!c") == True:
+                continue
             time.sleep(0.08)
             c.execute(
                 "SELECT * FROM Quotes WHERE Quote_text=? AND Guild_ID=?",
