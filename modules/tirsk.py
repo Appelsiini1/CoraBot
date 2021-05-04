@@ -39,7 +39,10 @@ async def tirskCount(message):
         if name:
             name = name.display_name
         else:
-            name = await message.guild.fetch_member(keypair[0])
+            try:
+                name = await message.guild.fetch_member(keypair[0])
+            except Exception:
+                name = None
             time.sleep(0.06)
             if name:
                 name = name.display_name
