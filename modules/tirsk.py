@@ -204,7 +204,7 @@ async def setTracking(message):
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
             c.execute(
-                "SELECT * FROM Tracked WHERE Channel_ID=? AND Guil_ID=?",
+                "SELECT * FROM Tracked WHERE Channel_ID=? AND Guild_ID=?",
                 (message.channel.id, message.guild.id),
             )
             tr = c.fetchone()
@@ -246,7 +246,7 @@ async def tirskExport(message):
 
         if len(quotes) == 0:
             emb.description = ""
-            emb.title = "No quotes to export."
+            emb.title = "No quotes to export on this channel."
             emb.color = get_hex_colour(error=True)
             await msg.edit(embed=emb)
         else:
@@ -301,7 +301,7 @@ async def tirskHelp(message):
     `start`  Aloita kanavan seuraaminen\n\
     `stop`   Lopeta kanavan seuraaminen\n\
     `export` Vie kaikki lainaukset tietokannasta\n\
-    `score`  Laske pistetaulu\
+    `score`  Laske pistetaulu\n\
     _Kaikki komennot vaativat 'administrator' oikeudet._"
     emb = discord.Embed()
     emb.title = "Tirsk."
