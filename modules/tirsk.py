@@ -66,9 +66,9 @@ async def countOldTirsk(message):
         await message.channel.trigger_typing()
 
         async for msg in message.channel.history(limit=None):
-            if message.author.bot == True:
+            if msg.author.bot == True:
                 continue
-            elif message.content.startswith("!c") == True:
+            elif msg.content.startswith("!c") == True:
                 continue
             time.sleep(0.08)
             c.execute(
