@@ -98,7 +98,7 @@ async def tirskAdd(message, c):
         # Channel_ID INT,
         # Guild_ID INT,
         # Quote_text TEXT,
-        c.execute("SELECT * FROM Quotes")
+        c.execute("SELECT * FROM Quotes ORDER BY Quote_ID DESC")
         old = c.fetchone()
         Quote_ID = old[0] + 1 if old != None else 1
         success = 0
