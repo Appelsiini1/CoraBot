@@ -302,7 +302,7 @@ async def tirskHelp(message):
     `stop`   Lopeta kanavan seuraaminen\n\
     `export` Vie kaikki lainaukset tietokannasta\n\
     `score`  Laske pistetaulu\
-    _Kaikki komennot vaativat 'administrator' oikeudet."
+    _Kaikki komennot vaativat 'administrator' oikeudet._"
     emb = discord.Embed()
     emb.title = "Tirsk."
     emb.description = txt
