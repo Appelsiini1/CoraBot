@@ -23,6 +23,7 @@ from modules import poll
 from modules import vote
 from modules import pop
 from modules import nitro
+from modules import dice_comm
 
 logging.basicConfig(
     filename="Coralog.txt",
@@ -131,6 +132,8 @@ async def on_message(message):
         )
     elif cmd == "nitro":
         await nitro.nitroJunction(message)
+    elif cmd == "dice":
+        await dice_comm.dice_comm(message)
     # elif cmd == "test":
         # await message.add_reaction("\N{white heavy check mark}")
 
