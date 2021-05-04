@@ -9,7 +9,7 @@ async def choose(message):
     valid = [x for x in args if x.strip() != ""]
 
     if len(valid) < 2:
-        msg = "**I need at least 2 options! Syntax: [option1] | [option2] ...**"
+        msg = "**I need at least 2 options! Syntax: `[option1] | [option2] ...`**"
     else:
         random_n = random.randint(0, len(valid) - 1)
         chosen = valid[random_n]

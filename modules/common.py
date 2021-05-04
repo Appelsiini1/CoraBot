@@ -2,6 +2,7 @@ import random
 import discord
 from modules.emoji_list import _EMOJIS
 import sqlite3
+import logging
 from constants import DB_F
 
 
@@ -47,6 +48,16 @@ async def sendEmoji(message):
         txt += emoji + " ; "
     await message.channel.send(txt)
 
+
+async def forbiddenErrorHandler(message):
+    logging.error("Unable to send message due to 403 - Forbidden")
+    emb = discord.Embed()
+    emb.description = f"Unable to send message to channel '{message.channel.name}' in '{message.guild.name}'. If you are the server owner, please make sure I have the proper rights to post messages to that channel."
+    emb.color = get_hex_colour(error=True)
+    dm_channel = message.author.dm_channel
+    if dm_channel == None:
+        dm_channel = await message.author.create_dm()
+    await dm_channel.send(embed=emb)
 
 def initializeDatabase():
     with sqlite3.connect(DB_F) as conn:
@@ -120,6 +131,28 @@ def initializeDatabase():
             Guild_ID INT,
             Track_YN INT,
             PRIMARY KEY (Guild_ID)
+        );"""
+        )
+
+        # Channels to track (other than Nitro)
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS Tracked(
+            Channel_ID INT,
+            Guild_ID INT,
+            Type INT,
+            PRIMARY KEY (Channel_ID)
+        );"""
+        )
+
+        # Quote table
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS Quotes(
+            Quote_ID INT UNIQUE,
+            User_ID INT,
+            Channel_ID INT,
+            Guild_ID INT,
+            Quote_text TEXT,
+            PRIMARY KEY (Quote_ID)
         );"""
         )
 

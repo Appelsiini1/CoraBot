@@ -216,7 +216,7 @@ async def Tracking(message):
                 return
 
             elif trackStatus[1] == 1:
-                emb.title = "The nitro tracking is already enabled on this server."
+                emb.title = "The nitro boost tracking is already enabled on this server."
                 emb.color = get_hex_colour(error=True)
                 await message.channel.send(embed=emb)
                 return
@@ -270,7 +270,7 @@ async def Tracking(message):
                 return
 
             elif trackStatus[1] == 2:
-                emb.title = "The nitro tracking is already disabled on this server."
+                emb.title = "The nitro boost tracking is already disabled on this server."
                 emb.color = get_hex_colour(error=True)
                 await message.channel.send(embed=emb)
                 return
@@ -299,7 +299,7 @@ async def addNitro(message):
         user_raw = args[0].strip().lstrip("[").rstrip("]")
         boostAmount = int(args[1].strip().lstrip("[").rstrip("]"))
     except Exception:
-        emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer. Also make sure you have commas in the right place"
+        emb.title = "Invalid user ID or boost amount. Give user as an ID or a mention. Boost amount should be an integer. Also make sure you have commas in the right place."
         emb.color = get_hex_colour(error=True)
         await message.channel.send(embed=emb)
         return
@@ -328,7 +328,7 @@ async def addNitro(message):
             boostTime = datetime.datetime.strptime(time, "%d.%m.%Y")
         except ValueError:
             emb.title = (
-                "Invalid timeformat. Please give boost time in the format 'DD.MM.YYYY'."
+                "Invalid timeformat. Please give boost time in the format `DD.MM.YYYY`."
             )
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
@@ -372,7 +372,7 @@ async def addNitro(message):
                     break
                 except sqlite3.IntegrityError:
                     newID += 1
-                    logging.info(f"Insertion to database failed, new boost ID is {newID}")
+                    logging.warning(f"Insertion to database failed, new boost ID is {newID}")
 
             if success != 1:
                 logging.error("Could not add boost to database.")
@@ -508,45 +508,45 @@ async def nitroHelp(message):
     emb.title = "Nitro Tracking 1/2"
     emb.color = get_hex_colour(cora_blonde=True)
     txt = "**General info**\n\
-        This is the best implementation of nitro tracking that is possible within Discord limitations.\n\
-        It can track boost amounts, times, and boosters. HOWEVER, it cannot continuously check if the boosts are valid. Checks are made either \
-        automatically when '!c nitro spin' command is used or when using '!c nitro check' manually. These commands however can only see overall Nitro status of the user.\n\
-        It cannot see wheter individual boosts have expired, only if all of them have. Please see these commands below for more info.\n\
-        **NOTE!!** All commands (besides help) below require administrator priviledges.\n\
-        \n**Enabling/Disabling nitro tracking on server**\n\
-        To enable nitro tracking on your server, use\n\
-        ```!c nitro start```\n\
-        To ONLY show boost announcements but not track boosts, use\n\
-        ```!c nitro notice```\n\
-        To stop tracking or announcements, use\n\
-        ```!c nitro stop```\n\n\
-        **Adding boosts manually**\n\
-        If you have older boosts active on the server, or an error occured during tracking, you can add them manually to the bot's database by using\n\
-        ```!c nitro add [user], [amount], [date]```\n\
-        _Arguments:_\n\
-        _user:_ Spesifies who the booster is. This can be a mention (@user) or a user ID as an integer.\n\
-        _amount:_ The amount of boosts to add as an integer.\n\
-        _date:_ The date of the boost(s). Date should be in format 'DD.MM.YYYY'. This argument is optional. If it is not given, current date will be used.\
-        If the user is not in the database, this will be added to both the latest and first boost dates. Otherwise the date is compared to the dates\
-        already in the database and figure out which one to update."
+This is the best implementation of nitro tracking that is possible within Discord limitations.\n\
+It can track boost amounts, times, and boosters. HOWEVER, it **cannot** continuously check if the boosts are valid. Checks are made either \
+automatically when `!c nitro spin` command is used or by using `!c nitro check` manually. These commands however can **only** see _overall_ Nitro status of the user.\n\
+It cannot see wheter individual boosts have expired, only if all of them have. Please see these commands below for more info.\n\
+**NOTE!!** All commands (besides help) below require administrator priviledges.\n\
+\n**Enabling/Disabling nitro tracking on server**\n\
+To enable nitro tracking on your server, use\n\
+```!c nitro start```\n\
+To _ONLY_ show boost announcements but not track boosts, use\n\
+```!c nitro notice```\n\
+To stop tracking or announcements, use\n\
+```!c nitro stop```\n\n\
+**Adding boosts manually**\n\
+If you have older boosts active on the server, or an error occured during tracking, you can add them manually to the bot's database by using\n\
+```!c nitro add [user], [amount], [date]```\n\
+_Arguments:_\n\
+`user`: Spesifies who the booster is. This can be a mention (@user) or a user ID as an integer.\n\
+`amount`: The amount of boosts to add as an integer.\n\
+`date`: The date of the boost(s). Date should be in format `DD.MM.YYYY`. This argument is optional. If it is not given, current date will be used.\
+If the user is not in the database, this will be added to both the latest and first boost dates. Otherwise the date is compared to the dates\
+already in the database and the bot will figure out which one to update."
     txt2 = "**Deleting boosts from database**\n\
-        The bot will delete expired boosts from database automatically if '!c nitro spin' command is issued. However, if you wish to delete boost(s) manually,\n\
-        you can use this command:\n\
-        ```!c nitro del [@user or user ID], [amount or 'all']```\n\
-        **Exporting the boost database**\n\
-        This command can only be issued by server owners. This command compiles a CSV-file of all boosters currently in the database and sends it to you via a private message.\n\
-        _NOTE! You should take a regular backup of your servers nitro boost incase something goes wrong with the bots database._\n\
-        To use this command type\n\
-        ```!c nitro export```\n\
-        **Checking Nitro boost statuses**\n\
-        To check the validity of the nitro boosters in the database, use\n\
-        ```!c nitro check```\n\
-        _NOTE! As said before, this cannot check individual boost status, only wheter the user is still a nitro booster._\n\
-        **Nitro spins**\n\
-        The nitro spin command is basically a bot version of a spin wheel for nitro boosters. This command will pick a random person from the list of nitro boosters. In the basic version\
-        will give more chances for users with more boosts. Meaning, if a user has three boosts, they have three total chances to win.\n\
-        _NOTE!_ If you want everyone to have an equal chance of winning regardless of how many boosts they have, add the `-e` flag to the end.\n\
-        ```!c nitro spin [-e]```"
+The bot will delete expired boosts from database automatically if `spin` or `check` command is used. However, if you wish to delete boost(s) manually,\n\
+you can use this command:\n\
+```!c nitro del [@user or user ID], [amount or 'all']```\n\
+**Exporting the boost database**\n\
+This command can only be issued by server owners. This command compiles a CSV-file of all boosters currently in the database and sends it to you via a private message.\n\
+_NOTE! You should take a regular backup of your servers nitro boost incase something goes wrong with the bots database._\n\
+To use this command type\n\
+```!c nitro export```\n\
+**Checking Nitro boost statuses**\n\
+To check the validity of the nitro boosters in the database, use\n\
+```!c nitro check```\n\
+_NOTE! As said before, this cannot check individual boost status, only wheter the user is still a nitro booster._\n\
+**Nitro spins**\n\
+The nitro spin command is basically a bot version of a spin wheel for nitro boosters. This command will pick a random person from the list of nitro boosters. In the default version\
+will give more chances for users with more boosts. Meaning, if a user has three boosts, they have three total chances to win.\n\
+If you want everyone to have an equal chance of winning regardless of how many boosts they have, add the `-e` flag to the end.\n\
+```!c nitro spin [-e]```"
 
     dm_channel = message.author.dm_channel
     if dm_channel == None:
@@ -569,6 +569,7 @@ async def exportNitro(message):
     emb.description = "_Compiling data, this could take a while._"
     emb.color = get_hex_colour(cora_blonde=True)
     msg = await message.channel.send(embed=emb)
+    await message.channel.trigger_typing()
 
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
@@ -581,7 +582,7 @@ async def exportNitro(message):
             emb.description = ""
             emb.title = "No boosts on record to export."
             emb.color = get_hex_colour(error=True)
-            await message.channel.send(embed=emb)
+            await msg.edit(embed=emb)
         else:
             filename = f"export_{guildID}.csv"
             with open(filename, "w", encoding="utf-8") as f:
@@ -593,13 +594,18 @@ async def exportNitro(message):
                     # Boost_Time TEXT,
                     # LatestBoost TEXT,
                     # Boosts INT,
-                    user = await message.guild.fetch_member(b[1])
+                    user = message.guild.get_member(b[1])
                     if user:
                         user = user.display_name
                     else:
-                        user = b[1]
+                        user = await message.guild.fetch_member(b[1])
+                        sleep(0.08)
+                        if user:
+                            user = user.display_name
+                        else:
+                            user = b[1]
                     f.write(f"{user};{b[3]};{b[4]};{b[5]}\n")
-                    sleep(0.08)
+                    
             fileToSend = discord.File(filename)
 
             emb.description = ""
@@ -629,7 +635,6 @@ async def exportNitro(message):
                 logging.exception(
                     "Unable to delete the local copy of boost export CSV."
                 )
-                print(e)
 
 
 async def checkNitro(message, checkType="normal"):
@@ -717,14 +722,14 @@ async def nitroSpin(message):
         return
 
     emb2 = discord.Embed()
-    emb2.description = "**_SPIIIIIIIIIIIIIIIIIIIIIIIN_**"
+    emb2.description = "**_SPIIIIIIIIIIIIIIIIIIIIIIIN!_**"
     emb2.color = get_hex_colour()
 
-    msg = await message.channel.send(embed=emb2)
+    await message.channel.send(embed=emb2)
     await message.channel.send(SPIN_GIF_URL)
     sleep(0.5)
     await message.channel.trigger_typing()
-    sleep(8.5)
+    sleep(9.5)
 
     if len(nitroBoosts) == 1:
         winner_id = nitroBoosts[0][1]
@@ -744,7 +749,7 @@ async def nitroSpin(message):
         winner_id = userPool[winnerIndex]
 
     member = message.guild.get_member(winner_id)
-    emb.title = f"And the winner is..."
+    emb.title = f"_And the winner is..._"
     emb.description = f"{member.mention}!! {EMOJI} {EMOJI}\nCongratulations to the winner! {HEART_EMOTE}"
     emb.color = get_hex_colour()
 
@@ -756,7 +761,7 @@ async def nitroJunction(message):
         arg2 = message.content.split(" ")[2].strip().lstrip("[").rstrip("]").lower()
     except IndexError:
         await message.channel.send(
-            "No arguments given. Use '!c nitro help' for correct syntax."
+            "No arguments given. Use `!c nitro help` for correct syntax."
         )
     if message.author.guild_permissions.administrator:
         if arg2 in ["start", "stop", "notice"]:
@@ -781,7 +786,7 @@ async def nitroJunction(message):
             await nitroSpin(message)
         else:
             await message.channel.send(
-                "Unknown argument. Use '!c nitro help' for correct syntax."
+                "Unknown argument. Use `!c nitro help` for correct syntax."
             )
     else:
         if arg2 == "help":
