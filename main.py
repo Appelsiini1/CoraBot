@@ -24,6 +24,7 @@ from modules import vote
 from modules import pop
 from modules import nitro
 from modules import dice_comm
+from modules import auction
 
 logging.basicConfig(
     filename="Coralog.txt",
@@ -83,8 +84,14 @@ async def on_message(message):
         and message.content.startswith(PREFIX) == False
         and message.author != client.user
     ):
-        await tirsk.tirskTrack(message)
-        return
+        ind = TRACKED_CHANNELS.channels.index(message.channel.id)
+        chtype = TRACKED_CHANNELS.types[ind]
+        if chtype == 1:
+            await tirsk.tirskTrack(message)
+            return
+        elif chtype == 2:
+            await auction.bid(message)
+            return
 
     elif message.content.startswith(PREFIX) == False:
         return
@@ -135,7 +142,7 @@ async def on_message(message):
     elif cmd == "dice":
         await dice_comm.dice_comm(message)
     # elif cmd == "test":
-        # await message.add_reaction("\N{white heavy check mark}")
+    # await message.add_reaction("\N{white heavy check mark}")
 
     else:
         await message.channel.send("What was that?")
