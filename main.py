@@ -65,7 +65,8 @@ async def on_message(message):
         discord.MessageType.premium_guild_tier_2,
         discord.MessageType.premium_guild_tier_3,
     ]:
-        nitro.trackNitro(message)
+        await nitro.trackNitro(message)
+        return
     elif (
         message.channel.type != discord.ChannelType.text
         and message.channel.type != discord.ChannelType.news
@@ -147,8 +148,13 @@ async def on_message(message):
             discord.MessageType.premium_guild_tier_2,
             discord.MessageType.premium_guild_tier_3,
         ]:
-            await message.add_reaction("\N{white heavy check mark}")
-            #nitro.trackNitro(message)
+            # await message.add_reaction("\N{white heavy check mark}")
+            # await nitro.trackNitro(message)
+            boostAmount = int(message.content)
+            await message.channel.send("test:")
+            emb = nitro.constructEmbed(message, boostAmount)
+            await message.channel.send(embed=emb)
+            return
         elif (
             message.channel.type != discord.ChannelType.text
             and message.channel.type != discord.ChannelType.news
