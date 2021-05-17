@@ -134,8 +134,48 @@ async def on_message(message):
         await nitro.nitroJunction(message)
     elif cmd == "dice":
         await dice_comm.dice_comm(message)
-    # elif cmd == "test":
-        # await message.add_reaction("\N{white heavy check mark}")
+    
+
+    elif cmd == "test":
+            if message.author == client.user:
+                return
+            elif message.type in [
+                discord.MessageType.premium_guild_subscription,
+                discord.MessageType.premium_guild_tier_1,
+                discord.MessageType.premium_guild_tier_2,
+                discord.MessageType.premium_guild_tier_3,
+            ]:
+                await message.add_reaction("\N{white heavy check mark}")
+                #nitro.trackNitro(message)
+            elif (
+                message.channel.type != discord.ChannelType.text
+                and message.channel.type != discord.ChannelType.news
+            ):
+                return
+            elif (
+                message.content.find("sairasta") != -1
+                or message.content.find("ei oo normaalii") != -1
+            ):
+                msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
+                await message.channel.send(msg)
+                return
+            elif (
+                message.channel.id in TRACKED_CHANNELS.channels
+                and message.content.startswith(PREFIX) == False
+                and message.author != client.user
+            ):
+                # ind = TRACKED_CHANNELS.channels.index(message.channel.id)
+                # chtype = TRACKED_CHANNELS.types[ind]
+                # if chtype == 1:
+                #     await tirsk.tirskTrack(message)
+                #     return
+                pass
+
+            elif message.content.startswith(PREFIX) == False:
+                return
+
+            # cmd = message.content.split(" ")[1].lower()
+            await message.channel.send("goddamnit.")
 
     else:
         await message.channel.send("What was that?")
