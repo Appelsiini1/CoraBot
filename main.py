@@ -150,7 +150,10 @@ async def on_message(message):
         ]:
             # await message.add_reaction("\N{white heavy check mark}")
             # await nitro.trackNitro(message)
-            boostAmount = int(message.content)
+            try:
+                boostAmount = int(message.content)
+            except Exception:
+                boostAmount = 1
             await message.channel.send("test:")
             emb = nitro.constructEmbed(message, boostAmount)
             await message.channel.send(embed=emb)
