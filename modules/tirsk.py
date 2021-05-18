@@ -304,12 +304,12 @@ async def tirskExport(message):
 
 async def tirskHelp(message):
     txt = "Saatavilla olevat tirsk komennot:\n\
-    `count`  Laske vanhat lainaukset\n\
-    `start`  Aloita kanavan seuraaminen\n\
-    `stop`   Lopeta kanavan seuraaminen\n\
-    `export` Vie kaikki lainaukset tietokannasta\n\
-    `score`  Laske pistetaulu\n\
-    _Kaikki komennot vaativat 'administrator' oikeudet._"
+`count`  Laske vanhat lainaukset\n\
+`start`  Aloita kanavan seuraaminen\n\
+`stop`   Lopeta kanavan seuraaminen\n\
+`export` Vie kaikki lainaukset tietokannasta\n\
+`score`  Laske pistetaulu\n\
+_Kaikki komennot vaativat 'administrator' oikeudet._"
     emb = discord.Embed()
     emb.title = "Tirsk."
     emb.description = txt
