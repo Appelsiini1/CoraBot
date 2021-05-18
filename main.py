@@ -66,7 +66,8 @@ async def on_message(message):
         discord.MessageType.premium_guild_tier_2,
         discord.MessageType.premium_guild_tier_3,
     ]:
-        nitro.trackNitro(message)
+        await nitro.trackNitro(message)
+        return
     elif (
         message.channel.type != discord.ChannelType.text
         and message.channel.type != discord.ChannelType.news
@@ -141,9 +142,8 @@ async def on_message(message):
         await nitro.nitroJunction(message)
     elif cmd == "dice":
         await dice_comm.dice_comm(message)
-    # elif cmd == "test":
-    # await message.add_reaction("\N{white heavy check mark}")
-
+    elif cmd == "test":
+        await message.add_reaction("\N{white heavy check mark}")
     else:
         await message.channel.send("What was that?")
 

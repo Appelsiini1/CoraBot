@@ -142,7 +142,7 @@ async def trackNitro(message):
                 await dm_channel.send(embed=emb)
                 return
             else:
-                emb = constructEmbed(message)
+                emb = constructEmbed(message, boostAmount)
                 try:
                     await message.channel.send(embed=emb)
                     conn.commit()
