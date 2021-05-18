@@ -59,6 +59,7 @@ async def forbiddenErrorHandler(message):
         dm_channel = await message.author.create_dm()
     await dm_channel.send(embed=emb)
 
+
 def initializeDatabase():
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
@@ -153,6 +154,37 @@ def initializeDatabase():
             Guild_ID INT,
             Quote_text TEXT,
             PRIMARY KEY (Quote_ID)
+        );"""
+        )
+
+        # Current auctions
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS Auctions(
+            Auction_ID INT UNIQUE,
+            Channel_ID INT,
+            Guild_ID INT,
+            Author_ID INT,
+            Slots TEXT,
+            Currency TEXT,
+            Starting_bid INT,
+            Min_increase INT,
+            Autobuy INT,
+            Start_time TEXT,
+            End_time TEXT,
+            PRIMARY KEY (Auction_ID)
+        );"""
+        )
+
+        # Auction bids
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS Bids(
+            Bid_ID INT UNIQUE,
+            Auction_ID INT,
+            Slot TEXT,
+            Value INT,
+            PRIMARY KEY (Bid_ID)
+            FOREIGN KEY (Auction_ID) REFERENCES Auctions(Auction_ID)
+                ON DELETE CASCADE
         );"""
         )
 

@@ -144,6 +144,7 @@ async def on_message(message):
         await dice_comm.dice_comm(message)
     elif cmd == "test":
         await message.add_reaction("\N{white heavy check mark}")
+        
     else:
         await message.channel.send("What was that?")
 
