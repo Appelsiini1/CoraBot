@@ -2,6 +2,8 @@ import os
 import logging
 from sys import exit
 import sqlite3
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from discord import Intents, Game
 
 
 def get_tokens():
@@ -22,6 +24,15 @@ GIT = "Source code for this bot can be found at https://github.com/Appelsiini1/C
 DB_F = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "Databases", "database.db"
 )
+SCHEDULER_CONFIG = [
+    {"default": SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")},
+    {
+        "default": {"type": "threadpool", "max_workers": 20},
+    },
+    {"coalesce": False, "max_instances": 15},
+]
+INTENTS = Intents().all()
+ACTIVITY = Game("!c help")
 
 # Token constants
 TOKENS = get_tokens()
@@ -32,9 +43,10 @@ TWIT_API_SECRET = TOKENS[2].lstrip("API_SECRET").strip()[1:]
 
 class CHANNEL_TRACKER:
     def __init__(self):
-        self.channels, self.types = self.start()
+        self.channels, self.types = self.__start__()
 
     def update(self):
+        """Updates the current list of tracked channels."""
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
             c.execute("SELECT * FROM Tracked")
@@ -47,7 +59,7 @@ class CHANNEL_TRACKER:
             self.channels = channels
             self.types = types
 
-    def start(self):
+    def __start__(self):
         # DO NOT CALL MORE THAN ONCE
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
