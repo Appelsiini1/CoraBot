@@ -4,11 +4,13 @@
 
 import discord
 import logging
-from datetime import datetime
+from datetime import datetime, date
+
 
 # import tweepy
 
 # scripts, functions & constants
+from workers import SCHEDULER, CLIENT
 from constants import *
 from modules import common
 from modules import quote
@@ -26,27 +28,26 @@ from modules import nitro
 from modules import dice_comm
 from modules import auction
 
+
+# Initialize required modules and constants
 logging.basicConfig(
     filename="Coralog.txt",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s - %(message)s",
     datefmt="%d/%m/%Y %H:%M:%S",
 )
-intents = discord.Intents().all()
-activ = discord.Game("!c help")
-client = discord.Client(intents=intents, activity=activ)
 common.initializeDatabase()
 
 # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
 
 
-@client.event
+@CLIENT.event
 async def on_ready():
-    print(f"{client.user} {VERSION} is online & ready.")
-    logging.info(f"{client.user} {VERSION} is online & ready.")
+    print(f"{CLIENT.user} {VERSION} is online & ready.")
+    logging.info(f"{CLIENT.user} {VERSION} is online & ready.")
 
 
-@client.event
+@CLIENT.event
 async def on_error(event, *args, **kwargs):
     time = datetime.now().strftime("%d.%m.%Y at %H:%M")
     logging.exception(
@@ -56,9 +57,9 @@ async def on_error(event, *args, **kwargs):
 
 
 # main event, parses commands
-@client.event
+@CLIENT.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author == CLIENT.user:
         return
     elif message.type in [
         discord.MessageType.premium_guild_subscription,
@@ -83,7 +84,7 @@ async def on_message(message):
     elif (
         message.channel.id in TRACKED_CHANNELS.channels
         and message.content.startswith(PREFIX) == False
-        and message.author != client.user
+        and message.author != CLIENT.user
     ):
         ind = TRACKED_CHANNELS.channels.index(message.channel.id)
         chtype = TRACKED_CHANNELS.types[ind]
@@ -123,7 +124,7 @@ async def on_message(message):
     elif cmd == "giveaway":
         await giveaway.initiate_giveaway(message)
     elif cmd == "endgiveaway":
-        await giveaway.end_giveaway(message, client.user.id)
+        await giveaway.end_giveaway(message, CLIENT.user.id)
     elif cmd == "vacc":
         await vaccine.sendVaccInfo(message)
     elif cmd == "tirsk":
@@ -143,13 +144,14 @@ async def on_message(message):
     elif cmd == "dice":
         await dice_comm.dice_comm(message)
     elif cmd == "test":
+        await SCHEDULER.add_job(auction.testFunction, 'date', run_date=datetime(2021, 5, 19, 21, 30), id="testJob", misfire_grace_time=60, replace_existing=True)
         await message.add_reaction("\N{white heavy check mark}")
-        
+
     else:
         await message.channel.send("What was that?")
 
 
-@client.event
+@CLIENT.event
 async def on_guild_join(guild):
     emb = discord.Embed()
     emb.color = common.get_hex_colour(cora_blonde=True)
@@ -172,4 +174,4 @@ async def on_guild_join(guild):
         logging.exception("Could not send welcome message to server owner.")
 
 
-client.run(DISCORD_TOKEN)
+CLIENT.run(DISCORD_TOKEN)
