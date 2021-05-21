@@ -78,7 +78,7 @@ def makeEmbed(one_dose, two_doses, emb, areaCode="Finland"):
         emb.title = f"Current number of COVID-19 vaccinated people in {area}:"
         emb.description = f"One dose: {one_dose}\nTwo doses: {two_doses}"
         emb.color = get_hex_colour(cora_eye=True)
-        emb.set_footer(text=f"Source: THL.fi")
+        emb.set_footer(text=f"Source: Finnish Institute for Health and Welfare (THL.fi)")
     return emb
 
 
