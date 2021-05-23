@@ -6,9 +6,7 @@ from modules import common
 async def cmds(message):
     cmd_list = """`hi` (alias: `hello`)
 `help`
-`author`
-`git`
-`version`
+`info`
 `inspire`
 `insult [user]`
 `f` (alias: `F`)
