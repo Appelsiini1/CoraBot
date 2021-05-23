@@ -110,9 +110,12 @@ async def on_message(message):
         emb.title = "CoraBot Info"
         emb.description = f"**Created by** Appelsiini1\nThe source code & development info for this bot can be found at https://github.com/Appelsiini1/CoraBot\n\nVersion: {VERSION}"
         emb.color = common.get_hex_colour(cora_blonde=True)
+        emb.set_thumbnail(
+        url="https://media.discordapp.net/attachments/693166291468681227/834200862246043648/cora_pfp.png"
+        )
 
         try:
-            message.channel.send(embed=emb)
+            await message.channel.send(embed=emb)
         except discord.errors.Forbidden:
             common.forbiddenErrorHandler(message)
     elif cmd == "inspire":
