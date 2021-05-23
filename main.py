@@ -103,12 +103,18 @@ async def on_message(message):
         await message.channel.send("Hello!")
     elif cmd == "help":
         await commands.cmds(message)
-    elif cmd == "author":
-        await message.channel.send(AUTHOR)
-    elif cmd == "git":
-        await message.channel.send(GIT)
-    elif cmd == "version":
-        await message.channel.send(f"CoraBot `{VERSION}`")
+    elif cmd in ["author", "git", "version"]:
+        await message.channel.send("This command has been depricated and will be removed soon. Use `!c info` instead.")
+    elif cmd == "info":
+        emb = discord.Embed()
+        emb.title = "CoraBot Info"
+        emb.description = f"**Created by** Appelsiini1\nThe source code & development info for this bot can be found at https://github.com/Appelsiini1/CoraBot\n\nVersion: {VERSION}"
+        emb.color = common.get_hex_colour(cora_blonde=True)
+
+        try:
+            message.channel.send(embed=emb)
+        except discord.errors.Forbidden:
+            common.forbiddenErrorHandler(message)
     elif cmd == "inspire":
         await quote.get_quote(message)
     elif cmd == "insult":
