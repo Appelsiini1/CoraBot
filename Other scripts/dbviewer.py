@@ -16,10 +16,11 @@ def main():
         result = c.fetchall()
 
         if toFile.strip() == "Y":
-            with open("result.txt") as fi:
+            with open("result.txt", "w", encoding="utf-8") as fi:
                 for r in result:
-                    fi.write(r)
-                    fi.write("\n")
+                    for t in r:
+                        fi.write(str(t) + ";")
+                        fi.write("\n")
 
         else:
             for r in result:
