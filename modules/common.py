@@ -84,6 +84,7 @@ def initializeDatabase():
             Author_ID INT,
             Options TEXT,
             PollName TEXT,
+            Timestamp TEXT,
             PRIMARY KEY (Poll_ID)
         );"""
         )
@@ -106,6 +107,7 @@ def initializeDatabase():
             Poll_ID INT,
             Voter_ID INT,
             Votes TXT,
+            Timestamp TEXT,
             PRIMARY KEY (Vote_ID)
             FOREIGN KEY (Poll_ID) REFERENCES RolePolls(Poll_ID)
                 ON DELETE CASCADE
@@ -155,6 +157,13 @@ def initializeDatabase():
             PRIMARY KEY (Quote_ID)
         );"""
         )
+
+        # ID table
+        c.execute("""CREATE TABLE IF NOT EXISTS IDs(
+            ID INT,
+            Type TEXT,
+            PRIMARY KEY (ID)
+        );""")
 
         # other databases here
 
