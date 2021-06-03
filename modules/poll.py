@@ -265,6 +265,7 @@ async def endPolls(message):
                     if polls != 0:
                         for poll_id in polls:
                             c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                            c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
                         conn.commit()
                         success = 1
                     else:
@@ -294,6 +295,7 @@ async def endPolls(message):
                     if polls != 0:
                         for poll_id in polls:
                             c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                            c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
                         conn.commit()
                         success = 1
                     else:
@@ -329,6 +331,7 @@ async def endPolls(message):
                     if polls != 0:
                         for poll_id in polls:
                             c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                            c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
                         conn.commit()
                         success = 1
                     else:
@@ -355,6 +358,7 @@ async def endPolls(message):
                     if polls != 0:
                         for poll_id in polls:
                             c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                            c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
                         conn.commit()
                         success = 1
                     else:
