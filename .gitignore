@@ -122,6 +122,7 @@ modules/test_module.py
 
 #Log
 Coralog.txt
+broadcaster_log.txt
 
 #Database
 Databases/

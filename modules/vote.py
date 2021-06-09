@@ -1,6 +1,7 @@
 import discord
 import sqlite3
 import logging
+import datetime
 
 from modules.common import get_hex_colour
 from constants import DB_F
@@ -142,12 +143,14 @@ async def vote(message):
             db_id = c.fetchone()
             maxid = 1 if db_id == None else db_id[0]
 
+            timestamp = datetime.datetime.today().strftime("%d.%m.%Y %H:%M %Z%z")
+
             success = 0
             for i in range(5):
                 try:
                     c.execute(
-                        "INSERT INTO RolePolls_Votes VALUES (?,?,?,?)",
-                        (maxid + 1, poll_id, message.author.id, vote_str),
+                        "INSERT INTO RolePolls_Votes VALUES (?,?,?,?,?)",
+                        (maxid + 1, poll_id, message.author.id, vote_str, timestamp),
                     )
                     success = 1
                     break

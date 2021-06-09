@@ -3,6 +3,7 @@ import discord
 import logging
 import sqlite3
 import re
+import datetime
 
 from modules.common import get_hex_colour, selectReactionEmoji
 from modules.emoji_list import _EMOJIS
@@ -264,6 +265,7 @@ async def endPolls(message):
                     if polls != 0:
                         for poll_id in polls:
                             c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                            c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
                         conn.commit()
                         success = 1
                     else:
@@ -293,6 +295,7 @@ async def endPolls(message):
                     if polls != 0:
                         for poll_id in polls:
                             c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                            c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
                         conn.commit()
                         success = 1
                     else:
@@ -328,6 +331,7 @@ async def endPolls(message):
                     if polls != 0:
                         for poll_id in polls:
                             c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                            c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
                         conn.commit()
                         success = 1
                     else:
@@ -354,6 +358,7 @@ async def endPolls(message):
                     if polls != 0:
                         for poll_id in polls:
                             c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
+                            c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
                         conn.commit()
                         success = 1
                     else:
@@ -363,6 +368,8 @@ async def endPolls(message):
             await message.delete()
         except Exception as e:
             logging.exception("Poll ending command message deletion failed.")
+    else:
+        logging.error("Something went wrong when ending the poll.")
 
 
 # ######################################################################################################## #
@@ -569,9 +576,9 @@ async def startRolePoll(message):
             title = f"A poll by {message.author.name}"
             titleStatus = 1
 
-        c.execute("SELECT Poll_ID FROM RolePolls ORDER BY Poll_ID DESC")
+        c.execute("SELECT ID FROM IDs WHERE Type='RolePoll' ORDER BY ID DESC")
         prevPollID = c.fetchone()
-        poll_id = 100 if prevPollID == None else prevPollID[0] + 1
+        poll_id = 103 if prevPollID == None else prevPollID[0] + 1
 
         if len(args) <= 1 or message.content.find(";") == -1:
             # help command
@@ -611,11 +618,13 @@ async def startRolePoll(message):
             if titleStatus == 1:
                 title = None
 
+            timestamp = datetime.datetime.today().strftime("%d.%m.%Y %H:%M %Z%z")
+
             success = 0
             for i in range(5):
                 try:
                     c.execute(
-                        "INSERT INTO RolePolls VALUES (?,?,?,?,?,?)",
+                        "INSERT INTO RolePolls VALUES (?,?,?,?,?,?,?)",
                         (
                             poll_id,
                             message.channel.id,
@@ -623,8 +632,10 @@ async def startRolePoll(message):
                             message.author.id,
                             option_str,
                             title,
+                            timestamp,
                         ),
                     )
+                    c.execute("INSERT INTO IDs VALUES (?,?)", (poll_id, "RolePoll"))
                     success = 1
                     break
                 except sqlite3.IntegrityError:
@@ -770,4 +781,6 @@ async def rolePollEndHelper(message, c, poll=None, polls=None):
             emb.color = get_hex_colour(cora_eye=True)
             await message.channel.send(embed=emb)
         return poll_ids
-    return 0
+    else:
+        logging.error("This should not be going here in RolePoll end helper, wtf?")
+        return 0

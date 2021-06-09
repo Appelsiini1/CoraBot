@@ -19,8 +19,6 @@ def get_tokens():
 
 # Functional constants
 PREFIX = "!c "
-AUTHOR = "This bot is maintained by Appelsiini1"
-GIT = "Source code for this bot can be found at https://github.com/Appelsiini1/CoraBot"
 DB_F = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "Databases", "database.db"
 )
@@ -78,4 +76,4 @@ TRACKED_CHANNELS = CHANNEL_TRACKER()
 
 
 # Version number
-VERSION = "v1.14.7"
+VERSION = "v1.14.11"
