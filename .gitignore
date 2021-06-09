@@ -94,6 +94,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+urls.txt
 
 # Spyder project settings
 .spyderproject
