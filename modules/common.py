@@ -203,6 +203,21 @@ def initializeDatabase():
         );"""
         )
 
+        # Scheduled events
+        c.execute("""CREATE TABLE IF NOT EXISTS Scheduler(
+            Event_ID INT,
+            Event_type TEXT,
+            Event_name TEXT,
+            Datetime TEXT,
+            Year INT,
+            Month INT,
+            Day INT,
+            Hour INT,
+            Minute INT,
+            Second INT,
+            PRIMARY KEY (Event_ID)
+        );""")
+
         # other databases here
 
         conn.commit()
