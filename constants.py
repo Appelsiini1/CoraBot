@@ -2,7 +2,6 @@ import os
 import logging
 from sys import exit
 import sqlite3
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from discord import Intents, Game
 
 
@@ -22,13 +21,6 @@ PREFIX = "!c "
 DB_F = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "Databases", "database.db"
 )
-SCHEDULER_CONFIG = [
-    {"default": SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")},
-    {
-        "default": {"type": "threadpool", "max_workers": 20},
-    },
-    {"coalesce": False, "max_instances": 15},
-]
 INTENTS = Intents().all()
 ACTIVITY = Game("!c help")
 

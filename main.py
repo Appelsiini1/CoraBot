@@ -10,7 +10,7 @@ from datetime import datetime, date
 # import tweepy
 
 # scripts, functions & constants
-from workers import SCHEDULER, CLIENT
+from modules.scheduler import SCHEDULER
 from constants import *
 from modules import common
 from modules import quote
@@ -36,6 +36,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s - %(message)s",
     datefmt="%d/%m/%Y %H:%M:%S",
 )
+CLIENT = discord.Client(intents=INTENTS, activity=ACTIVITY)
 common.initializeDatabase()
 
 # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
@@ -127,9 +128,6 @@ async def on_message(message):
         await choose.choose(message)
     elif cmd.lower() == "f":
         await pressF.pressF(message)
-    elif cmd == "tweet":
-        # await get_tweet.get_tweet(message, twitter_auth)
-        await message.channel.send("This feature is not yet implemented! Sorry!")
     elif cmd == "giveaway":
         await giveaway.initiate_giveaway(message)
     elif cmd == "endgiveaway":

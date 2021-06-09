@@ -5,7 +5,7 @@ import sqlite3
 from currency_symbols import CurrencySymbols
 from modules.common import get_hex_colour, forbiddenErrorHandler
 from constants import DB_F, TRACKED_CHANNELS
-from workers import CLIENT, SCHEDULER
+from modules.scheduler import SCHEDULER
 
 
 async def makeAuction(message, scheduler):
@@ -219,5 +219,5 @@ async def auctionJunction(message, scheduler=None):
 
 async def testFunction():
     print("working...")
-    channel = await CLIENT.fetch_channel(822224994788180019)
-    await channel.send("hello!")
+    #channel = await .fetch_channel(822224994788180019)
+    #await channel.send("hello!")
