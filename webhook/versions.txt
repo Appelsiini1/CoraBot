@@ -1,3 +1,6 @@
+v1.14.12
+- Add more info to error logs in nitro boost errors; now prints the values that caused the error to the log
+###
 v1.14.11
 - Fix advanced polls not ending correctly
 ###
