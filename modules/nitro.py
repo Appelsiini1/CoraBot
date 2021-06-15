@@ -134,6 +134,7 @@ async def trackNitro(message):
 
             if success != 1:
                 logging.error("Could not add boost to database.")
+                logging.error(f"Boost amount: {boostAmount}, ID: {newID}, time {time}, lastID: {lastID}, success {success}, guild: {message.guild.name}, person: {message.author.name}, i: {i}")
                 dm_channel = message.guild.owner.dm_channel
                 if dm_channel == None:
                     dm_channel = await message.guild.owner.create_dm()
@@ -165,10 +166,24 @@ async def trackNitro(message):
             boost = c.fetchone()
             boosts = boost[5]
             newValue = boosts + boostAmount
-            c.execute(
-                "UPDATE NitroBoosts SET Boosts=?, LatestBoost=? WHERE Guild_ID=? AND User_ID=?",
-                (newValue, time, guild_id, booster_id),
-            )
+            try:
+
+                c.execute(
+                    "UPDATE NitroBoosts SET Boosts=?, LatestBoost=? WHERE Guild_ID=? AND User_ID=?",
+                    (newValue, time, guild_id, booster_id),
+                )
+            except Exception:
+                logging.exception("Error updating existing boost in database.")
+                logging.error(f"newValue: {newValue}, time {time}, guild {message.guild.name}, booster {message.author.name}")
+                emb.clear_fields()
+                emb.description = f"Unable to update boost entry for {message.author.name} in '{message.guild.name}'. Please contact the developer."
+                emb.color = get_hex_colour(error=True)
+                dm_channel = message.guild.owner.dm_channel
+                if dm_channel == None:
+                    dm_channel = await message.guild.owner.create_dm()
+                await dm_channel.send(embed=emb)
+                return
+
             emb = constructEmbed(message, boostAmount)
             try:
                 conn.commit()
