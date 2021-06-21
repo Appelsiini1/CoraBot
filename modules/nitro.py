@@ -112,7 +112,7 @@ async def trackNitro(message):
             c.execute("SELECT Boost_ID FROM NitroBoosts ORDER BY Boost_ID DESC")
             lastID = c.fetchone()
             newID = 0
-            newID += 1 if lastID != None else 1
+            newID += (lastID[0] + 1) if lastID[0] != None else 1
 
             # Boost_ID INT UNIQUE,
             # User_ID INT,
