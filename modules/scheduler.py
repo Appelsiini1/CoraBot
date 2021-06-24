@@ -13,7 +13,14 @@ def on_scheduler_event(event):
 
 class SCHEDULER():
     def __init__(self) -> None:
-        self.event_checker.start()
+        #self.event_checker.start()
+        #self.test_loop.start()
+        pass
+
+
+    @tasks.loop(seconds=5.0, count=3)
+    async def test_loop():
+        print("test")
 
     @tasks.loop(minutes=10.0)
     async def event_checker():

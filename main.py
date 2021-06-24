@@ -151,7 +151,8 @@ async def on_message(message):
     elif cmd == "dice":
         await dice_comm.dice_comm(message)
     elif cmd == "test":
-        await SCHEDULER.add_job(auction.testFunction, 'date', run_date=datetime(2021, 5, 19, 21, 30), id="testJob", misfire_grace_time=60, replace_existing=True)
+        await SCHEDULER.test_loop.start()
+        #await SCHEDULER.add_job(auction.testFunction, 'date', run_date=datetime(2021, 5, 19, 21, 30), id="testJob", misfire_grace_time=60, replace_existing=True)
         await message.add_reaction("\N{white heavy check mark}")
 
     else:
