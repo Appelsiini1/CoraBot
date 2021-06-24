@@ -17,6 +17,7 @@ async def cmds(message):
 `vote [Poll ID] [option:votes], [option:votes], ...`
 `pop [number between 1-14]`
 `dice [help | [N]dS | [N]wS | [N]uS]` (extra arguments can be seen from dice help)
+`status`
 
 **_Admin commands:_**
 `giveaway`
