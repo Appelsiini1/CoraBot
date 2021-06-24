@@ -151,6 +151,8 @@ async def on_message(message):
         await nitro.nitroJunction(message)
     elif cmd == "dice":
         await dice_comm.dice_comm(message)
+    elif cmd == "status":
+        await message.channel.send("418 I'm a teapot")
     elif cmd == "test":
         await message.add_reaction("\N{white heavy check mark}")
     else:
