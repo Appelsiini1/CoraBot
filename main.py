@@ -5,6 +5,7 @@
 import discord
 import logging
 from datetime import datetime, date
+from discord.ext import commands
 
 
 # import tweepy
@@ -15,7 +16,7 @@ from constants import *
 from modules import common
 from modules import quote
 from modules import insult
-from modules import commands
+from modules import command_help
 from modules import choose
 from modules import giveaway
 from modules import pressF
@@ -29,32 +30,48 @@ from modules import dice_comm
 from modules import auction
 
 
-# Initialize required modules and constants
-logging.basicConfig(
-    filename="Coralog.txt",
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s - %(message)s",
-    datefmt="%d/%m/%Y %H:%M:%S",
-)
-CLIENT = discord.Client(intents=INTENTS, activity=ACTIVITY)
-common.initializeDatabase()
+class CoraBot(commands.Bot):
+    def __init__(self):
+        command_prefix = PREFIX
+        help_command = command_help.cmds()
+        super().__init__(command_prefix, help_command=help_command, intents = INTENTS, activity = ACTIVITY)
 
-# twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
+        # Initialize required modules and constants
+        logging.basicConfig(
+            filename="Coralog.txt",
+            level=logging.INFO,
+            format="%(asctime)s %(levelname)s - %(message)s",
+            datefmt="%d/%m/%Y %H:%M:%S",
+        )
+        common.initializeDatabase()
+        # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
 
 
-@CLIENT.event
-async def on_ready():
-    print(f"{CLIENT.user} {VERSION} is online & ready.")
-    logging.info(f"{CLIENT.user} {VERSION} is online & ready.")
+        self.run(DISCORD_TOKEN)
+
+        async def on_ready():
+            print(f"{self.user.name} {VERSION} is online & ready.")
+            logging.info(f"{self.user.name} {VERSION} is online & ready.")
+
+        async def on_command_error(self, context: commands.Context, exception: Exception):
+            time = datetime.now().strftime("%d.%m.%Y at %H:%M")
+            logging.exception(
+                f"An unhandled exception occured in {context.command}. \nMessage: {context.message}\nMessage content: '{context.message.content}'\n**********\n{exception}"
+            )
+            print(f"{time} - An unhandled exception occured in {context.command}, see log for details.\n{exception}")
+
+        @self.listen()
+        async def on_message(message):
+            pass
+
+if __name__ == "__main__":
+    CLIENT = CoraBot()
+
 
 
 @CLIENT.event
 async def on_error(event, *args, **kwargs):
-    time = datetime.now().strftime("%d.%m.%Y at %H:%M")
-    logging.exception(
-        f"An unhandled exception occured in {event}. \nMessage: {args[0]}\nMessage content: '{args[0].content}'\n**********"
-    )
-    print(f"{time} - An unhandled exception occured in {event}, see log for details.")
+
 
 
 # main event, parses commands
