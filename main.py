@@ -2,6 +2,7 @@
 # Copyright 2021 (c) Appelsiini1
 
 
+from time import sleep
 import discord
 import logging
 from datetime import datetime, date
@@ -33,8 +34,9 @@ from modules import auction
 class CoraBot(commands.Bot):
     def __init__(self):
         command_prefix = PREFIX
-        help_command = command_help.cmds()
-        super().__init__(command_prefix, help_command=help_command, intents = INTENTS, activity = ACTIVITY)
+        super().__init__(
+            command_prefix, help_command=None, intents=INTENTS, activity=ACTIVITY
+        )
 
         # Initialize required modules and constants
         logging.basicConfig(
@@ -46,36 +48,81 @@ class CoraBot(commands.Bot):
         common.initializeDatabase()
         # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
 
-
+        self.add_all_commands()
         self.run(DISCORD_TOKEN)
 
-        async def on_ready():
-            print(f"{self.user.name} {VERSION} is online & ready.")
-            logging.info(f"{self.user.name} {VERSION} is online & ready.")
+    async def on_ready(self):
+        print(f"{self.user.name} {VERSION} is online & ready.")
+        logging.info(f"{self.user.name} {VERSION} is online & ready.")
 
-        async def on_command_error(self, context: commands.Context, exception: Exception):
-            time = datetime.now().strftime("%d.%m.%Y at %H:%M")
-            logging.exception(
-                f"An unhandled exception occured in {context.command}. \nMessage: {context.message}\nMessage content: '{context.message.content}'\n**********\n{exception}"
-            )
-            print(f"{time} - An unhandled exception occured in {context.command}, see log for details.\n{exception}")
+    def add_all_commands(self):  # used to add all commands that the bot listens to
+        self.add_command(command_help.info)
+        self.add_command(command_help.cmds)
 
-        @self.listen()
-        async def on_message(message):
-            pass
+    async def on_command_error(self, context: commands.Context, exception: Exception):
+        time = datetime.now().strftime("%d.%m.%Y at %H:%M")
+        logging.exception(
+            f"An unhandled exception occured in {context.command}. \nMessage: {context.message}\nMessage content: '{context.message.content}'\n**********\n{exception}"
+        )
+        print(
+            f"{time} - An unhandled exception occured in {context.command}, see log for details.\n{exception}"
+        )
+
+    async def on_message(self, message, *args):
+        if message.author == self.user:
+            return
+        elif message.content == "!c hi":
+            print("OK")
+        elif message.type in [
+            discord.MessageType.premium_guild_subscription,
+            discord.MessageType.premium_guild_tier_1,
+            discord.MessageType.premium_guild_tier_2,
+            discord.MessageType.premium_guild_tier_3,
+        ]:
+            await nitro.trackNitro(message)
+            return
+        elif (
+            message.channel.type != discord.ChannelType.text
+            and message.channel.type != discord.ChannelType.news
+        ):
+            return
+        elif (
+            message.content.find("sairasta") != -1
+            or message.content.find("ei oo normaalii") != -1
+        ):
+            msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
+            await message.channel.send(msg)
+            return
+        elif (
+            message.channel.id in TRACKED_CHANNELS.channels
+            and message.content.startswith(PREFIX) == False
+            and message.author != CLIENT.user
+        ):
+            ind = TRACKED_CHANNELS.channels.index(message.channel.id)
+            chtype = TRACKED_CHANNELS.types[ind]
+            if chtype == 1:
+                await tirsk.tirskTrack(message)
+                return
+            elif chtype == 2:
+                await auction.bid(message)
+                return
+
 
 if __name__ == "__main__":
     CLIENT = CoraBot()
 
 
-
 @CLIENT.event
 async def on_error(event, *args, **kwargs):
-
+    time = datetime.now().strftime("%d.%m.%Y at %H:%M")
+    logging.exception(
+        f"An unhandled exception occured in {event}. \nMessage: {args[0]}\nMessage content: '{args[0].content}'\n**********"
+    )
+    print(f"{time} - An unhandled exception occured in {event}, see log for details.")
 
 
 # main event, parses commands
-@CLIENT.event
+# @CLIENT.event
 async def on_message(message):
     if message.author == CLIENT.user:
         return
@@ -123,14 +170,16 @@ async def on_message(message):
     elif cmd == "help":
         await commands.cmds(message)
     elif cmd in ["author", "git", "version"]:
-        await message.channel.send("This command has been depricated and will be removed soon. Use `!c info` instead.")
+        await message.channel.send(
+            "This command has been depricated and will be removed soon. Use `!c info` instead."
+        )
     elif cmd == "info":
         emb = discord.Embed()
         emb.title = "CoraBot Info"
         emb.description = f"**Created by** Appelsiini1\nThe source code & development info for this bot can be found at https://github.com/Appelsiini1/CoraBot\n\nVersion: {VERSION}"
         emb.color = common.get_hex_colour(cora_blonde=True)
         emb.set_thumbnail(
-        url="https://media.discordapp.net/attachments/693166291468681227/834200862246043648/cora_pfp.png"
+            url="https://media.discordapp.net/attachments/693166291468681227/834200862246043648/cora_pfp.png"
         )
 
         try:
@@ -169,14 +218,14 @@ async def on_message(message):
         await dice_comm.dice_comm(message)
     elif cmd == "test":
         await SCHEDULER.test_loop.start()
-        #await SCHEDULER.add_job(auction.testFunction, 'date', run_date=datetime(2021, 5, 19, 21, 30), id="testJob", misfire_grace_time=60, replace_existing=True)
+        # await SCHEDULER.add_job(auction.testFunction, 'date', run_date=datetime(2021, 5, 19, 21, 30), id="testJob", misfire_grace_time=60, replace_existing=True)
         await message.add_reaction("\N{white heavy check mark}")
 
     else:
         await message.channel.send("What was that?")
 
 
-@CLIENT.event
+# @CLIENT.event
 async def on_guild_join(guild):
     emb = discord.Embed()
     emb.color = common.get_hex_colour(cora_blonde=True)
@@ -197,6 +246,3 @@ async def on_guild_join(guild):
         await dm_channel.send(embed=emb)
     except Exception:
         logging.exception("Could not send welcome message to server owner.")
-
-
-CLIENT.run(DISCORD_TOKEN)
