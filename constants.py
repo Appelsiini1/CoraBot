@@ -3,6 +3,7 @@ import logging
 from sys import exit
 import sqlite3
 from discord import Intents, Game
+from discord.ext import commands
 
 
 def get_tokens():
@@ -23,6 +24,7 @@ DB_F = os.path.join(
 )
 INTENTS = Intents().all()
 ACTIVITY = Game("!c help")
+CLIENT = commands.Bot(PREFIX, intents=INTENTS, activity=ACTIVITY)
 
 # Token constants
 TOKENS = get_tokens()
