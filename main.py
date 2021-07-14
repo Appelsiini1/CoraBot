@@ -12,10 +12,10 @@ from discord.ext import commands
 # scripts, functions & constants
 from modules.scheduler import SCHEDULER
 from constants import *
+from modules import command_help
 from modules import common
 from modules import quote
 from modules import insult
-from modules import command_help
 from modules import choose
 from modules import giveaway
 from modules import pressF
@@ -30,76 +30,45 @@ from modules import auction
 from modules import listeners
 
 
-# class CoraBot(commands.Bot):
-#     def __init__(self):
-#         command_prefix = PREFIX
-#         super().__init__(
-#             command_prefix, help_command=None, intents=INTENTS, activity=ACTIVITY
-#         )
-
-#         # Initialize required modules and constants
+class CoraBot(commands.Bot):
+    def __init__(self):
+        command_prefix = PREFIX
+        super().__init__(
+            command_prefix, help_command=None, intents=INTENTS, activity=ACTIVITY
+        )
+        self.remove_command("help")
+        # Initialize required modules and constants
         
-#         # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
-#         self.add_command(command_help.info)
-#         self.add_command(command_help.cmds)
-#         self.add_listener(listeners.on_guild_join)
-#         #self.add_listener(listeners.on_ready)
-#         self.add_listener(listeners.on_error)
+        # twitter_auth = tweepy.AppAuthHandler(Twit_API_key, Twit_API_secret)
+        #self.load_extension("modules.command_help")
+        command_help.setup(self)
+        self.add_listener(listeners.on_guild_join)
+        cog = self.get_cog('Info')
+        commands = cog.get_commands()
+        print([c.name for c in commands])
+        #self.add_listener(listeners.on_ready)
+        #self.add_listener(on_error)
 
-#         self.run(DISCORD_TOKEN)
+        self.run(DISCORD_TOKEN)
 
-#     # async def on_ready(self):
-#     #     print(f"{self.user.name} {VERSION} is online & ready.")
-#     #     logging.info(f"{self.user.name} {VERSION} is online & ready.")
+    # async def on_ready(self):
+    #     print(f"{self.user.name} {VERSION} is online & ready.")
+    #     logging.info(f"{self.user.name} {VERSION} is online & ready.")
 
-#     async def on_command_error(self, context: commands.Context, exception: Exception):
-#         time = datetime.now().strftime("%d.%m.%Y at %H:%M")
-#         logging.exception(
-#             f"An unhandled exception occured in {context.command}. \nMessage: {context.message}\nMessage content: '{context.message.content}'\n**********\n{exception}"
-#         )
-#         print(
-#             f"{time} - An unhandled exception occured in {context.command}, see log for details.\n{exception}"
-#         )
+    async def on_command_error(self, context: commands.Context, exception: Exception):
+        time = datetime.now().strftime("%d.%m.%Y at %H:%M")
+        logging.exception(
+            f"An unhandled exception occured in {context.command}. \nMessage: {context.message}\nMessage content: '{context.message.content}'\n**********\n{exception}"
+        )
+        print(
+            f"{time} - An unhandled exception occured in {context.command}, see log for details.\n{exception}"
+        )
 
-#     async def on_message(self, message, *args):
-#         if message.author == self.user:
-#             return
-#         elif message.content == "!c hi":
-#             print("OK")
-#             raise ImportError
-#         elif message.type in [
-#             discord.MessageType.premium_guild_subscription,
-#             discord.MessageType.premium_guild_tier_1,
-#             discord.MessageType.premium_guild_tier_2,
-#             discord.MessageType.premium_guild_tier_3,
-#         ]:
-#             await nitro.trackNitro(message)
-#             return
-#         elif (
-#             message.channel.type != discord.ChannelType.text
-#             and message.channel.type != discord.ChannelType.news
-#         ):
-#             return
-#         elif (
-#             message.content.find("sairasta") != -1
-#             or message.content.find("ei oo normaalii") != -1
-#         ):
-#             msg = "https://cdn.discordapp.com/attachments/693166291468681227/823282434203189258/eioonormaalii.gif"
-#             await message.channel.send(msg)
-#             return
-#         elif (
-#             message.channel.id in TRACKED_CHANNELS.channels
-#             and message.content.startswith(PREFIX) == False
-#             and message.author != CLIENT.user
-#         ):
-#             ind = TRACKED_CHANNELS.channels.index(message.channel.id)
-#             chtype = TRACKED_CHANNELS.types[ind]
-#             if chtype == 1:
-#                 await tirsk.tirskTrack(message)
-#                 return
-#             elif chtype == 2:
-#                 await auction.bid(message)
-#                 return
+    async def on_ready(self):
+        print(f"{self.user.name} {VERSION} is online & ready.")
+        logging.info(f"{self.user.name} {VERSION} is online & ready.")
+        print(self.cogs)
+        print(self.commands)
 
 
 logging.basicConfig(
@@ -109,12 +78,7 @@ logging.basicConfig(
             datefmt="%d/%m/%Y %H:%M:%S",
     )
 common.initializeDatabase()
-CLIENT.add_cog(command_help.Info(CLIENT))
-
-@CLIENT.event
-async def on_ready():
-    print(f"{CLIENT.user.name} {VERSION} is online & ready.")
-    logging.info(f"{CLIENT.user.name} {VERSION} is online & ready.")
+CLIENT = CoraBot()
 
 
 @CLIENT.event
@@ -305,4 +269,4 @@ async def on_message(message, *args):
 #         logging.exception("Could not send welcome message to server owner.")
 
 
-CLIENT.run(DISCORD_TOKEN)
+# CLIENT.run(DISCORD_TOKEN)

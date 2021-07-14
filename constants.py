@@ -24,7 +24,7 @@ DB_F = os.path.join(
 )
 INTENTS = Intents().all()
 ACTIVITY = Game("!c help")
-CLIENT = commands.Bot(PREFIX, intents=INTENTS, activity=ACTIVITY)
+# CLIENT = commands.Bot(PREFIX, intents=INTENTS, activity=ACTIVITY)
 
 # Token constants
 TOKENS = get_tokens()
