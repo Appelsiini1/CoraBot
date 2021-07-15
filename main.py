@@ -48,6 +48,7 @@ class CoraBot(commands.Bot):
         giveaway.setup(self)
         short_comms.setup(self)
         insult.setup(self)
+        nitro.setup(self)
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")
