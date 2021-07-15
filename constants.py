@@ -24,7 +24,6 @@ DB_F = os.path.join(
 )
 INTENTS = Intents().all()
 ACTIVITY = Game("!c help")
-# CLIENT = commands.Bot(PREFIX, intents=INTENTS, activity=ACTIVITY)
 
 # Token constants
 TOKENS = get_tokens()
@@ -70,4 +69,4 @@ TRACKED_CHANNELS = CHANNEL_TRACKER()
 
 
 # Version number
-VERSION = "v1.14.13"
+VERSION = "v2.0.0 ALPHA 1"

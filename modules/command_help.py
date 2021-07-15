@@ -10,72 +10,67 @@ from constants import VERSION
 class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        print("hey")
+
     @commands.command()
     async def help(self, ctx):
-        print("hey2")
-        if ctx.invoked_subcommand is None:
-            cmd_list = """`hi` (alias: `hello`)
-        `help`
-        `info`
-        `inspire`
-        `insult [user]`
-        `f` (alias: `F`)
-        `choose option1 | option2 | ... `
-        `vacc [Area code (or empty for all areas) | help]`
-        `poll [new | end | help]`
-        `vote help`
-        `vote [Poll ID] [option:votes], [option:votes], ...`
-        `pop [number between 1-14]`
-        `dice [help | [N]dS | [N]wS | [N]uS]` (extra arguments can be seen from dice help)
+        cmd_list = """`hi` (alias: `hello`)
+`help`
+`info`
+`inspire`
+`insult [user]`
+`f` (alias: `F`)
+`choose option1 | option2 | ... `
+`vacc [Area code (or empty for all areas) | help]`
+`poll [new | end | help]`
+`vote help`
+`vote [Poll ID] [option:votes], [option:votes], ...`
+`pop [number between 1-14]`
+`dice [help | [N]dS | [N]wS | [N]uS]` (extra arguments can be seen from dice help)
 
-        **_Admin commands:_**
-        `giveaway`
-        `endgiveaway [GiveawayID]`
-        `poll [set|del]roles`
-        `poll roles`
-        `poll new -r`
-        `nitro [help | add | del | export | start | stop | notice | check | spin]`
-        """
-            emb = Embed(
-                title="List of available commands:",
-                description=cmd_list,
-                colour=common.get_hex_colour(cora_blonde=True),
-            )
-            try:
-                await ctx.send(embed=emb)
-            except Forbidden:
-                logging.error("Unable to send message due to 403 - Forbidden")
-                emb.clear_fields()
-                emb.description = f"Unable to send message to channel in '{ctx.guild.name}'. If you are the server owner, please make sure I have the proper rights to post messages to that channel."
-                emb.color = common.get_hex_colour(error=True)
-                dm_channel = ctx.guild.owner.dm_channel
-                if dm_channel == None:
-                    dm_channel = await ctx.guild.owner.create_dm()
-                await dm_channel.send(embed=emb)
+**_Admin commands:_**
+`giveaway`
+`endgiveaway [GiveawayID]`
+`poll [set|del]roles`
+`poll roles`
+`poll new -r`
+`nitro [help | add | del | export | start | stop | notice | check | spin]`
+    """
+        emb = Embed(
+            title="List of available commands:",
+            description=cmd_list,
+            colour=common.get_hex_colour(cora_blonde=True),
+        )
+        try:
+            await ctx.send(embed=emb)
+        except Forbidden:
+            logging.error("Unable to send message due to 403 - Forbidden")
+            emb.clear_fields()
+            emb.description = f"Unable to send message to channel in '{ctx.guild.name}'. If you are the server owner, please make sure I have the proper rights to post messages to that channel."
+            emb.color = common.get_hex_colour(error=True)
+            dm_channel = ctx.guild.owner.dm_channel
+            if dm_channel == None:
+                dm_channel = await ctx.guild.owner.create_dm()
+            await dm_channel.send(embed=emb)
 
     @commands.command()
     async def info(self, ctx, *arg):
-            emb = Embed()
-            emb.title = "CoraBot Info"
-            emb.description = f"**Created by** Appelsiini1\nThe source code & development info for this bot can be found at https://github.com/Appelsiini1/CoraBot\n\nVersion: {VERSION}"
-            emb.color = common.get_hex_colour(cora_blonde=True)
-            emb.set_thumbnail(
+        emb = Embed()
+        emb.title = "CoraBot Info"
+        emb.description = f"**Created by** Appelsiini1\nThe source code & development info for this bot can be found at https://github.com/Appelsiini1/CoraBot\n\nVersion: {VERSION}"
+        emb.color = common.get_hex_colour(cora_blonde=True)
+        emb.set_thumbnail(
             url="https://media.discordapp.net/attachments/693166291468681227/834200862246043648/cora_pfp.png"
-            )
+        )
 
-            try:
-                await ctx.send(embed=emb)
-            except Forbidden:
-                common.forbiddenErrorHandler(ctx)
+        try:
+            await ctx.send(embed=emb)
+        except Forbidden:
+            common.forbiddenErrorHandler(ctx)
 
     @commands.Cog.listener()
     async def on_message(self, message, *args):
-        if message.author == self.user:
+        if message.author == self.bot.user:
             return
-        elif message.content == "!c hi":
-            print("OK")
-            raise ImportError
         # elif message.type in [
         #     MessageType.premium_guild_subscription,
         #     MessageType.premium_guild_tier_1,
@@ -110,6 +105,6 @@ class Info(commands.Cog):
         #         await auction.bid(message)
         #         return
 
+
 def setup(client):
     client.add_cog(Info(client))
-    print("here")
