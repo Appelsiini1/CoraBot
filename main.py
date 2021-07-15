@@ -76,15 +76,13 @@ class CoraBot(commands.Bot):
         description = "\n%s\n" % "".join(exc)
 
         name = ctx.command.qualified_name
-        author = "{0} (ID: {0.id})".format(ctx.message.author)
+        author = f"{ctx.message.author} (ID: {ctx.message.author.id})"
         try:
-            location = "{0}/{1}".format(ctx.message.channel, ctx.message.server)
+            location = f"{ctx.message.channel}/{ctx.message.server}"
         except AttributeError:
             location = "MAIN"
 
-        message = "{0} at {1}: Called by: {2} in {3}. More info: {4}".format(
-            name, time, author, location, description
-        )
+        message = f"{name} at {time}: Called by: {author} in {location}. More info: {description}"
         print(
             f"{time} - An unhandled exception occured in {location}, see log for details."
         )
