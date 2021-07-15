@@ -5,6 +5,7 @@ from modules.common import get_hex_colour
 
 EMOJI = "\N{PARTY POPPER}"
 
+
 class Giveaway(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -38,7 +39,9 @@ class Giveaway(commands.Cog):
                 await ctx.send(embed=emb)
                 return
             prefix = "!c endgiveaway "
-            args = ctx.message.content[len(prefix) - 1 :].strip().lstrip("[").rstrip("]")
+            args = (
+                ctx.message.content[len(prefix) - 1 :].strip().lstrip("[").rstrip("]")
+            )
             react = await ctx.channel.fetch_message(args)
             list_user = await react.reactions[0].users().flatten()
             random_n = random.randint(0, len(list_user) - 1)
@@ -65,6 +68,7 @@ class Giveaway(commands.Cog):
             await ctx.send(
                 "Sorry, you do not have permissions to end a giveaway on this server."
             )
+
 
 def setup(client):
     client.add_cog(Giveaway(client))

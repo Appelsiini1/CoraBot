@@ -2,6 +2,7 @@ from discord import Embed
 from discord.ext import commands
 from modules.common import get_hex_colour
 
+
 class Short(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -20,7 +21,10 @@ class Short(commands.Cog):
 
     @commands.command()
     async def mood(self, ctx):
-        await ctx.send("https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4")
+        await ctx.send(
+            "https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4"
+        )
+
 
 def setup(client):
     client.add_cog(Short(client))

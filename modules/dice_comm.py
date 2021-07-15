@@ -9,6 +9,7 @@ from modules.common import get_hex_colour, forbiddenErrorHandler
 
 MAX_DICE = 2 ** 20
 
+
 class Dice(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -49,11 +50,15 @@ class Dice(commands.Cog):
         # Command structure
         # !c dice [help | [N]dS]
         try:
-            arg = ctx.message.content.split(" ")[2].strip().lstrip("[").rstrip("]").lower()
-        except IndexError:
-            await ctx.send(
-                "No arguments given. Valid arguments are `help` and `[N]dS`"
+            arg = (
+                ctx.message.content.split(" ")[2]
+                .strip()
+                .lstrip("[")
+                .rstrip("]")
+                .lower()
             )
+        except IndexError:
+            await ctx.send("No arguments given. Valid arguments are `help` and `[N]dS`")
             return
 
         if arg == "help":
@@ -71,9 +76,7 @@ class Dice(commands.Cog):
                         if len(dices) == 1:
                             dices = arg.split("u")
                             if len(dices) == 1:
-                                emb.title = (
-                                    "Unknown dice mode. Valid modes are `d`, `u` and `w`."
-                                )
+                                emb.title = "Unknown dice mode. Valid modes are `d`, `u` and `w`."
                                 emb.color = get_hex_colour(error=True)
                                 try:
                                     await ctx.send(embed=emb)
@@ -182,6 +185,7 @@ class Dice(commands.Cog):
                     await ctx.send(embed=emb)
                 except discord.errors.Forbidden:
                     await forbiddenErrorHandler(ctx)
+
 
 def setup(client):
     client.add_cog(Dice(client))

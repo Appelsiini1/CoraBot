@@ -3,6 +3,7 @@ import requests
 import json
 import logging
 
+
 class Insult(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -31,6 +32,7 @@ class Insult(commands.Cog):
             )
             logging.error(msg)
             await ctx.send(msg)
+
 
 def setup(client):
     client.add_cog(Insult(client))
