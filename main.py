@@ -27,6 +27,7 @@ from modules import pop
 from modules import nitro
 from modules import dice_comm
 from modules import auction
+from modules import short_comms
 
 # Main bot class
 class CoraBot(commands.Bot):
@@ -45,6 +46,8 @@ class CoraBot(commands.Bot):
         choose.setup(self)
         dice_comm.setup(self)
         giveaway.setup(self)
+        short_comms.setup(self)
+        
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")
