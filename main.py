@@ -40,6 +40,7 @@ class CoraBot(commands.Bot):
         # Command setup
         command_help.setup(self)
         choose.setup(self)
+        dice_comm.setup(self)
 
         self.run(DISCORD_TOKEN)
 
