@@ -12,6 +12,10 @@ class Short(commands.Cog):
         await ctx.send("Hello!")
 
     @commands.command()
+    async def hello(self, ctx):
+        await ctx.send("Hi!")
+
+    @commands.command()
     async def status(self, ctx):
         emb = Embed()
         emb.color = get_hex_colour()
