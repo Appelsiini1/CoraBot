@@ -41,6 +41,7 @@ class CoraBot(commands.Bot):
         command_help.setup(self)
         choose.setup(self)
         dice_comm.setup(self)
+        giveaway.setup(self)
 
         self.run(DISCORD_TOKEN)
 
