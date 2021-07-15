@@ -2,6 +2,8 @@ import random
 import discord
 from discord.ext import commands
 from modules.common import get_hex_colour
+
+
 class Choose(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -27,6 +29,7 @@ class Choose(commands.Cog):
 
         emb = discord.Embed(title=msg, color=get_hex_colour(cora_eye=True))
         await ctx.send(embed=emb)
+
 
 def setup(client):
     client.add_cog(Choose(client))
