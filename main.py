@@ -47,7 +47,7 @@ class CoraBot(commands.Bot):
         dice_comm.setup(self)
         giveaway.setup(self)
         short_comms.setup(self)
-        
+        insult.setup(self)
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")

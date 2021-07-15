@@ -7,6 +7,7 @@ class Insult(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command()
     async def insult(self, ctx):
         prefix = "!c insult "
         response = requests.get(
