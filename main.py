@@ -39,6 +39,7 @@ class CoraBot(commands.Bot):
 
         # Command setup
         command_help.setup(self)
+        choose.setup(self)
 
         self.run(DISCORD_TOKEN)
 
