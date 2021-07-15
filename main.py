@@ -36,14 +36,15 @@ class CoraBot(commands.Bot):
             command_prefix, help_command=None, intents=INTENTS, activity=ACTIVITY
         )
         self.remove_command("help")
+        self.__cogsetup__()
+        self.run(DISCORD_TOKEN)
 
-        # Command setup
+    def __cogsetup__(self):
+        # Load cogs
         command_help.setup(self)
         choose.setup(self)
         dice_comm.setup(self)
         giveaway.setup(self)
-
-        self.run(DISCORD_TOKEN)
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")
