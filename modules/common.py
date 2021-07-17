@@ -9,8 +9,8 @@ from constants import DB_F
 def get_hex_colour(cora_blonde=False, cora_eye=False, error=False):
     """Returns a hex colour as a discord.Colour object
 
-    Args: 
-    
+    Args:
+
     cora_blonde = [True|False] (Default: False)
 
     cora_eye = [True|False] (Default: False)
@@ -59,7 +59,7 @@ async def sendEmoji(message):
 
 async def forbiddenErrorHandler(message):
     """Handles the error when the bot does not have permission to send a message to channel."""
-    
+
     logging.error("Unable to send message due to 403 - Forbidden")
     emb = discord.Embed()
     emb.description = f"Unable to send message to channel '{message.channel.name}' in '{message.guild.name}'. If you are the server owner, please make sure I have the proper rights to post messages to that channel."
@@ -71,8 +71,8 @@ async def forbiddenErrorHandler(message):
 
 
 def initializeDatabase():
-    """Initializes the required database tables if they do not exist yet. 
-    Does nothing if they already exist in the database. 
+    """Initializes the required database tables if they do not exist yet.
+    Does nothing if they already exist in the database.
     Note: table declarations cannot be edited if they have been already run."""
 
     with sqlite3.connect(DB_F) as conn:
@@ -173,14 +173,15 @@ def initializeDatabase():
         );"""
         )
 
-
         # ID table
-        c.execute("""CREATE TABLE IF NOT EXISTS IDs(
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS IDs(
             ID INT,
             Type TEXT,
             PRIMARY KEY (ID)
-        );""")
-    
+        );"""
+        )
+
         # Current auctions
         c.execute(
             """CREATE TABLE IF NOT EXISTS Auctions(
@@ -213,7 +214,8 @@ def initializeDatabase():
         )
 
         # Scheduled events
-        c.execute("""CREATE TABLE IF NOT EXISTS Scheduler(
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS Scheduler(
             Event_ID INT,
             Event_type TEXT,
             Event_name TEXT,
@@ -225,7 +227,8 @@ def initializeDatabase():
             Minute INT,
             Second INT,
             PRIMARY KEY (Event_ID)
-        );""")
+        );"""
+        )
 
         # other databases here
 

@@ -3,6 +3,7 @@ from discord.errors import Forbidden
 from discord.ext import commands
 from modules.common import forbiddenErrorHandler, get_hex_colour
 
+
 class Pop(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -32,8 +33,8 @@ class Pop(commands.Cog):
         pop = ""
         x = 0
         y = 0
-        while x<arg:
-            while y<arg:
+        while x < arg:
+            while y < arg:
                 pop += "||pop!||"
                 y += 1
             x += 1

@@ -11,12 +11,20 @@ def on_scheduler_event(event):
     else:
         logging.info("Job executed succesfully.")
 
-class SCHEDULER():
-    def __init__(self) -> None:
-        #self.event_checker.start()
-        #self.test_loop.start()
-        pass
 
+def addEvent(eventType):
+    pass
+
+
+def delEvent(eventID):
+    pass
+
+
+class SCHEDULER:
+    def __init__(self):
+        # self.event_checker.start()
+        # self.test_loop.start()
+        pass
 
     @tasks.loop(seconds=5.0, count=3)
     async def test_loop():
@@ -26,4 +34,3 @@ class SCHEDULER():
     async def event_checker():
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
-

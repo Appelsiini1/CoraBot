@@ -36,7 +36,9 @@ class Vote(commands.Cog):
             try:
                 poll_id = int(arg.strip().lstrip("[").rstrip("]"))
             except ValueError:
-                await self.voteErrorHandler(ctx.message, dm_channel, 1)  # invalid Poll ID
+                await self.voteErrorHandler(
+                    ctx.message, dm_channel, 1
+                )  # invalid Poll ID
                 return
 
             with sqlite3.connect(DB_F) as conn:
@@ -115,20 +117,30 @@ class Vote(commands.Cog):
                         option_no = int(options[0].strip().lstrip("[").rstrip("]"))
                         vote_amount = int(options[1].strip().lstrip("[").rstrip("]"))
                     except Exception:
-                        await self.voteErrorHandler(ctx.message, dm_channel, 6, poll_name=poll[0][5])
+                        await self.voteErrorHandler(
+                            ctx.message, dm_channel, 6, poll_name=poll[0][5]
+                        )
                         return
                     if option_no == 0 or option_no < 0:
-                        await self.voteErrorHandler(ctx.message, dm_channel, 6, poll_name=poll[0][5])
+                        await self.voteErrorHandler(
+                            ctx.message, dm_channel, 6, poll_name=poll[0][5]
+                        )
                         return
                     elif option_no > optionsCount:
-                        await self.voteErrorHandler(ctx.message, dm_channel, 6, poll_name=poll[0][5])
+                        await self.voteErrorHandler(
+                            ctx.message, dm_channel, 6, poll_name=poll[0][5]
+                        )
                         return
                     elif vote_amount < 0:
-                        await self.voteErrorHandler(ctx.message, dm_channel, 6, poll_name=poll[0][5])
+                        await self.voteErrorHandler(
+                            ctx.message, dm_channel, 6, poll_name=poll[0][5]
+                        )
                     try:
                         votes[option_no - 1] = vote_amount
                     except IndexError:
-                        await self.voteErrorHandler(ctx.message, dm_channel, 6, poll_name=poll[0][5])
+                        await self.voteErrorHandler(
+                            ctx.message, dm_channel, 6, poll_name=poll[0][5]
+                        )
                         logging.error(
                             f"Unknown exception handled in '!c vote'. The command was: {ctx.message.content}"
                         )
@@ -136,7 +148,11 @@ class Vote(commands.Cog):
 
                 if totalVotes > maxvoteint:
                     await self.voteErrorHandler(
-                        ctx.message, dm_channel, 5, maxvotes=maxvoteint, poll_name=poll[0][5]
+                        ctx.message,
+                        dm_channel,
+                        5,
+                        maxvotes=maxvoteint,
+                        poll_name=poll[0][5],
                     )
                     return
                 vote_str = ""
@@ -184,8 +200,9 @@ class Vote(commands.Cog):
                 await dm_channel.send(embed=emb)
                 await ctx.message.delete()
 
-
-    async def voteErrorHandler(self, message, dm_channel, err_type, poll_name="", maxvotes=0):
+    async def voteErrorHandler(
+        self, message, dm_channel, err_type, poll_name="", maxvotes=0
+    ):
         emb = discord.Embed()
         if err_type == 1:
             emb.description = f"\N{no entry} **Invalid poll ID. Please give the ID as an integer. See `!c vote help` for more help.**\
@@ -219,8 +236,9 @@ class Vote(commands.Cog):
         try:
             await message.delete()
         except discord.errors.NotFound:
-            logging.exception("Could not delete vote command message. Message not found.")
-
+            logging.exception(
+                "Could not delete vote command message. Message not found."
+            )
 
     async def voteHelp(self, message):
         emb = discord.Embed()
@@ -250,7 +268,6 @@ class Vote(commands.Cog):
                 "Could not delete vote help command message. Message not found."
             )
 
-
     async def delVotes(self, message):
         # Command structure
         # !c vote delete [Poll ID]
@@ -278,6 +295,7 @@ class Vote(commands.Cog):
             emb.color = get_hex_colour(cora_eye=True)
             await dm_channel.send(embed=emb)
             await message.delete()
+
 
 def setup(client):
     client.add_cog(Vote(client))

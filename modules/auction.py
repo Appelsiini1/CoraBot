@@ -6,17 +6,19 @@ from currency_symbols import CurrencySymbols
 from discord.ext import commands
 from modules.common import get_hex_colour, forbiddenErrorHandler
 from constants import DB_F, TRACKED_CHANNELS
-from modules.scheduler import SCHEDULER
+
+# from modules.scheduler import
 
 
 async def bid(message):
     pass
 
+
 class Auction(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    #helper function
+    # helper function
     async def sendEmbed(self, ctx, emb):
         try:
             await ctx.send(embed=emb)
@@ -25,7 +27,7 @@ class Auction(commands.Cog):
             await forbiddenErrorHandler(ctx.message)
             return
 
-    #add auction to schedule and construct info message
+    # add auction to schedule and construct info message
     async def makeAuction(self, ctx, scheduler):
         # Command structure
         # !c auction start title;number of slots [int];currency as a 3-letter identifier (ISO-4217);starting bid [int, x > 0];min increase [int, x >= 0];autobuy [int, 0 if disabled, x >= 0];start time [DD.MM.YYYY HH:MM UTC-/+HHMM (as 24-hour clock)] or [now];end time or empty
@@ -166,19 +168,22 @@ class Auction(commands.Cog):
                 else:
                     pass
 
-
     async def startAuction(self):
         pass
-
 
     async def endAuction(self, ctx, scheduler):
         pass
 
-
     @commands.command(name="auction")
     async def auctionJunction(self, ctx, scheduler=None):
         try:
-            cmd = ctx.message.content.split(" ")[2].strip().lstrip("[").rstrip("]").lower()
+            cmd = (
+                ctx.message.content.split(" ")[2]
+                .strip()
+                .lstrip("[")
+                .rstrip("]")
+                .lower()
+            )
         except IndexError:
             emb = discord.Embed()
             emb.title = "No argument given. See `!c auction help` for arguments."
@@ -209,7 +214,8 @@ class Auction(commands.Cog):
 def setup(client):
     client.add_cog(Auction(client))
 
+
 async def testFunction():
     print("working...")
-    #channel = await .fetch_channel(822224994788180019)
-    #await channel.send("hello!")
+    # channel = await .fetch_channel(822224994788180019)
+    # await channel.send("hello!")
