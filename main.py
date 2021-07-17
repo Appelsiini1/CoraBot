@@ -51,6 +51,7 @@ class CoraBot(commands.Bot):
         nitro.setup(self)
         poll.setup(self)
         pop.setup(self)
+        pressF.setup(self)
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")
