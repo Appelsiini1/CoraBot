@@ -27,13 +27,19 @@ class Short(commands.Cog):
         emb.color = get_hex_colour()
         emb.title = "CoraBot Status:"
         emb.description = "**418** I'm a teapot"
-        await ctx.send(embed=emb)
+        try:
+            await ctx.send(embed=emb)
+        except Forbidden:
+            forbiddenErrorHandler(ctx.message)
 
     @commands.command()
     async def mood(self, ctx):
-        await ctx.send(
-            "https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4"
-        )
+        try:
+            await ctx.send(
+                "https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4"
+            )
+        except Forbidden:
+            forbiddenErrorHandler(ctx.message)
 
 
 def setup(client):
