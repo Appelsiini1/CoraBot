@@ -53,6 +53,7 @@ class CoraBot(commands.Bot):
         pop.setup(self)
         pressF.setup(self)
         quote.setup(self)
+        tirsk.setup(self)
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")
