@@ -8,9 +8,14 @@ from constants import DB_F
 
 def get_hex_colour(cora_blonde=False, cora_eye=False, error=False):
     """Returns a hex colour as a discord.Colour object
-    Args: cora_blonde = [True|False] Default: False
-    cora_eye = [True|False] Default: False
-    error = [True|False] Default: False"""
+
+    Args: 
+    
+    cora_blonde = [True|False] (Default: False)
+
+    cora_eye = [True|False] (Default: False)
+
+    error = [True|False] (Default: False)"""
     if cora_blonde == True:
         color = discord.Colour(value=0xFFCC99)
     elif cora_eye == True:
@@ -26,7 +31,7 @@ def get_hex_colour(cora_blonde=False, cora_eye=False, error=False):
 
 def selectReactionEmoji(n, indexes=False):
     """Helper function to randomly select n emojis from the emoji list. Returns a list containing the emojis.
-    If 'indexes' is set to True, will return the indexes of the emojis in the list instead of the actual emojis."""
+    If 'indexes' parameter is set to True, will return the indexes of the emojis in the list instead of the actual emojis."""
     selected = []
     r_ns = []
     i = 0
@@ -54,6 +59,7 @@ async def sendEmoji(message):
 
 async def forbiddenErrorHandler(message):
     """Handles the error when the bot does not have permission to send a message to channel."""
+    
     logging.error("Unable to send message due to 403 - Forbidden")
     emb = discord.Embed()
     emb.description = f"Unable to send message to channel '{message.channel.name}' in '{message.guild.name}'. If you are the server owner, please make sure I have the proper rights to post messages to that channel."
@@ -65,7 +71,10 @@ async def forbiddenErrorHandler(message):
 
 
 def initializeDatabase():
-    """Initializes the required database tables if they do not exist yet. Does nothing if they already exist in the database."""
+    """Initializes the required database tables if they do not exist yet. 
+    Does nothing if they already exist in the database. 
+    Note: table declarations cannot be edited if they have been already run."""
+
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
         # BasicPolls Table

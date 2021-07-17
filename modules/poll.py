@@ -11,7 +11,7 @@ from constants import DB_F
 
 _POLL_PREFIX = "!c poll "
 
-# only affects rolepolls
+# only affects rolepolls, basic polls always have a maximum of 20 (Discord limitation)
 MAX_OPTIONS = 20
 
 RoleRE1 = re.compile(r"^.*<@&(\d+)>")
