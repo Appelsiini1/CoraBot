@@ -52,6 +52,7 @@ class CoraBot(commands.Bot):
         poll.setup(self)
         pop.setup(self)
         pressF.setup(self)
+        quote.setup(self)
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")
