@@ -40,6 +40,7 @@ class CoraBot(commands.Bot):
 
     def __cogsetup__(self):
         # Load cogs
+        auction.setup(self)
         command_help.setup(self)
         choose.setup(self)
         dice_comm.setup(self)
