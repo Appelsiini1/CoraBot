@@ -54,6 +54,7 @@ class CoraBot(commands.Bot):
         pressF.setup(self)
         quote.setup(self)
         tirsk.setup(self)
+        vaccine.setup(self)
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")
