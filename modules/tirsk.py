@@ -3,7 +3,6 @@ import discord
 import logging
 import time
 from discord.errors import Forbidden
-
 from discord.ext import commands
 from modules.common import forbiddenErrorHandler, get_hex_colour
 from constants import DB_F, TRACKED_CHANNELS
