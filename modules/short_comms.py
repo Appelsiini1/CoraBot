@@ -1,19 +1,25 @@
 from discord import Embed
+from discord.errors import Forbidden
 from discord.ext import commands
-from modules.common import get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour
 
 
 class Short(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=["hello"])
     async def hi(self, ctx):
-        await ctx.send("Hello!")
-
-    @commands.command()
-    async def hello(self, ctx):
-        await ctx.send("Hi!")
+        if ctx.invoked_with == "hi":
+            try:
+                await ctx.send("Hello!")
+            except Forbidden:
+                forbiddenErrorHandler(ctx.message)
+        else:
+            try:
+                await ctx.send("Hi!")
+            except Forbidden:
+                forbiddenErrorHandler(ctx.message)
 
     @commands.command()
     async def status(self, ctx):
