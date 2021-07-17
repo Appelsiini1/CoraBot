@@ -20,7 +20,7 @@ class Pop(commands.Cog):
             try:
                 await ctx.send(embed=emb)
             except Forbidden:
-                forbiddenErrorHandler(ctx.message)
+                await forbiddenErrorHandler(ctx.message)
             return
 
         if arg > 14:
@@ -43,7 +43,7 @@ class Pop(commands.Cog):
         try:
             await ctx.send(pop)
         except Forbidden:
-            forbiddenErrorHandler(ctx.message)
+            await forbiddenErrorHandler(ctx.message)
 
 
 def setup(client):

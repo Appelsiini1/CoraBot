@@ -24,7 +24,7 @@ async def makeAuction(message, scheduler):
             message.channel.send(embed=emb)
             return
         except discord.errors.Forbidden:
-            forbiddenErrorHandler(message)
+            await forbiddenErrorHandler(message)
             return
     elif len(cmd_split[3].split(";")) < 8:
         emb.title = "Too few arguments. Please remember to give all arguments. See `!c auction help` for more information."
@@ -34,7 +34,7 @@ async def makeAuction(message, scheduler):
             message.channel.send(embed=emb)
             return
         except discord.errors.Forbidden:
-            forbiddenErrorHandler(message)
+            await forbiddenErrorHandler(message)
             return
     else:
         args = cmd_split[3].split(";")
@@ -60,7 +60,7 @@ async def makeAuction(message, scheduler):
                 message.channel.send(embed=emb)
                 return
             except discord.errors.Forbidden:
-                forbiddenErrorHandler(message)
+                await forbiddenErrorHandler(message)
                 return
         if start_bid == 0:
             emb.title = "Starting bid must be greater than zero."
@@ -69,7 +69,7 @@ async def makeAuction(message, scheduler):
                 message.channel.send(embed=emb)
                 return
             except discord.errors.Forbidden:
-                forbiddenErrorHandler(message)
+                await forbiddenErrorHandler(message)
                 return
 
         currency_symbol = CurrencySymbols.get_symbol(currency)
@@ -80,7 +80,7 @@ async def makeAuction(message, scheduler):
                 message.channel.send(embed=emb)
                 return
             except discord.errors.Forbidden:
-                forbiddenErrorHandler(message)
+                await forbiddenErrorHandler(message)
                 return
 
         if start_time == "now":
@@ -99,7 +99,7 @@ async def makeAuction(message, scheduler):
                     message.channel.send(embed=emb)
                     return
                 except discord.errors.Forbidden:
-                    forbiddenErrorHandler(message)
+                    await forbiddenErrorHandler(message)
                     return
 
         if end_time != "":
@@ -112,7 +112,7 @@ async def makeAuction(message, scheduler):
                     message.channel.send(embed=emb)
                     return
                 except discord.errors.Forbidden:
-                    forbiddenErrorHandler(message)
+                    await forbiddenErrorHandler(message)
                     return
 
         # Auction_ID INT UNIQUE, 0
@@ -214,7 +214,7 @@ async def auctionJunction(message, scheduler=None):
         try:
             message.channel.send(embed=emb)
         except discord.errors.Forbidden:
-            forbiddenErrorHandler(message)
+            await forbiddenErrorHandler(message)
 
 
 async def testFunction():

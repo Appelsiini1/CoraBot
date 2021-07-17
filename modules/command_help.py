@@ -103,7 +103,7 @@ class Info(commands.Cog):
         try:
             await ctx.send(embed=emb)
         except Forbidden:
-            common.forbiddenErrorHandler(ctx)
+            await common.forbiddenErrorHandler(ctx)
 
 
 def setup(client):

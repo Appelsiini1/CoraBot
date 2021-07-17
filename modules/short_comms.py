@@ -14,12 +14,12 @@ class Short(commands.Cog):
             try:
                 await ctx.send("Hello!")
             except Forbidden:
-                forbiddenErrorHandler(ctx.message)
+                await forbiddenErrorHandler(ctx.message)
         else:
             try:
                 await ctx.send("Hi!")
             except Forbidden:
-                forbiddenErrorHandler(ctx.message)
+                await forbiddenErrorHandler(ctx.message)
 
     @commands.command()
     async def status(self, ctx):
@@ -30,7 +30,7 @@ class Short(commands.Cog):
         try:
             await ctx.send(embed=emb)
         except Forbidden:
-            forbiddenErrorHandler(ctx.message)
+            await forbiddenErrorHandler(ctx.message)
 
     @commands.command()
     async def mood(self, ctx):
@@ -39,7 +39,7 @@ class Short(commands.Cog):
                 "https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4"
             )
         except Forbidden:
-            forbiddenErrorHandler(ctx.message)
+            await forbiddenErrorHandler(ctx.message)
 
 
 def setup(client):

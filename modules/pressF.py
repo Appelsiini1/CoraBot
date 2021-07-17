@@ -27,7 +27,7 @@ class PressF(commands.Cog):
         try:
             await ctx.send(msg)
         except Forbidden:
-            forbiddenErrorHandler(ctx.message)
+            await forbiddenErrorHandler(ctx.message)
 
 def setup(client):
     client.add_cog(PressF(client))

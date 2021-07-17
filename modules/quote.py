@@ -29,7 +29,7 @@ class Inspire(commands.Cog):
         try:
             await ctx.send(embed=emb)
         except Forbidden:
-            forbiddenErrorHandler(ctx.message)
+            await forbiddenErrorHandler(ctx.message)
 
 def setup(client):
     client.add_cog(Inspire(client))
