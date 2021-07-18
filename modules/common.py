@@ -175,7 +175,8 @@ def initializeDatabase():
 
 
         # ID table
-        c.execute("""CREATE TABLE IF NOT EXISTS IDs(
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS IDs(
             ID INT,
             Type TEXT,
             PRIMARY KEY (ID)
@@ -213,7 +214,8 @@ def initializeDatabase():
         )
 
         # Scheduled events
-        c.execute("""CREATE TABLE IF NOT EXISTS Scheduler(
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS Scheduler(
             Event_ID INT,
             Event_type TEXT,
             Event_name TEXT,
