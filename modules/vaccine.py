@@ -125,7 +125,7 @@ class Vaccine(commands.Cog):
         ):
             json_data = json.loads(response.text)
             vacc_data = json_data["dataset"]["value"].items()
-            pop_data = response3.json["value"][ALUEET_INDEX.index(param)] if param != "518333" else 0
+            pop_data = json.loads(response3.text)["value"][ALUEET_INDEX.index(param)] if param != "518333" else 0
             one_dose = 0
             for keypair in vacc_data:
                 one_dose = keypair[1]
@@ -156,10 +156,10 @@ class Vaccine(commands.Cog):
             else:
                 area = "Finland"
             emb.title = f"Current number of COVID-19 vaccinated people in {area}:"
-            emb.description = f"One dose: {one_dose} ({round((one_dose/pop_data)*100)}% of area population)\nTwo doses: {two_doses} ({round((two_doses/pop_data)*100)}% of area population)"
+            emb.description = f"One dose: {one_dose} ({round((int(one_dose)/int(pop_data))*100)}% of area population)\nTwo doses: {two_doses} ({round((int(two_doses)/int(pop_data))*100)}% of area population)"
             emb.color = get_hex_colour(cora_eye=True)
             emb.set_footer(
-                text=f"Source: Finnish Institute for Health and Welfare (THL.fi)"
+                text=f"Source: Finnish Institute for Health and Welfare (THL.fi) and Statistics Finland (tilastokeskus.fi)"
             )
         return emb
 
