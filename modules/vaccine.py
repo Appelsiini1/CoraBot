@@ -57,7 +57,7 @@ ALUEET_INDEX = [
     "518366",
     "518323",
     "518349",
-    "518327"
+    "518327",
 ]
 
 QUERY = {
@@ -125,7 +125,11 @@ class Vaccine(commands.Cog):
         ):
             json_data = json.loads(response.text)
             vacc_data = json_data["dataset"]["value"].items()
-            pop_data = json.loads(response3.text)["value"][ALUEET_INDEX.index(param)] if param != "518333" else 0
+            pop_data = (
+                json.loads(response3.text)["value"][ALUEET_INDEX.index(param)]
+                if param != "518333"
+                else 0
+            )
             one_dose = 0
             for keypair in vacc_data:
                 one_dose = keypair[1]
@@ -162,7 +166,6 @@ class Vaccine(commands.Cog):
                 text=f"Source: Finnish Institute for Health and Welfare (THL.fi) and Statistics Finland (tilastokeskus.fi)"
             )
         return emb
-
 
     @commands.command(name="vacc")
     async def sendVaccInfo(self, ctx):
