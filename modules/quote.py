@@ -31,5 +31,6 @@ class Inspire(commands.Cog):
         except Forbidden:
             await forbiddenErrorHandler(ctx.message)
 
+
 def setup(client):
     client.add_cog(Inspire(client))

@@ -32,6 +32,20 @@ class SCHEDULER(commands.Cog):
         #self.test_loop.start()
         self.bot = bot
 
+def addEvent(eventType):
+    pass
+
+
+def delEvent(eventID):
+    pass
+
+
+class SCHEDULER:
+    def __init__(self):
+        # self.event_checker.start()
+        # self.test_loop.start()
+        pass
+
     @tasks.loop(seconds=5.0, count=3)
     async def test_loop():
         print("test")

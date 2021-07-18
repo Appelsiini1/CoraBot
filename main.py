@@ -7,8 +7,6 @@ from datetime import datetime
 from discord.ext import commands
 import traceback
 
-from discord.ext.commands import errors
-
 # scripts, functions & constants
 from modules.scheduler import SCHEDULER
 from constants import *
@@ -42,6 +40,7 @@ class CoraBot(commands.Bot):
 
     def __cogsetup__(self):
         # Load cogs
+        auction.setup(self)
         command_help.setup(self)
         choose.setup(self)
         dice_comm.setup(self)
@@ -55,6 +54,7 @@ class CoraBot(commands.Bot):
         quote.setup(self)
         tirsk.setup(self)
         vaccine.setup(self)
+        vote.setup(self)
 
     async def on_ready(self):
         print(f"{self.user.name} {VERSION} is online & ready.")

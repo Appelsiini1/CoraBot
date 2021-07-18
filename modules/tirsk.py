@@ -3,7 +3,6 @@ import discord
 import logging
 import time
 from discord.errors import Forbidden
-
 from discord.ext import commands
 from modules.common import forbiddenErrorHandler, get_hex_colour
 from constants import DB_F, TRACKED_CHANNELS
@@ -12,6 +11,7 @@ import re
 import os
 
 MENTION_RE = re.compile(r"^.*<@!(\d+)>")
+
 
 async def tirskAdd(message, c):
     mentions = message.mentions
@@ -147,7 +147,6 @@ class Tirsk(commands.Cog):
         await msgID.edit(embed=emb)
         logging.info("Quote counting in {} finished.".format(message.channel.name))
 
-
     async def countOldTirsk(self, message):
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
@@ -184,12 +183,10 @@ class Tirsk(commands.Cog):
             You can see the scoreboard by typing `!c tirsk score`"
             await msgID.edit(embed=emb)
 
-
     async def tirskTrack(self, message):
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
             await tirskAdd(message, c)
-
 
     async def setTracking(self, message):
         # Command structure
@@ -262,7 +259,6 @@ class Tirsk(commands.Cog):
                         await forbiddenErrorHandler(message)
                         return
 
-
     async def tirskExport(self, message):
         guildID = message.guild.id
         channelID = message.channel.id
@@ -320,11 +316,15 @@ class Tirsk(commands.Cog):
                     await dm_channel.send(file=fileToSend)
                     await dm_channel.send(embed=emb)
                     emb.title = ""
-                    emb.description = "**Quote data succesfully compiled and sent to you.**"
+                    emb.description = (
+                        "**Quote data succesfully compiled and sent to you.**"
+                    )
                     emb.color = get_hex_colour(cora_eye=True)
                     await msg.edit(embed=emb)
                 except Exception:
-                    logging.exception("Unable to send exported quotes to the requester.")
+                    logging.exception(
+                        "Unable to send exported quotes to the requester."
+                    )
                     try:
                         await message.channel.send(
                             "Unable to send exported data due to an error. Please try again."
@@ -339,7 +339,6 @@ class Tirsk(commands.Cog):
                         logging.exception(
                             "Unable to delete the local copy of quote export CSV."
                         )
-
 
     async def tirskHelp(self, message):
         txt = "Saatavilla olevat tirsk komennot:\n\
@@ -362,7 +361,13 @@ class Tirsk(commands.Cog):
     @commands.command(name="tirsk")
     async def tirskJunction(self, ctx):
         try:
-            arg2 = ctx.message.content.split(" ")[2].strip().lstrip("[").rstrip("]").lower()
+            arg2 = (
+                ctx.message.content.split(" ")[2]
+                .strip()
+                .lstrip("[")
+                .rstrip("]")
+                .lower()
+            )
         except IndexError:
             try:
                 await ctx.send(
@@ -397,6 +402,7 @@ class Tirsk(commands.Cog):
                 await ctx.send(embed=emb)
             except Forbidden:
                 await forbiddenErrorHandler(ctx.message)
+
 
 def setup(client):
     client.add_cog(Tirsk(client))

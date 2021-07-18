@@ -5,6 +5,7 @@ import random
 
 MAX_ITEMS = 100
 
+
 async def get_tweet(message, auth):
     api = tweepy.API(auth)
 
@@ -16,6 +17,4 @@ async def get_tweet(message, auth):
     for i in range(0, random_n):
         tweet = cursor.next()
 
-    #time = datetime.datetime.today().strftime("%d.%m.%Y")
-
-    
+    # time = datetime.datetime.today().strftime("%d.%m.%Y")

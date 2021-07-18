@@ -18,6 +18,7 @@ MAX_OPTIONS = 20
 
 RoleRE1 = re.compile(r"^.*<@&(\d+)>")
 
+
 class Polls(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -57,7 +58,6 @@ class Polls(commands.Cog):
                 await ctx.send(embed=emb)
         else:
             await self.sendHelp(ctx.message)
-
 
     # Send help
     async def sendHelp(self, message):
@@ -107,7 +107,6 @@ class Polls(commands.Cog):
         await dm_channel.send(embed=emb)
         await message.add_reaction("\N{white heavy check mark}")
 
-
     # Basic poll start
     async def startBasicPoll(self, message):
         # Command structure:
@@ -136,7 +135,9 @@ class Polls(commands.Cog):
                 emoji_list = selectReactionEmoji(len(args), indexes=True)
                 for i, option in enumerate(args):
                     emoji = _EMOJIS[emoji_list[i]]
-                    poll_txt += emoji + ": " + option.strip().lstrip("[").rstrip("]") + "\n"
+                    poll_txt += (
+                        emoji + ": " + option.strip().lstrip("[").rstrip("]") + "\n"
+                    )
 
                 if len(poll_txt) >= 2048:
                     emb.description = (
@@ -184,7 +185,9 @@ class Polls(commands.Cog):
                     ),
                 )
                 conn.commit()
-                logging.info("Added poll {} into BasicPolls database table.".format(msg.id))
+                logging.info(
+                    "Added poll {} into BasicPolls database table.".format(msg.id)
+                )
                 await dm_channel.send(txt)
                 await dm_channel.send(txt2)
                 try:
@@ -194,10 +197,11 @@ class Polls(commands.Cog):
                         "Could not delete message when creating a basic poll. Message was not found."
                     )
             else:
-                emb.description = "Exceeded maximum option amount of 20 options for polls!"
+                emb.description = (
+                    "Exceeded maximum option amount of 20 options for polls!"
+                )
                 emb.color = get_hex_colour(error=True)
                 await message.channel.send(embed=emb)
-
 
     # Basic poll ender
     async def BasicPollEndHelper(self, poll, message):
@@ -240,9 +244,7 @@ class Polls(commands.Cog):
         emb.description = txt
         return emb
 
-
     # ######################################################################################################## #
-
 
     # Poll ender
     async def endPolls(self, message):
@@ -275,8 +277,12 @@ class Polls(commands.Cog):
                         polls = await self.rolePollEndHelper(message, c, polls=poll)
                         if polls != 0:
                             for poll_id in polls:
-                                c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
-                                c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
+                                c.execute(
+                                    f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}"
+                                )
+                                c.execute(
+                                    f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}"
+                                )
                             conn.commit()
                             success = 1
                         else:
@@ -305,15 +311,21 @@ class Polls(commands.Cog):
                         polls = await self.rolePollEndHelper(message, c, polls=poll)
                         if polls != 0:
                             for poll_id in polls:
-                                c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
-                                c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
+                                c.execute(
+                                    f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}"
+                                )
+                                c.execute(
+                                    f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}"
+                                )
                             conn.commit()
                             success = 1
                         else:
                             success = 0
             else:
                 try:
-                    arg = int(message.content.split(" ")[3].strip().lstrip("[").rstrip("]"))
+                    arg = int(
+                        message.content.split(" ")[3].strip().lstrip("[").rstrip("]")
+                    )
                 except Exception:
                     logging.exception(
                         "Something went wrong when trying to convert poll ID to int"
@@ -341,8 +353,12 @@ class Polls(commands.Cog):
                         polls = await self.rolePollEndHelper(message, c, poll=poll)
                         if polls != 0:
                             for poll_id in polls:
-                                c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
-                                c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
+                                c.execute(
+                                    f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}"
+                                )
+                                c.execute(
+                                    f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}"
+                                )
                             conn.commit()
                             success = 1
                         else:
@@ -368,8 +384,12 @@ class Polls(commands.Cog):
                         polls = await self.rolePollEndHelper(message, c, polls=poll)
                         if polls != 0:
                             for poll_id in polls:
-                                c.execute(f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}")
-                                c.execute(f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}")
+                                c.execute(
+                                    f"DELETE FROM RolePolls WHERE Poll_ID={poll_id}"
+                                )
+                                c.execute(
+                                    f"DELETE FROM RolePolls_Votes WHERE Poll_ID={poll_id}"
+                                )
                             conn.commit()
                             success = 1
                         else:
@@ -382,9 +402,7 @@ class Polls(commands.Cog):
         else:
             logging.error("Something went wrong when ending the poll.")
 
-
     # ######################################################################################################## #
-
 
     # Role poll role record
     async def recordRoles(self, message):
@@ -395,9 +413,7 @@ class Polls(commands.Cog):
         args = message.content[len(prefix) :].split(",")
 
         if args == 0:
-            emb.description = (
-                "You did not give any arguments. Use `!c poll help` for the correct syntax."
-            )
+            emb.description = "You did not give any arguments. Use `!c poll help` for the correct syntax."
             emb.color = get_hex_colour(error=True)
             await message.channel.send(embed=emb)
             return
@@ -485,7 +501,6 @@ class Polls(commands.Cog):
             emb.colour = get_hex_colour()
             await message.channel.send(embed=emb)
 
-
     # Send all roles
     async def showRoles(self, message):
         # Command format
@@ -512,7 +527,6 @@ class Polls(commands.Cog):
             emb.color = get_hex_colour()
         await message.channel.send(embed=emb)
 
-
     # Delete roles for rolepolls
     async def delRoles(self, message):
         # Command format
@@ -531,7 +545,9 @@ class Polls(commands.Cog):
             c = conn.cursor()
 
             if args[0].strip().lstrip("[").rstrip("]") == "all":
-                c.execute(f"DELETE FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}")
+                c.execute(
+                    f"DELETE FROM RolesMaxVotes WHERE Guild_ID={message.guild.id}"
+                )
                 amount = -1
             else:
                 for i, arg in enumerate(args):
@@ -559,7 +575,6 @@ class Polls(commands.Cog):
             emb.description = f"Deleted {i} roles from database."
             emb.color = get_hex_colour(cora_eye=True)
             await message.channel.send(embed=emb)
-
 
     # Start role poll
     async def startRolePoll(self, message):
@@ -658,9 +673,7 @@ class Polls(commands.Cog):
                         emb.set_footer(text=f"Poll ID: {poll_id}")
 
                 if success != 1:
-                    emb2.title = (
-                        "Poll creation failed due to a database error. Please try again."
-                    )
+                    emb2.title = "Poll creation failed due to a database error. Please try again."
                     emb2.description = f"Your command was: ```{message.content}```"
                     emb2.color = get_hex_colour(error=True)
                     await dm_channel.send(embed=emb2)
@@ -708,12 +721,9 @@ class Polls(commands.Cog):
                 await message.delete()
 
             else:
-                emb.description = (
-                    f"Exceeded maximum option amount of {MAX_OPTIONS} options for polls!"
-                )
+                emb.description = f"Exceeded maximum option amount of {MAX_OPTIONS} options for polls!"
                 emb.color = get_hex_colour(error=True)
                 await message.channel.send(embed=emb)
-
 
     # Role poll ender
     async def rolePollEndHelper(self, message, c, poll=None, polls=None):
@@ -791,7 +801,9 @@ class Polls(commands.Cog):
                     txt += f"**{poll_options[i]}**: {option}\n"
                 poll_ids.append(poll_id)
                 voter_amount = len(voters)
-                emb.set_footer(text=f"A total of {voter_amount} people voted in this poll.")
+                emb.set_footer(
+                    text=f"A total of {voter_amount} people voted in this poll."
+                )
                 emb.description = txt
                 emb.title = f"Results for '{poll_name}'"
                 emb.color = get_hex_colour(cora_eye=True)
