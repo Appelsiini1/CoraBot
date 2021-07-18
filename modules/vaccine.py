@@ -1,5 +1,4 @@
 import json
-from discord import embeds
 from discord.errors import Forbidden
 from discord.ext import commands
 import requests
