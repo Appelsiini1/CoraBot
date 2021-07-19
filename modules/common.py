@@ -219,6 +219,7 @@ def initializeDatabase():
             Event_ID INT,
             Event_type TEXT,
             Event_name TEXT,
+            Event_info TEXT,
             Datetime TEXT,
             Year INT,
             Month INT,
