@@ -26,6 +26,7 @@ from modules import nitro
 from modules import dice_comm
 from modules import auction
 from modules import short_comms
+from modules import saimaa
 
 # Main bot class
 class CoraBot(commands.Bot):
@@ -52,6 +53,7 @@ class CoraBot(commands.Bot):
         pop.setup(self)
         pressF.setup(self)
         quote.setup(self)
+        saimaa.setup(self)
         tirsk.setup(self)
         vaccine.setup(self)
         vote.setup(self)
