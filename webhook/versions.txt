@@ -1,5 +1,8 @@
+v1.14.15
+- Add '!c saimaa' command to get the surface temperature of the Saimaa lake
+###
 v1.14.14
-- Add `!c tatus` command to check bot status
+- Add `!c status` command to check bot status
 ###
 v1.14.13
 - Fix nitro boost tracking for the n+1th f*****g time
