@@ -12,6 +12,10 @@ class EVENT_CHECKER(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @tasks.loop(minutes=10)
+    async def less_than_hour():
+        pass
+
     @tasks.loop(minutes=1)
     async def less_than_ten():
         pass
@@ -86,7 +90,7 @@ class SCHEDULER(commands.Cog):
     async def test_loop():
         print("test")
 
-    @tasks.loop(minutes=10.0)
+    @tasks.loop(hours=1.0)
     async def event_checker():
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
@@ -99,6 +103,9 @@ class SCHEDULER(commands.Cog):
                 (year_now, month_now, day_now),
             )
             data = c.fetchall()
+
+            for event in data:
+                pass
 
 
 def setup(client):
