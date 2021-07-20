@@ -64,4 +64,4 @@ TRACKED_CHANNELS = CHANNEL_TRACKER()
 
 
 # Version number
-VERSION = "v1.14.14"
+VERSION = "v1.14.15"

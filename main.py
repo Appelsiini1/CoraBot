@@ -25,6 +25,7 @@ from modules import pop
 from modules import nitro
 from modules import dice_comm
 from modules import auction
+from modules import saimaa
 
 logging.basicConfig(
     filename="Coralog.txt",
@@ -153,6 +154,8 @@ async def on_message(message):
         await dice_comm.dice_comm(message)
     elif cmd == "status":
         await message.channel.send("418 I'm a teapot")
+    elif cmd == "saimaa":
+        await saimaa.saimaa(message)
     elif cmd == "test":
         await message.add_reaction("\N{white heavy check mark}")
     else:
