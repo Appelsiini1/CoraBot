@@ -160,32 +160,13 @@ class Vote(commands.Cog):
                     vote_str += f"{vote};"
 
                 remainingVotes = maxvoteint - totalVotes
-                c.execute("SELECT Vote_ID FROM RolePolls_Votes ORDER BY Vote_ID DESC")
-                db_id = c.fetchone()
-                maxid = 1 if db_id == None else db_id[0]
-
                 timestamp = datetime.datetime.today().strftime("%d.%m.%Y %H:%M %Z%z")
 
-                success = 0
-                for i in range(5):
-                    try:
-                        c.execute(
-                            "INSERT INTO RolePolls_Votes VALUES (?,?,?,?,?)",
-                            (maxid + 1, poll_id, ctx.author.id, vote_str, timestamp),
-                        )
-                        success = 1
-                        break
-                    except sqlite3.IntegrityError:
-                        maxid += 1
-                        continue
-                if success != 1:
-                    await self.voteErrorHandler(
-                        ctx.message, dm_channel, 7
-                    )  # unable to record the vote to database
-                    logging.error(
-                        "Sqlite IntegrityError during voting. Vote recording was not succesful after 5 attempts."
-                    )
-                    return
+                c.execute(
+                    "INSERT INTO RolePolls_Votes VALUES (?,?,?,?,?)",
+                    (None, poll_id, ctx.author.id, vote_str, timestamp),
+                )
+
                 conn.commit()
                 pollOptions = poll[0][4][:-1].split(";")
                 txt = ""

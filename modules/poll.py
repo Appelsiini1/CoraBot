@@ -176,7 +176,7 @@ class Polls(commands.Cog):
                 c.execute(
                     "INSERT INTO BasicPolls VALUES (?,?,?,?,?,?)",
                     (
-                        msg.id,
+                        None,
                         message.channel.id,
                         message.guild.id,
                         message.author.id,

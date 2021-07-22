@@ -5,12 +5,13 @@ import sqlite3
 
 with sqlite3.connect("Databases/database.db") as conn:
     c = conn.cursor()
-    c.execute(
-        """ALTER TABLE RolePolls_Votes
-        ADD COLUMN Timestamp TEXT;"""
-        )
-    c.execute(
-        """ALTER TABLE RolePolls
-        ADD COLUMN Timestamp TEXT;"""
-        )
+    # c.execute(
+    #     """ALTER TABLE RolePolls_Votes
+    #     ADD COLUMN Timestamp TEXT;"""
+    #     )
+    # c.execute(
+    #     """ALTER TABLE RolePolls
+    #     ADD COLUMN Timestamp TEXT;"""
+    #     )
+    c.execute("DROP TABLE RolePolls_Votes")
     conn.commit()

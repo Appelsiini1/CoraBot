@@ -111,56 +111,31 @@ async def trackNitro(message):
         previousBoosts = c.fetchone()
         # print(previousBoosts)
         if previousBoosts == None:
-            c.execute("SELECT Boost_ID FROM NitroBoosts ORDER BY Boost_ID DESC")
-            lastID = c.fetchone()
-            newID = 0
-            newID += (lastID[0] + 1) if lastID[0] != None else 1
-
             # Boost_ID INT UNIQUE,
             # User_ID INT,
             # Guild_ID INT,
             # Boost_Time TEXT,
             # LatestBoost TEXT,
             # Boosts INT,
-            success = 0
-            for i in range(10):
-                try:
-                    c.execute(
-                        "INSERT INTO NitroBoosts VALUES (?,?,?,?,?,?)",
-                        (newID, booster_id, guild_id, time, time, boostAmount),
-                    )
-                    success = 1
-                    break
-                except sqlite3.IntegrityError:
-                    newID += 1
+            c.execute(
+                "INSERT INTO NitroBoosts VALUES (?,?,?,?,?,?)",
+                (None, booster_id, guild_id, time, time, boostAmount),
+            )
 
-            if success != 1:
-                logging.error("Could not add boost to database.")
-                logging.error(
-                    f"Boost amount: {boostAmount}, ID: {newID}, time {time}, lastID: {lastID}, success {success}, guild: {message.guild.name}, person: {message.author.name}, i: {i}"
-                )
+            emb = constructEmbed(message, boostAmount)
+            try:
+                conn.commit()
+                await message.channel.send(embed=emb)
+            except discord.errors.Forbidden:
+                logging.error("Unable to send message due to 403 - Forbidden")
+                emb.clear_fields()
+                emb.description = f"Unable to send boost announcement to system message channel in '{message.guild.name}'. Please make sure I have the proper rights to post messages to that channel."
+                emb.color = get_hex_colour(error=True)
                 dm_channel = message.guild.owner.dm_channel
                 if dm_channel == None:
                     dm_channel = await message.guild.owner.create_dm()
-                emb.title = f"There was an error adding a boost by '{message.author.display_name}' in '{message.guild.name}'. Please add this boost manually."
-                emb.color = get_hex_colour(error=True)
                 await dm_channel.send(embed=emb)
                 return
-            else:
-                emb = constructEmbed(message, boostAmount)
-                try:
-                    await message.channel.send(embed=emb)
-                    conn.commit()
-                except discord.errors.Forbidden:
-                    logging.error("Unable to send message due to 403 - Forbidden")
-                    emb.clear_fields()
-                    emb.description = f"Unable to send boost announcement to system message channel in '{message.guild.name}'. Please make sure I have the proper rights to post messages to that channel."
-                    emb.color = get_hex_colour(error=True)
-                    dm_channel = message.guild.owner.dm_channel
-                    if dm_channel == None:
-                        dm_channel = await message.guild.owner.create_dm()
-                    await dm_channel.send(embed=emb)
-                    return
 
         else:
             c.execute(
@@ -387,45 +362,25 @@ class Nitro(commands.Cog):
             )
             previousBoosts = c.fetchone()
             if previousBoosts == None:
-                c.execute("SELECT Boost_ID FROM NitroBoosts ORDER BY Boost_ID DESC")
-                lastID = c.fetchone()
-                newID = 0
-                newID = lastID[0] + 1 if lastID != None else 1
-
                 # Boost_ID INT UNIQUE, 0
                 # User_ID INT, 1
                 # Guild_ID INT, 2
                 # Boost_Time TEXT, 3
                 # LatestBoost TEXT, 4
                 # Boosts INT, 5
-                success = 0
-                for i in range(10):
-                    try:
-                        c.execute(
-                            "INSERT INTO NitroBoosts VALUES (?,?,?,?,?,?)",
-                            (
-                                newID,
-                                user.id,
-                                guild_id,
-                                boostTime.strftime("%d.%m.%Y"),
-                                boostTime.strftime("%d.%m.%Y"),
-                                boostAmount,
-                            ),
-                        )
-                        success = 1
-                        break
-                    except sqlite3.IntegrityError:
-                        newID += 1
-                        logging.warning(
-                            f"Insertion to database failed, new boost ID is {newID}"
-                        )
 
-                if success != 1:
-                    logging.error("Could not add boost to database.")
-                    emb.title = f"There was a database error adding a boost by '{user.display_name}'. Please try again later."
-                    emb.color = get_hex_colour(error=True)
-                    await message.channel.send(embed=emb)
-                    return
+                c.execute(
+                    "INSERT INTO NitroBoosts VALUES (?,?,?,?,?,?)",
+                    (
+                        None,
+                        user.id,
+                        guild_id,
+                        boostTime.strftime("%d.%m.%Y"),
+                        boostTime.strftime("%d.%m.%Y"),
+                        boostAmount,
+                    ),
+                )
+
                 emb.description = f"Added {boostAmount} boost(s) by {user.display_name} into database."
                 emb.color = get_hex_colour(cora_eye=True)
                 conn.commit()

@@ -80,50 +80,46 @@ def initializeDatabase():
         # BasicPolls Table
         c.execute(
             """CREATE TABLE IF NOT EXISTS BasicPolls(
-            Poll_ID INT UNIQUE,
+            Poll_ID INTEGER PRIMARY KEY UNIQUE,
             Ch_ID INT,  
             Guild_ID INT,
             Author_ID INT,
             Emojis TEXT,
-            PollName TEXT,
-            PRIMARY KEY (Poll_ID)
+            PollName TEXT
         );"""
         )
 
         # RolePolls Table
         c.execute(
             """CREATE TABLE IF NOT EXISTS RolePolls(
-            Poll_ID INT UNIQUE,
+            Poll_ID INTEGER UNIQUE PRIMARY KEY,
             Ch_ID INT,
             Guild_ID INT,
             Author_ID INT,
             Options TEXT,
             PollName TEXT,
-            Timestamp TEXT,
-            PRIMARY KEY (Poll_ID)
+            Timestamp TEXT
         );"""
         )
 
         # MaxVotes
         c.execute(
             """CREATE TABLE IF NOT EXISTS RolesMaxVotes(
-            Role_ID INT UNIQUE,
+            Role_ID INTEGER UNIQUE PRIMARY KEY,
             Role_name TEXT,
             Guild_ID INT,
-            MaxVotes INT,
-            PRIMARY KEY (Role_ID)
+            MaxVotes INT
         );"""
         )
 
         # Votes for RolePolls Table
         c.execute(
             """CREATE TABLE IF NOT EXISTS RolePolls_Votes(
-            Vote_ID INT UNIQUE,
+            Vote_ID INTEGER UNIQUE PRIMARY KEY,
             Poll_ID INT,
             Voter_ID INT,
             Votes TXT,
             Timestamp TEXT,
-            PRIMARY KEY (Vote_ID)
             FOREIGN KEY (Poll_ID) REFERENCES RolePolls(Poll_ID)
                 ON DELETE CASCADE
         );"""
@@ -132,22 +128,20 @@ def initializeDatabase():
         # Nitro boosts
         c.execute(
             """CREATE TABLE IF NOT EXISTS NitroBoosts(
-            Boost_ID INT UNIQUE,
+            Boost_ID INTEGER UNIQUE PRIMARY KEY,
             User_ID INT,
             Guild_ID INT,
             Boost_Time TEXT,
             LatestBoost TEXT,
-            Boosts INT,
-            PRIMARY KEY (Boost_ID)
+            Boosts INT
         );"""
         )
 
         # Servers to track Nitro
         c.execute(
             """CREATE TABLE IF NOT EXISTS NitroTrack(
-            Guild_ID INT,
-            Track_YN INT,
-            PRIMARY KEY (Guild_ID)
+            Guild_ID INTEGER PRIMARY KEY,
+            Track_YN INT
         );"""
         )
 
@@ -164,28 +158,26 @@ def initializeDatabase():
         # Quote table
         c.execute(
             """CREATE TABLE IF NOT EXISTS Quotes(
-            Quote_ID INT UNIQUE,
+            Quote_ID INTEGER UNIQUE PRIMARY KEY,
             User_ID INT,
             Channel_ID INT,
             Guild_ID INT,
-            Quote_text TEXT,
-            PRIMARY KEY (Quote_ID)
+            Quote_text TEXT
         );"""
         )
 
         # ID table
         c.execute(
             """CREATE TABLE IF NOT EXISTS IDs(
-            ID INT,
-            Type TEXT,
-            PRIMARY KEY (ID)
+            ID INTEGER PRIMARY KEY,
+            Type TEXT
         );"""
         )
 
         # Current auctions
         c.execute(
             """CREATE TABLE IF NOT EXISTS Auctions(
-            Auction_ID INT UNIQUE,
+            Auction_ID INTEGER UNIQUE PRIMARY KEY,
             Channel_ID INT,
             Guild_ID INT,
             Author_ID INT,
@@ -195,19 +187,17 @@ def initializeDatabase():
             Min_increase INT,
             Autobuy INT,
             Start_time TEXT,
-            End_time TEXT,
-            PRIMARY KEY (Auction_ID)
+            End_time TEXT
         );"""
         )
 
         # Auction bids
         c.execute(
             """CREATE TABLE IF NOT EXISTS Bids(
-            Bid_ID INT UNIQUE,
+            Bid_ID INTEGER UNIQUE PRIMARY KEY,
             Auction_ID INT,
             Slot TEXT,
             Value INT,
-            PRIMARY KEY (Bid_ID)
             FOREIGN KEY (Auction_ID) REFERENCES Auctions(Auction_ID)
                 ON DELETE CASCADE
         );"""
@@ -216,7 +206,7 @@ def initializeDatabase():
         # Scheduled events
         c.execute(
             """CREATE TABLE IF NOT EXISTS Scheduler(
-            Event_ID INT,
+            Event_ID INTEGER UNIQUE PRIMARY KEY,
             Event_type TEXT,
             Event_name TEXT,
             Event_info TEXT,
@@ -226,8 +216,7 @@ def initializeDatabase():
             Day INT,
             Hour INT,
             Minute INT,
-            Second INT,
-            PRIMARY KEY (Event_ID)
+            Second INT
         );"""
         )
 

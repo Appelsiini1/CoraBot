@@ -127,46 +127,24 @@ class Auction(commands.Cog):
                     "INSERT INTO Tracked VALUES (?,?,?)",
                     (ctx.channel.id, ctx.guild.id, 2),
                 )
-                c.execute("SELECT * FROM Auctions")
-                lastID = c.fetchone()
-                newID = 0
-                newID += 1 if lastID != None else 1
 
-                for i in range(5):
-                    try:
-                        c.execute(
-                            "INSERT INTO Auctions VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                            (
-                                newID,
-                                ctx.channel.id,
-                                ctx.guild.id,
-                                ctx.author.id,
-                                slots,
-                                currency,
-                                start_bid,
-                                min_inc,
-                                autobuy,
-                                start_time,
-                                end_time,
-                            ),
-                        )
-                        success = 1
-                        break
-                    except sqlite3.IntegrityError:
-                        newID += 1
-
-                if success != 1:
-                    logging.error("Could not add auction to database.")
-                    dm_channel = ctx.guild.owner.dm_channel
-                    if dm_channel == None:
-                        dm_channel = await ctx.guild.owner.create_dm()
-                    emb.title = f"There was a database error adding the auction to database. Please contact the developer."
-                    emb.color = get_hex_colour(error=True)
-                    await dm_channel.send(embed=emb)
-                    await ctx.message.add_reaction("\N{no entry}")
-                    return
-                else:
-                    pass
+                c.execute(
+                    "INSERT INTO Auctions VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                    (
+                        None,
+                        ctx.channel.id,
+                        ctx.guild.id,
+                        ctx.author.id,
+                        slots,
+                        currency,
+                        start_bid,
+                        min_inc,
+                        autobuy,
+                        start_time,
+                        end_time,
+                    ),
+                )
+                conn.commit()
 
     async def startAuction(self):
         pass

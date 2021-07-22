@@ -42,36 +42,23 @@ def addEvent(ctx, eventType, eventTime, eventName, eventInfo):
         hour = eventTime.strftime("%H")
         minute = eventTime.strftime("%M")
         second = eventTime.strftime("%S")
-        c.execute("SELECT * FROM IDs")
-        lastID = c.fetchone()
-        newID = 0
-        newID += 1 if lastID != None else 100
-        success = 0
 
-        for i in range(0, 10):
-            try:
-                c.execute("INSERT INTO IDs (?,?)", (newID, eventType))
-                c.execute(
-                    "INSERT INTO Scheduler (?,?,?,?,?,?,?,?,?,?,?)",
-                    (
-                        newID,
-                        eventType,
-                        eventName,
-                        eventTime,
-                        eventInfo,
-                        year,
-                        month,
-                        day,
-                        hour,
-                        minute,
-                        second,
-                    ),
-                )
-            except sqlite3.IntegrityError:
-                newID += 1
-
-        if success != 0:
-            logging.error("Could not add scheduled event to database.")
+        c.execute(
+            "INSERT INTO Scheduler (?,?,?,?,?,?,?,?,?,?,?)",
+            (
+                None,
+                eventType,
+                eventName,
+                eventTime,
+                eventInfo,
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+            ),
+        )
 
         conn.commit()
 

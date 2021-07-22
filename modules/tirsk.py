@@ -28,31 +28,18 @@ async def tirskAdd(message, c):
         old = c.fetchone()
         Quote_ID = old[0] + 1 if old != None else 1
         success = 0
-        for i in range(10):
-            try:
-                c.execute(
-                    "INSERT INTO Quotes VALUES (?,?,?,?,?)",
-                    (
-                        Quote_ID,
-                        auth,
-                        message.channel.id,
-                        message.guild.id,
-                        message.content,
-                    ),
-                )
-                success = 1
-                break
-            except sqlite3.IntegrityError:
-                Quote_ID += 1
-                logging.warning(
-                    f"Insertion to database failed, new quote ID is {Quote_ID}"
-                )
+        c.execute(
+            "INSERT INTO Quotes VALUES (?,?,?,?,?)",
+            (
+                None,
+                auth,
+                message.channel.id,
+                message.guild.id,
+                message.content,
+            ),
+        )
+        await message.add_reaction("\N{white heavy check mark}")
 
-        if success == 0:
-            logging.error("Could not add quote to database due to database error.")
-            await message.add_reaction("\N{no entry}")
-        else:
-            await message.add_reaction("\N{white heavy check mark}")
     elif len(mentions) >= 2:
         # pos = msg.content.rfind("<")
         # user_id = msg.content[pos:].strip()[3:][:-1]
@@ -94,6 +81,12 @@ async def tirskAdd(message, c):
             await message.add_reaction("\N{no entry}")
             logging.error("Could not make an RE match when parsing quote.")
             logging.info(f"Message content: '{message.content}'")
+
+
+async def tirskTrack(message):
+    with sqlite3.connect(DB_F) as conn:
+        c = conn.cursor()
+        await tirskAdd(message, c)
 
 
 class Tirsk(commands.Cog):
@@ -182,11 +175,6 @@ class Tirsk(commands.Cog):
             emb.description = "Old quotes were counted. All messages with green check marks have been added to database. The ones that did not conform to the spesifications were ignored.\n\
             You can see the scoreboard by typing `!c tirsk score`"
             await msgID.edit(embed=emb)
-
-    async def tirskTrack(self, message):
-        with sqlite3.connect(DB_F) as conn:
-            c = conn.cursor()
-            await tirskAdd(message, c)
 
     async def setTracking(self, message):
         # Command structure
