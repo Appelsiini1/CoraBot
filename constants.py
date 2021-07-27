@@ -3,7 +3,7 @@ import logging
 from sys import exit
 import sqlite3
 from discord import Intents, Game
-from discord.ext import commands
+from modules import random_api
 
 
 def get_tokens():
@@ -30,6 +30,7 @@ TOKENS = get_tokens()
 DISCORD_TOKEN = TOKENS[0].lstrip("TOKEN").strip()[1:]
 TWIT_API_KEY = TOKENS[1].lstrip("API_KEY").strip()[1:]
 TWIT_API_SECRET = TOKENS[2].lstrip("API_SECRET").strip()[1:]
+RANDOM_API_KEY = TOKENS[4].lstrip("RANDOM_API_KEY").strip()[1:]
 
 
 class CHANNEL_TRACKER:
@@ -67,6 +68,8 @@ class CHANNEL_TRACKER:
 # Keeps track of channels that need to be tracked
 TRACKED_CHANNELS = CHANNEL_TRACKER()
 
+# Random API Request limits
+REQUEST_LIMITS = random_api.requestLimits()
 
 # Version number
-VERSION = "v2.0.0 BETA 5"
+VERSION = "v2.0.0 BETA 6"
