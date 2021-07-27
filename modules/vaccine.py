@@ -147,6 +147,8 @@ class Vaccine(commands.Cog):
             msg2 = f"PARAM = {param}"
             logging.error(msg2)
             logging.error(response.content)
+            logging.error(response2.content)
+            logging.error(response3.content)
             return msg, msg2
 
     def makeEmbed(self, one_dose, two_doses, emb, pop_data, areaCode="Finland"):
