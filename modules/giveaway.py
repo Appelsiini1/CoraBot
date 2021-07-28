@@ -1,7 +1,7 @@
 import discord
-import random
 from discord.ext import commands
 from modules.common import get_hex_colour
+from modules.random_api import randInt
 
 EMOJI = "\N{PARTY POPPER}"
 
@@ -44,7 +44,7 @@ class Giveaway(commands.Cog):
             )
             react = await ctx.channel.fetch_message(args)
             list_user = await react.reactions[0].users().flatten()
-            random_n = random.randint(0, len(list_user) - 1)
+            random_n = randInt(1, 0, len(list_user) - 1, ctx.message.id)
             if len(list_user) == 1:
                 await ctx.send("No entries to the giveaway :(")
                 return
@@ -54,7 +54,7 @@ class Giveaway(commands.Cog):
                 if winner_id != client_id:
                     break
                 if winner_id == client_id:
-                    random_n = random.randint(0, len(list_user) - 1)
+                    random_n = randInt(1, 0, len(list_user) - 1, ctx.message.id)
             mention_str = "<@" + str(winner_id) + ">"
             w_msg = (
                 "**Gongratulations "
