@@ -16,6 +16,6 @@ class RequestLimitReached(Exception):
         message -- explanation of the error
     """
 
-    def __init__(self, message):
-        self.message = message
+    def __init__(self):
+        self.message = "Request limit has been reached for the day, please contact the developer."
         super().__init__(self.message)
