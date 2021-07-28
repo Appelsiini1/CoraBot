@@ -10,6 +10,7 @@ from time import sleep
 from modules.common import get_hex_colour
 from constants import DB_F
 from discord.ext import commands
+from modules.random_api import randInt
 
 EMOJI = "\N{PARTY POPPER}"
 EMOJI2 = "\N{CONFETTI BALL}"
@@ -751,7 +752,7 @@ class Nitro(commands.Cog):
                     else:
                         for i in range(b[5]):
                             userPool.append(b[1])
-            winnerIndex = random.randint(0, len(userPool) - 1)
+            winnerIndex = randInt(1, 0, len(userPool) - 1, message.id)[0]
             winner_id = userPool[winnerIndex]
 
         member = message.guild.get_member(winner_id)
