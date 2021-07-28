@@ -3,6 +3,7 @@ from constants import *
 import sqlite3
 from pytz import utc
 from datetime import datetime, time, timedelta
+from discord.ext import commands
 
 TEN_MINUTES = time(0, 10, 0, 0)
 ONE_MINUTE = time(0, 1, 0, 0)
@@ -13,15 +14,15 @@ class EVENT_CHECKER(commands.Cog):
         self.bot = bot
 
     @tasks.loop(minutes=10)
-    async def less_than_hour():
+    async def less_than_hour(self,):
         pass
 
     @tasks.loop(minutes=1)
-    async def less_than_ten():
+    async def less_than_ten(self,):
         pass
 
     @tasks.loop(seconds=10)
-    async def less_than_one():
+    async def less_than_one(self,):
         pass
 
 
@@ -74,11 +75,11 @@ class SCHEDULER(commands.Cog):
         self.bot = bot
 
     @tasks.loop(seconds=5.0, count=3)
-    async def test_loop():
+    async def test_loop(self,):
         print("test")
 
     @tasks.loop(hours=1.0)
-    async def event_checker():
+    async def event_checker(self):
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
             current_time = datetime.today()
