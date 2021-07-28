@@ -35,7 +35,7 @@ def makeRequest(n: int, min: int, max: int, id=42):
         try:
             error_msg = json_response["error"]
             logging.error(f"Random.org API Error: {error_msg}")
-            raise RandomOrgAPIError
+            raise RandomOrgAPIError(error_msg)
         except KeyError:
             pass
         result = json_response["result"]["random"]["data"]
@@ -46,14 +46,14 @@ def makeRequest(n: int, min: int, max: int, id=42):
 
 
 def randInt(n: int, min: int, max: int, id=42):
+    """Get n random integers between min and max. Includes both endpoints.
+    n cannot be 0 or negative.
+    Always returns a list."""
+
+    if n <= 0:
+        raise ValueError
     REQUEST_LIMITS.checkLimits()
     REQUEST_LIMITS.checkDelay()
     result = makeRequest(n, min, max, id)
-
+    
     return result
-
-
-async def test(msg):
-    rInt = randInt(1, 1, 69, msg.id)
-
-    await msg.channel.send(f"{rInt[0]}")
