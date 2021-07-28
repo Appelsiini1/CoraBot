@@ -1,9 +1,13 @@
 import os
 import logging
-from sys import exit
 import sqlite3
+
+from sys import exit
 from discord import Intents, Game
-from modules import random_api
+from requests import post
+from modules.custom_errors import RandomOrgAPIError, RequestLimitReached
+from datetime import datetime
+from time import sleep
 
 
 def get_tokens():
@@ -65,11 +69,70 @@ class CHANNEL_TRACKER:
             return channels, types
 
 
+USAGE_QUERY = {
+    "jsonrpc": "2.0",
+    "method": "getUsage",
+    "params": {"apiKey": RANDOM_API_KEY},
+    "id": 42,
+}
+
+R_API = "https://api.random.org/json-rpc/4/invoke"
+
+
+class requestLimits:
+    def __init__(self):
+        self.bitsLeft = 0
+        self.requestsLeft = 0
+        self.advisoryDelay = 0
+        self.lastRequest = datetime.today()
+        self.updateLimits()
+
+    def updateLimits(self):
+        response = post(
+            R_API,
+            headers={"User-Agent": "Appelsiini1's Discord Bot"},
+            json=USAGE_QUERY,
+        )
+
+        if response.status_code != 200:
+            logging.error(
+                f"Random.org API returned status code {response.status_code}.\nFull response: {response.json()}"
+            )
+        else:
+            json_response = response.json()
+            try:
+                error_msg = json_response["error"]
+                logging.error(f"Random.org API Error: {error_msg}")
+                raise RandomOrgAPIError
+            except KeyError:
+                pass
+            result = json_response["result"]
+            bitsLeft = result["bitsLeft"]
+            requestsLeft = result["requestsLeft"]
+            self.bitsLeft = bitsLeft
+            self.requestsLeft = requestsLeft
+
+    def checkDelay(self):
+        now = datetime.today()
+        difference = now - self.lastRequest
+        if difference.seconds > self.advisoryDelay:
+            sleep(abs(int(difference.seconds)))
+
+    def checkLimits(self):
+        # Raise error if limit is reached
+        if self.bitsLeft <= 15 or self.requestsLeft == 0:
+            raise RequestLimitReached
+
+    def resetLimits(self):
+        self.requestsLeft = 1000
+        self.bitsLeft = 250000
+
+
 # Keeps track of channels that need to be tracked
 TRACKED_CHANNELS = CHANNEL_TRACKER()
 
 # Random API Request limits
-REQUEST_LIMITS = random_api.requestLimits()
+REQUEST_LIMITS = requestLimits()
 
 # Version number
 VERSION = "v2.0.0 BETA 6"
