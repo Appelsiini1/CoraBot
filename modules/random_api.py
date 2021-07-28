@@ -100,9 +100,6 @@ def makeRequest(n: int, min: int, max: int, id=42):
     "id": id
     }
 
-    REQUEST_LIMITS.checkLimits()
-    REQUEST_LIMITS.checkDelay()
-
     response = requests.post(
     R_API,
     headers={"User-Agent": "Appelsiini1's Discord Bot"},
@@ -124,3 +121,17 @@ def makeRequest(n: int, min: int, max: int, id=42):
         REQUEST_LIMITS.lastRequest = datetime.today()
 
         return result
+
+
+def randInt(n: int, min: int, max: int, id=42):
+    REQUEST_LIMITS.checkLimits()
+    REQUEST_LIMITS.checkDelay()
+    result = makeRequest(n, min, max, id)
+
+    return result
+
+
+async def test(msg):
+    rInt = randInt(1, 1, 69, msg.id)
+
+    await msg.channel.send(f"{rInt[0]}")
