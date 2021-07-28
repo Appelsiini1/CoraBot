@@ -103,7 +103,7 @@ class requestLimits:
             try:
                 error_msg = json_response["error"]
                 logging.error(f"Random.org API Error: {error_msg}")
-                raise RandomOrgAPIError
+                raise RandomOrgAPIError(error_msg)
             except KeyError:
                 pass
             result = json_response["result"]
@@ -115,7 +115,7 @@ class requestLimits:
     def checkDelay(self):
         now = datetime.today()
         difference = now - self.lastRequest
-        if difference.seconds > self.advisoryDelay:
+        if difference.seconds < self.advisoryDelay:
             sleep(abs(int(difference.seconds)))
 
     def checkLimits(self):
@@ -135,4 +135,4 @@ TRACKED_CHANNELS = CHANNEL_TRACKER()
 REQUEST_LIMITS = requestLimits()
 
 # Version number
-VERSION = "v2.0.0 BETA 6"
+VERSION = "v2.0.0 BETA 8"
