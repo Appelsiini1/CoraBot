@@ -1,4 +1,3 @@
-import random
 import re
 import discord
 import logging
