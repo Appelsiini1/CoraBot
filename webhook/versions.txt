@@ -1,3 +1,14 @@
+v2.0.0
+Version 2.0.0 brings a major rework to CoraBot.
+- Refactor codebase to use discord.ext.commands framework
+- Add scheduling framework
+- Add auction commands
+- Rework how IDs are autoincremented in the database
+- Add support for Random.org's API to use true randomness
+- Nitro spin and giveaway now uses true randomness in winner selection
+- Vaccine command now shows percentage of the population
+- 
+###
 v1.14.13
 - Fix nitro boost tracking for the n+1th f*****g time
 ###
