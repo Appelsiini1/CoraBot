@@ -17,7 +17,7 @@ class Info(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message, *args):
-        if message.author == self.bot.user:
+        if message.author.bot == True:
             return
         elif message.type in [
             MessageType.premium_guild_subscription,
