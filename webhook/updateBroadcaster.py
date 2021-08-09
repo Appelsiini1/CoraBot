@@ -37,6 +37,8 @@ def main():
     for i, url in enumerate(urls):
         if url.strip() == "":
             continue
+        if url.startswith("##"):
+            continue
         result = requests.post(url.strip(), json=data)
 
         try:
