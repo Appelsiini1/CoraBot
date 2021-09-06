@@ -10,20 +10,20 @@ def main():
         datefmt="%d/%m/%Y %H:%M:%S",
     )
 
-    with open("urls.txt", "r") as f:
-        urls = f.readlines()
+    with open("urls.txt", "r") as file:
+        urls = file.readlines()
 
-    with open("versions.txt", "r") as f:
-        txtFromFile = f.readline()
+    with open("versions.txt", "r") as file:
+        txtFromFile = file.readline()
         if txtFromFile.startswith("v"):
             title = f"New version of CoraBot is live!"
             version = txtFromFile
-            txtFromFile = f.readline()
+            txtFromFile = file.readline()
 
         text = f"**{version}**\n"
         while txtFromFile.strip() != "###":
             text += txtFromFile
-            txtFromFile = f.readline()
+            txtFromFile = file.readline()
 
     # for all params, see https://discordapp.com/developers/docs/resources/webhook#execute-webhook
     data = {
