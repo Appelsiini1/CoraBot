@@ -6,7 +6,7 @@ import datetime
 import os
 from time import sleep
 
-from modules.common import get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour
 from constants import DB_F
 from discord.ext import commands
 from modules.random_api import randInt
@@ -565,6 +565,80 @@ class Nitro(commands.Cog):
             "Help message for Nitro commands has been sent via a private message."
         )
 
+    # boost listing
+    async def listNitro(self, message):
+        guildID = message.guild.id
+        time = datetime.datetime.now().strftime("%d.%m.%Y at %H:%M")
+        emb = discord.Embed()
+        emb.description = "_Compiling data, this could take a while._"
+        emb.color = get_hex_colour(cora_blonde=True)
+        msg = await message.channel.send(embed=emb)
+        await message.channel.trigger_typing()
+
+        with sqlite3.connect(DB_F) as conn:
+            c = conn.cursor()
+            c.execute(
+                f"SELECT * FROM NitroBoosts WHERE Guild_ID={guildID}",
+            )
+            boosts = c.fetchall()
+            if len(boosts) == 0:
+                emb.description = ""
+                emb.title = "No boosts on record to export."
+                emb.color = get_hex_colour(error=True)
+                await msg.edit(embed=emb)
+            else:
+                # Boost_ID INT UNIQUE, 0
+                # User_ID INT, 1
+                # Guild_ID INT, 2
+                # Boost_Time TEXT, 3
+                # LatestBoost TEXT, 4
+                # Boosts INT 5
+                btext = ""
+                texts = []
+
+                for b in boosts:
+                    user = message.guild.get_member(b[1])
+                    if user == None:
+                        message.guild.fetch_member(b[1])
+                        if user == None:
+                            user = b[1]
+                        else:
+                            user = user.display_name
+                    else:
+                        user = user.display_name
+                    btext += f"{user} |{b[5]}|{b[3]}\n"
+                    if len(btext) >= 4048:
+                        texts.append(btext)
+                        btext = ""
+                
+                title = f"Nitro boosters in {message.guild.name}"
+                emb2 = discord.Embed()
+                emb2.color = get_hex_colour(cora_blonde=True)
+                texts_len = len(texts)
+                for i, t in enumerate(texts, start=1):
+                    if i == 1:
+                        emb2.title = title
+                        emb2.description = t
+                        try:
+                            await msg.edit(embed=emb)
+                        except discord.Forbidden:
+                            forbiddenErrorHandler(message)
+                            return
+                        continue
+                    elif i == 2:
+                        emb2.title = ""
+                    emb2.description = t
+                    if i == texts_len:
+                        emb2.set_footer(text=f"Data fetched: {time}")
+                    try:
+                        await message.channel.send(embed=emb2)
+                    except discord.Forbidden:
+                        forbiddenErrorHandler(message)
+                        return
+
+
+
+
     # boost export
     async def exportNitro(self, message):
         guildID = message.guild.id
@@ -798,6 +872,8 @@ class Nitro(commands.Cog):
                 await self.checkNitro(ctx.message)
             elif arg2 == "spin":
                 await self.nitroSpin(ctx.message)
+            elif arg2 == "list":
+                await self.listNitro(ctx.message)
             else:
                 await ctx.send(
                     "Unknown argument. Use `!c nitro help` for correct syntax."

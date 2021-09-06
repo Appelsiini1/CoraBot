@@ -76,7 +76,7 @@ class Info(commands.Cog):
 `poll [set|del]roles`
 `poll roles`
 `poll new -r`
-`nitro [help | add | del | export | start | stop | notice | check | spin]`
+`nitro [help | add | del | export | start | stop | notice | check | spin | list]`
     """
         emb = Embed(
             title="List of available commands:",
