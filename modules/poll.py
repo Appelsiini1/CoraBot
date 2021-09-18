@@ -8,6 +8,7 @@ import datetime
 from discord.ext import commands
 
 from modules.common import get_hex_colour, selectReactionEmoji
+from modules.command_help import pollHelp
 from modules.emoji_list import _EMOJIS
 from constants import DB_F
 
@@ -36,7 +37,7 @@ class Polls(commands.Cog):
             arg = ""
 
         if content == "help":
-            await self.sendHelp(ctx.message)
+            await pollHelp(ctx.message)
         elif content == "new" and arg != "-r":
             await self.startBasicPoll(ctx.message)
         elif content == "end":
@@ -57,55 +58,7 @@ class Polls(commands.Cog):
                 emb.color = get_hex_colour(error=True)
                 await ctx.send(embed=emb)
         else:
-            await self.sendHelp(ctx.message)
-
-    # Send help
-    async def sendHelp(self, message):
-        emb = discord.Embed()
-        emb.title = "How to use polls 1/2"
-        emb.color = get_hex_colour()
-        txt1 = "**Basic polls**_\n\
-    **Adding a new basic poll:**\n\
-    ```!c poll new [title]; [option1]; [option2]; ... [option20]```\n\
-    The command will select random emotes for reactions. You can leave the title empty, but in that case remember to put a `;` before the first option.\n\
-    Please note that the poll has a character limit of about ~1800 to ~1950 characters depending on how many options you have. Title is not counted into this amount.\n\
-    \n\
-    **Ending a poll:**\n\
-    ```!c poll end [Poll ID]```\n\
-    _NOTE!_ If you have multiple polls running (basic or advanced), you can end them all by leaving out the ID.\n\
-    The command will only end polls that have been iniated by you.\n"
-        txt2 = "_**Advanced polls**_\n\
-    Please note that advanced polls require administrator permissions to use.\
-    With advanced polls you can set different maximum vote amounts for different roles. Voting will be done via a command as opposed to reactions in the basic polls. You can end advanced polls the same command as basic polls.\n\
-    To add or edit roles in(to) the bot's database, use \n```!c poll setroles [role]:[voteamount],[role]:[voteamount], ...```\n\
-    You can add as many roles as you need. Input the role as a mention (`@role`) or a role ID if you don't want to mention the role (you can get a role ID by enabling Discord's Developer mode. Then go to `Server Settings` -> `Roles` and copy the ID by right clicking on the role and selecting `Copy ID`. To enable Developer mode, see https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).\n\
-    `voteamount` should be an integer.\n\
-    \n\
-    **Adding a new advanced poll:**\
-    ```!c poll new -r [title]; [option1]; [option2]; ... [option20]```\n\
-    Please note that the poll has a character limit of about ~1850 to ~1950 characters depending on how many options you have. Title is not counted into this amount.\n\
-    \n**For voting help, type:**\n\
-    ```!c vote help```\n\
-    \n\
-    **Editing or deleting roles from the database:**\n\
-    If you want to change how many votes a role has use:\n\
-    ```!c poll editrole [role]:[voteamount],[role]:[voteamount], ...```\n\
-    Note, that if you change anything in the role you do not need to add or edit the role in the bot's database unless you delete and create a new role in the server settings (i.e. you only need to re-add it if the ID of it changes).\
-    If you wish to delete a role, use\n\
-    ```!c poll delrole [role], [role], ...```\n\
-    where `role` is a role ID or a role mention.\n\
-    Note that you can also delete all roles with the keyword `all`, as in\n\
-    ```!c poll delrole all```"
-        dm_channel = message.author.dm_channel
-        if dm_channel == None:
-            dm_channel = await message.author.create_dm()
-
-        emb.description = txt1
-        await dm_channel.send(embed=emb)
-        emb.description = txt2
-        emb.title = "How to use polls 2/2"
-        await dm_channel.send(embed=emb)
-        await message.add_reaction("\N{white heavy check mark}")
+            await pollHelp(ctx.message)
 
     # Basic poll start
     async def startBasicPoll(self, message):

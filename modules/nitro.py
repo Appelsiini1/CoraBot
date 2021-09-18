@@ -7,6 +7,7 @@ import os
 from time import sleep
 
 from modules.common import forbiddenErrorHandler, get_hex_colour
+from modules.command_help import nitroHelp
 from constants import DB_F
 from discord.ext import commands
 from modules.random_api import randInt
@@ -506,65 +507,6 @@ class Nitro(commands.Cog):
                 conn.commit()
                 await message.channel.send(embed=emb)
 
-    # nitro help
-    async def nitroHelp(self, message):
-        emb = discord.Embed()
-        emb.title = "Nitro Tracking 1/2"
-        emb.color = get_hex_colour(cora_blonde=True)
-        txt = "**General info**\n\
-    This is the best implementation of nitro tracking that is possible within Discord limitations.\n\
-    It can track boost amounts, times, and boosters. HOWEVER, it **cannot** continuously check if the boosts are valid. Checks are made either \
-    automatically when `!c nitro spin` command is used or by using `!c nitro check` manually. These commands however can **only** see _overall_ Nitro status of the user.\n\
-    It cannot see wheter individual boosts have expired, only if all of them have. Please see these commands below for more info.\n\
-    **NOTE!!** All commands (besides help) below require administrator priviledges.\n\
-    \n**Enabling/Disabling nitro tracking on server**\n\
-    To enable nitro tracking on your server, use\n\
-    ```!c nitro start```\n\
-    To _ONLY_ show boost announcements but not track boosts, use\n\
-    ```!c nitro notice```\n\
-    To stop tracking or announcements, use\n\
-    ```!c nitro stop```\n\n\
-    **Adding boosts manually**\n\
-    If you have older boosts active on the server, or an error occured during tracking, you can add them manually to the bot's database by using\n\
-    ```!c nitro add [user], [amount], [date]```\n\
-    _Arguments:_\n\
-    `user`: Spesifies who the booster is. This can be a mention (@user) or a user ID as an integer.\n\
-    `amount`: The amount of boosts to add as an integer.\n\
-    `date`: The date of the boost(s). Date should be in format `DD.MM.YYYY`. This argument is optional. If it is not given, current date will be used.\
-    If the user is not in the database, this will be added to both the latest and first boost dates. Otherwise the date is compared to the dates\
-    already in the database and the bot will figure out which one to update."
-        txt2 = "**Deleting boosts from database**\n\
-    The bot will delete expired boosts from database automatically if `spin` or `check` command is used. However, if you wish to delete boost(s) manually,\n\
-    you can use this command:\n\
-    ```!c nitro del [@user or user ID], [amount or 'all']```\n\
-    **Exporting the boost database**\n\
-    This command can only be issued by server owners. This command compiles a CSV-file of all boosters currently in the database and sends it to you via a private message.\n\
-    _NOTE! You should take a regular backup of your servers nitro boost incase something goes wrong with the bots database._\n\
-    To use this command type\n\
-    ```!c nitro export```\n\
-    **Checking Nitro boost statuses**\n\
-    To check the validity of the nitro boosters in the database, use\n\
-    ```!c nitro check```\n\
-    _NOTE! As said before, this cannot check individual boost status, only wheter the user is still a nitro booster._\n\
-    **Nitro spins**\n\
-    The nitro spin command is basically a bot version of a spin wheel for nitro boosters. This command will pick a random person from the list of nitro boosters. In the default version\
-    will give more chances for users with more boosts. Meaning, if a user has three boosts, they have three total chances to win.\n\
-    If you want everyone to have an equal chance of winning regardless of how many boosts they have, add the `-e` flag to the end.\n\
-    ```!c nitro spin [-e]```"
-
-        dm_channel = message.author.dm_channel
-        if dm_channel == None:
-            dm_channel = await message.author.create_dm()
-
-        emb.description = txt
-        await dm_channel.send(embed=emb)
-        emb.title = "Nitro Tracking 2/2"
-        emb.description = txt2
-        await dm_channel.send(embed=emb)
-        await message.channel.send(
-            "Help message for Nitro commands has been sent via a private message."
-        )
-
     # boost listing
     async def listNitro(self, message):
         guildID = message.guild.id
@@ -635,9 +577,6 @@ class Nitro(commands.Cog):
                     except discord.Forbidden:
                         forbiddenErrorHandler(message)
                         return
-
-
-
 
     # boost export
     async def exportNitro(self, message):
@@ -859,7 +798,7 @@ class Nitro(commands.Cog):
             elif arg2 == "del":
                 await self.delNitro(ctx.message)
             elif arg2 == "help":
-                await self.nitroHelp(ctx.message)
+                await nitroHelp(ctx.message)
             elif arg2 == "export":
                 if ctx.author.id == ctx.guild.owner_id:
                     await self.exportNitro(ctx.message)
@@ -880,7 +819,7 @@ class Nitro(commands.Cog):
                 )
         else:
             if arg2 == "help":
-                await self.nitroHelp(ctx.message)
+                await nitroHelp(ctx.message)
             else:
                 emb = discord.Embed()
                 emb.description = "You do not have the permissions to use this."

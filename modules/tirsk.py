@@ -5,6 +5,7 @@ import time
 from discord.errors import Forbidden
 from discord.ext import commands
 from modules.common import forbiddenErrorHandler, get_hex_colour
+from modules.command_help import tirskHelp
 from constants import DB_F, TRACKED_CHANNELS
 import datetime
 import re
@@ -328,24 +329,6 @@ class Tirsk(commands.Cog):
                             "Unable to delete the local copy of quote export CSV."
                         )
 
-    async def tirskHelp(self, message):
-        txt = "Saatavilla olevat tirsk komennot:\n\
-    `count`  Laske vanhat lainaukset\n\
-    `start`  Aloita kanavan seuraaminen\n\
-    `stop`   Lopeta kanavan seuraaminen\n\
-    `export` Vie kaikki lainaukset tietokannasta\n\
-    `score`  Laske pistetaulu\n\
-    _Kaikki komennot vaativat 'administrator' oikeudet._"
-        emb = discord.Embed()
-        emb.title = "Tirsk."
-        emb.description = txt
-        emb.color = get_hex_colour()
-
-        try:
-            await message.channel.send(embed=emb)
-        except Forbidden:
-            await forbiddenErrorHandler(message)
-
     @commands.command(name="tirsk")
     async def tirskJunction(self, ctx):
         try:
@@ -374,7 +357,7 @@ class Tirsk(commands.Cog):
             elif arg2 == "count":
                 await self.countOldTirsk(ctx.message)
             elif arg2 == "help":
-                await self.tirskHelp(ctx.message)
+                await tirskHelp(ctx.message)
             else:
                 try:
                     await ctx.send(

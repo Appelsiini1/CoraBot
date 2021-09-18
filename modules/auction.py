@@ -6,6 +6,7 @@ from currency_symbols import CurrencySymbols
 from discord.ext import commands
 from modules.common import get_hex_colour, forbiddenErrorHandler
 from constants import DB_F, TRACKED_CHANNELS
+from modules.command_help import auction_help
 
 # from modules.scheduler import
 
@@ -178,6 +179,8 @@ class Auction(commands.Cog):
             await self.makeAuction(ctx, scheduler)
         elif cmd == "stop":
             await self.endAuction(ctx, scheduler)
+        elif cmd == "help":
+            await auction_help()
         else:
             emb = discord.Embed()
             emb.title = "Invalid argument. See `!c auction help` for correct syntax."
