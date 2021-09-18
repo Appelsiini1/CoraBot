@@ -46,9 +46,9 @@ def main():
         except requests.exceptions.HTTPError:
             logging.exception("Error occured while sending message:")
         else:
-            logging.info(
-                f"Payload {i} delivered successfully, code {result.status_code}."
-            )
+            s = f"Payload {i} delivered successfully, code {result.status_code}."
+            logging.info(s)
+            print(s)
 
 
 if __name__ == "__main__":
