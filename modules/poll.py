@@ -124,10 +124,13 @@ class Polls(commands.Cog):
             if title.strip() == "":
                 title = f"A poll by {message.author.name}"
                 titleStatus = 1
+            for i, option in enumerate(args):
+                    if option.strip().lstrip("[").rstrip("]") == "":
+                        del args[i]
 
             if len(args) <= 1 or message.content.find(";") == -1:
                 # help command
-                emb.description = "You gave less than 2 options or you are missing separators. For correct use of the command, use ```!c poll help```"
+                emb.description = "You gave less than 2 options or you are missing separators. For correct use of the command, use `!c poll help`"
                 emb.color = get_hex_colour(error=True)
                 await message.channel.send(embed=emb)
             elif len(args) <= 20:
@@ -147,17 +150,49 @@ class Polls(commands.Cog):
                     await message.channel.send(embed=emb)
                     return
 
+                emoji_str = ""
+                for i in emoji_list:
+                    emoji_str += str(i) + ","
+                arg_str = ""
+                for option in args:
+                    arg_str += option + ","
+                if titleStatus == 1:
+                    title = None
+
+                c.execute(
+                    "INSERT INTO BasicPolls VALUES (?,?,?,?,?,?,?,?)",
+                    (
+                        None,
+                        message.channel.id,
+                        message.guild.id,
+                        message.author.id,
+                        emoji_str,
+                        arg_str,
+                        title,
+                        0,
+                    ),
+                )
+                conn.commit()
+                c.execute(f"SELECT Poll_ID FROM BasicPolls WHERE PollOptions='{arg_str}'")
+                poll_id = c.fetchone()[0]
+                footer = "Poll ID: " + str(poll_id)
+                emb.set_footer(text=footer)
+                logging.info(
+                    "Added poll {} into BasicPolls database table.".format(poll_id)
+                )
+
                 emb.description = poll_txt
                 emb.color = get_hex_colour()
                 emb.title = title
                 msg = await message.channel.send(embed=emb)
-                footer = "Poll ID: " + str(msg.id)
-                emb.set_footer(text=footer)
 
                 await msg.edit(embed=emb)
                 for i in emoji_list:
                     emoji = _EMOJIS[i]
                     await msg.add_reaction(emoji)
+
+                c.execute(f"UPDATE BasicPolls SET MSG_ID={msg.id} WHERE Poll_ID={poll_id}")
+                conn.commit()
 
                 dm_channel = message.author.dm_channel
                 if dm_channel == None:
@@ -167,27 +202,7 @@ class Polls(commands.Cog):
                 )
                 txt2 = "```{}```".format(message.content)
 
-                emoji_str = ""
-                for i in emoji_list:
-                    emoji_str += str(i) + ","
-                if titleStatus == 1:
-                    title = None
-
-                c.execute(
-                    "INSERT INTO BasicPolls VALUES (?,?,?,?,?,?)",
-                    (
-                        None,
-                        message.channel.id,
-                        message.guild.id,
-                        message.author.id,
-                        emoji_str,
-                        title,
-                    ),
-                )
-                conn.commit()
-                logging.info(
-                    "Added poll {} into BasicPolls database table.".format(msg.id)
-                )
+                
                 await dm_channel.send(txt)
                 await dm_channel.send(txt2)
                 try:
@@ -212,35 +227,45 @@ class Polls(commands.Cog):
         # Guild_ID INT,   2
         # Author_ID INT,  3
         # Emojis TEXT,    4
-        # PollName TEXT,  5
-
-        msg = await message.channel.fetch_message(poll[0])
+        # PollOptions     5
+        # PollName TEXT,  6
+        # MSG_ID          7
+        
+        msg = await message.channel.fetch_message(poll[7])
         originalEmojis = poll[4][:-1].split(",")
-
+        options_split = poll[5][:-1].split(",")
+        
         emojis = []
+        emoji_lookup = {}
         for i in originalEmojis:
-            emojis.append(_EMOJIS[int(i)])
+            em = _EMOJIS[int(i)]
+            emojis.append(em)
+            emoji_lookup[em] = i
 
-        pollName = poll[5]
+        pollName = poll[6]
         results = {}
         for reaction in msg.reactions:
             if reaction.emoji in emojis:
                 results[reaction.emoji] = reaction.count
-
+        
+        results_str = {}
+        for i, emoji in enumerate(originalEmojis):
+            results_str[emoji] = options_split[i]
+        
         if pollName == None:
             emb.title = "Poll results:"
         else:
             emb.title = f"Results for '{pollName}'"
-
+        
         txt = ""
         for i, keypair in enumerate(
             sorted(results.items(), key=lambda x: x[1], reverse=True)
         ):
             if i == 0:
-                txt += f"{keypair[0]}** : _{keypair[1]-1}_**\n"
+                txt += f"{results_str[emoji_lookup[keypair[0]]]}** : _{keypair[1]-1}_**\n"
             else:
-                txt += f"{keypair[0]} : {keypair[1]-1}\n"
-
+                txt += f"{results_str[emoji_lookup[keypair[0]]]} : {keypair[1]-1}\n"
+        
         emb.description = txt
         return emb
 
@@ -605,6 +630,10 @@ class Polls(commands.Cog):
             if title.strip().lstrip("[").rstrip("]") == "":
                 title = f"A poll by {message.author.name}"
                 titleStatus = 1
+
+            for i, option in enumerate(args):
+                if option.strip().lstrip("[").rstrip("]") == "":
+                    del args[i]
 
             c.execute("SELECT ID FROM IDs WHERE Type='RolePoll' ORDER BY ID DESC")
             prevPollID = c.fetchone()

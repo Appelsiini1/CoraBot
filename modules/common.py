@@ -85,7 +85,9 @@ def initializeDatabase():
             Guild_ID INT,
             Author_ID INT,
             Emojis TEXT,
-            PollName TEXT
+            PollOptions TEXT,
+            PollName TEXT,
+            MSG_ID INT
         );"""
         )
 
