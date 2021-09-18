@@ -13,26 +13,6 @@ class EVENT_CHECKER(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @tasks.loop(minutes=10)
-    async def less_than_hour(self,):
-        pass
-
-    @tasks.loop(minutes=1)
-    async def less_than_ten(self,):
-        pass
-
-    @tasks.loop(seconds=10)
-    async def less_than_one(self,):
-        pass
-
-
-# Scheduler event listener
-def on_scheduler_event(event):
-    if event.exception:
-        logging.error(f"Scheduler job failed: {event}")
-    else:
-        logging.info("Job executed succesfully.")
-
 
 def addEvent(ctx, eventType, eventTime, eventName, eventInfo):
     with sqlite3.connect(DB_F) as conn:
@@ -65,7 +45,10 @@ def addEvent(ctx, eventType, eventTime, eventName, eventInfo):
 
 
 def delEvent(eventID):
-    pass
+    with sqlite3.connect(DB_F) as conn:
+        c = conn.cursor()
+        c.execute(f"DELETE FROM Scheduler WHERE Event_ID={eventID}")
+        conn.commit()
 
 
 class SCHEDULER(commands.Cog):
@@ -73,9 +56,52 @@ class SCHEDULER(commands.Cog):
         # self.event_checker.start()
         # self.test_loop.start()
         self.bot = bot
+        self.LessThanHourTasks = []
+        self.LessThanTenTasks = []
+        self.LessThanOneTasks = []
+
+    @tasks.loop(minutes=10)
+    async def less_than_hour(
+        self,
+    ):
+        current_time = datetime.today()
+        for i, event in enumerate(self.LessThanHourTasks):
+            event_time = datetime.strptime(event[4])
+            if current_time-event_time <= timedelta(seconds=600):
+                self.LessThanTenTasks.append(event)
+                del self.LessThanHourTasks[i]
+                try:
+                    self.less_than_ten.start()
+                except RuntimeError:
+                    pass
+
+    @tasks.loop(minutes=1)
+    async def less_than_ten(
+        self,
+    ):
+        current_time = datetime.today()
+        for i, event in enumerate(self.LessThanTenTasks):
+            event_time = datetime.strptime(event[4])
+            if current_time-event_time <= timedelta(seconds=600):
+                self.LessThanOneTasks.append(event)
+                del self.LessThanTenTasks[i]
+
+    @tasks.loop(seconds=2)
+    async def less_than_one(
+        self,
+    ):
+        current_time = datetime.today()
+        for i, event in enumerate(self.LessThanOneTasks):
+            event_time = datetime.strptime(event[4])
+            if current_time-event_time <= timedelta(seconds=2):
+                #EVENT STARTUP LOGIC
+                
+                del self.LessThanOneTasks[i]
 
     @tasks.loop(seconds=5.0, count=3)
-    async def test_loop(self,):
+    async def test_loop(
+        self,
+    ):
         print("test")
 
     @tasks.loop(hours=1.0)
@@ -86,6 +112,7 @@ class SCHEDULER(commands.Cog):
             year_now = current_time.strftime("%Y")
             month_now = current_time.strftime("%m")
             day_now = current_time.strftime("%d")
+            
             c.execute(
                 "SELECT * FROM Scheduler WHERE Year=? AND Month=? AND Day=?",
                 (year_now, month_now, day_now),
@@ -93,7 +120,27 @@ class SCHEDULER(commands.Cog):
             data = c.fetchall()
 
             for event in data:
-                pass
+                # Event_ID INTEGER 0
+                # Event_type TEXT, 1
+                # Event_name TEXT, 2
+                # Event_info TEXT, 3
+                # Datetime TEXT,   4
+                # Year INT,        5
+                # Month INT,       6
+                # Day INT,         7
+                # Hour INT,        8
+                # Minute INT,      9
+                # Second INT       10
+                event_time = datetime.strptime(event[4])
+
+                # check for past/missed events?
+                # Add logic to not get events twice
+                if current_time-event_time <= timedelta(seconds=3600):
+                    self.LessThanHourTasks.append(event)
+                    try:
+                        self.less_than_hour.start()
+                    except RuntimeError:
+                        pass
 
 
 def setup(client):

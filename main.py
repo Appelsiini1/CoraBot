@@ -7,8 +7,7 @@ from datetime import datetime
 from discord.ext import commands
 import traceback
 
-# scripts, functions & constants
-from modules.scheduler import SCHEDULER
+# scripts, functions & constants5
 from constants import *
 from modules import command_help
 from modules import common
