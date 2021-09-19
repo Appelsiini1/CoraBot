@@ -1,22 +1,15 @@
 from discord.ext import tasks
 from constants import *
 import sqlite3
-from pytz import utc
-from datetime import datetime, time, timedelta
+from dateutil import tz
+from datetime import datetime, timedelta
 from discord.ext import commands
-
-TEN_MINUTES = time(0, 10, 0, 0)
-ONE_MINUTE = time(0, 1, 0, 0)
-
-
-class EVENT_CHECKER(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
 
 
 def addEvent(ctx, eventType, eventTime, eventName, eventInfo):
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
+
         year = eventTime.strftime("%Y")
         month = eventTime.strftime("%m")
         day = eventTime.strftime("%d")
@@ -85,8 +78,12 @@ class SCHEDULER(commands.Cog):
             if current_time-event_time <= timedelta(seconds=600):
                 self.LessThanOneTasks.append(event)
                 del self.LessThanTenTasks[i]
+                try:
+                    self.less_than_one.start()
+                except RuntimeError:
+                    pass
 
-    @tasks.loop(seconds=2)
+    @tasks.loop(seconds=1)
     async def less_than_one(
         self,
     ):
@@ -131,6 +128,7 @@ class SCHEDULER(commands.Cog):
                 # Hour INT,        8
                 # Minute INT,      9
                 # Second INT       10
+                # Timezone TEXT    11
                 event_time = datetime.strptime(event[4])
 
                 # check for past/missed events?
@@ -145,4 +143,3 @@ class SCHEDULER(commands.Cog):
 
 def setup(client):
     client.add_cog(SCHEDULER(client))
-    client.add_cog(EVENT_CHECKER(client))
