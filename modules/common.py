@@ -3,6 +3,7 @@ import discord
 from modules.emoji_list import _EMOJIS
 import sqlite3
 import logging
+from pytz import all_timezones
 from dateutil import tz
 from datetime import datetime
 from constants import DB_F
@@ -77,8 +78,8 @@ def timeParser(timeToParse):
     Returns a timezone-aware datetime object converted to local time."""
     # DD.MM.YYYY HH:MM, America/Los_Angeles (as 24-hour clock)(Timezone as per the IANA Database: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
     naive_time = datetime.strptime(timeToParse.split(",")[0], "%d.%m.%Y %H:%M")
-    timezone_raw = timeToParse.split(",")[1]
-    if tz.gettz(timezone_raw) != None:
+    timezone_raw = timeToParse.split(",")[1].strip().lstrip("[").rstrip("]")
+    if timezone_raw in all_timezones:
         timezone = tz.gettz(timezone_raw)
         aware_time = naive_time.replace(tzinfo=timezone)
         server_local_time = aware_time.astimezone(tz.gettz())
