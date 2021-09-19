@@ -3,6 +3,8 @@ import discord
 from modules.emoji_list import _EMOJIS
 import sqlite3
 import logging
+from dateutil import tz
+from datetime import datetime
 from constants import DB_F
 
 
@@ -69,6 +71,28 @@ async def forbiddenErrorHandler(message):
         dm_channel = await message.author.create_dm()
     await dm_channel.send(embed=emb)
 
+
+def timeParser(timeToParse):
+    """Parses time data. Input is string in the format 'DD.MM.YYYY HH:MM, Area/Location', where timezone is per the IANA tz database.
+    Returns a timezone-aware datetime object converted to local time."""
+    # DD.MM.YYYY HH:MM, America/Los_Angeles (as 24-hour clock)(Timezone as per the IANA Database: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+    naive_time = datetime.strptime(timeToParse.split(",")[0], "%d.%m.%Y %H:%M")
+    timezone_raw = timeToParse.split(",")[1]
+    if tz.gettz(timezone_raw) != None:
+        timezone = tz.gettz(timezone_raw)
+        aware_time = naive_time.replace(tzinfo=timezone)
+        server_local_time = aware_time.astimezone(tz.gettz())
+        
+        return server_local_time
+    else:
+        raise ValueError
+
+def timeConverter(timeToConvert: datetime, timezone=None):
+    """Converts to spesific timezone. If timezone argument is not given, local time is used. timeToConvert must be a datetime object with tzinfo. Returns a datetime object with new tzinfo."""
+    new_timezone = tz.gettz(timezone)
+    new_time = timeToConvert.astimezone(new_timezone)
+
+    return new_time
 
 def initializeDatabase():
     """Initializes the required database tables if they do not exist yet.
@@ -218,7 +242,8 @@ def initializeDatabase():
             Day INT,
             Hour INT,
             Minute INT,
-            Second INT
+            Second INT,
+            Timezone TEXT
         );"""
         )
 
