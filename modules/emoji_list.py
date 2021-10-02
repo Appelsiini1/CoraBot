@@ -125,6 +125,7 @@ _EMOJIS = [
     "\N{sled}",
     "\N{snowman}",
     "\N{sparkle}",
+    "\N{sparkles}",
     "\N{sparkling heart}",
     "\N{spoon}",
     "\N{stadium}",
