@@ -26,6 +26,7 @@ from modules import dice_comm
 from modules import auction
 from modules import short_comms
 from modules import saimaa
+from modules import message_listener
 
 # Main bot class
 class CoraBot(commands.Bot):
@@ -47,6 +48,7 @@ class CoraBot(commands.Bot):
         giveaway.setup(self)
         short_comms.setup(self)
         insult.setup(self)
+        message_listener.setup(self)
         nitro.setup(self)
         poll.setup(self)
         pop.setup(self)
