@@ -535,34 +535,37 @@ class Nitro(commands.Cog):
                 # Boost_Time TEXT, 3
                 # LatestBoost TEXT, 4
                 # Boosts INT 5
-                btext = ""
+                btext = "**Name, Boost Amount**\n"
                 texts = []
 
-                for b in boosts:
+                for i, b in enumerate(boosts, start=1):
                     user = message.guild.get_member(b[1])
                     if user == None:
                         message.guild.fetch_member(b[1])
                         if user == None:
                             user = b[1]
                         else:
-                            user = user.display_name
+                            user = user.name
                     else:
-                        user = user.display_name
-                    btext += f"{user} |{b[5]}|{b[3]}\n"
+                        user = user.name
+                    btext += f"**{user}** \N{sparkles} {b[5]}\n"
                     if len(btext) >= 4048:
                         texts.append(btext)
                         btext = ""
                 
+                texts.append(btext)
+                texts_len = len(texts)
+                
                 title = f"Nitro boosters in {message.guild.name}"
                 emb2 = discord.Embed()
                 emb2.color = get_hex_colour(cora_blonde=True)
-                texts_len = len(texts)
+
                 for i, t in enumerate(texts, start=1):
                     if i == 1:
                         emb2.title = title
                         emb2.description = t
                         try:
-                            await msg.edit(embed=emb)
+                            await msg.edit(embed=emb2)
                         except discord.Forbidden:
                             forbiddenErrorHandler(message)
                             return
