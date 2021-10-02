@@ -3,7 +3,7 @@ import sqlite3
 import logging
 import datetime
 from discord.ext import commands
-from modules.common import get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour
 from constants import DB_F
 
 
@@ -178,7 +178,10 @@ class Vote(commands.Cog):
                     text=f"You have {remainingVotes} votes left in this poll.\nIf your votes look incorrect, you can use `!c vote delete {poll_id}` to delete your vote(s) and try again."
                 )
                 emb.color = get_hex_colour(cora_eye=True)
-                await dm_channel.send(embed=emb)
+                try:
+                    await dm_channel.send(embed=emb)
+                except discord.Forbidden:
+                    self.voteErrorHandler(ctx.message, dm_channel, 9, poll_name=poll[0][5])
                 await ctx.message.delete()
 
     async def voteErrorHandler(
@@ -209,11 +212,32 @@ class Vote(commands.Cog):
                 Your command was: ```{message.content}```"
         elif err_type == 8:
             emb.description = f"\N{no entry} **You have already given maximum amount of votes into the poll '{poll_name}'.**"
+        elif err_type == 9:
+            emb.description = f"\N{no entry} **{message.author.mention} Your votes were succesfully registered to the poll '{poll_name}', but I was unable to send a confirmation via a private message. Please check that you have private messages enabled on the server if you wish to get confirmations in the future.**"
+            emb.color = get_hex_colour(error=True)
+            try:
+                await message.channel.send(embed=emb)
+            except discord.Forbidden:
+                forbiddenErrorHandler(message)
+            try:
+                await message.delete()
+            except discord.errors.NotFound:
+                logging.exception(
+                    "Could not delete vote command message. Message not found."
+                )
+            return
         else:
             emb.description = "Something went wrong in voting."
 
         emb.color = get_hex_colour(error=True)
-        await dm_channel.send(embed=emb)
+        try:
+            await dm_channel.send(embed=emb)
+        except discord.Forbidden:
+            emb.description = f"\N{no entry} **{message.author.mention} There was an error in your vote command and I was unable to send you details via a private message. Please enable private messages for this server and try again.**"
+            try:
+                await message.channel.send(embed=emb)
+            except discord.Forbidden:
+                forbiddenErrorHandler(message)
         try:
             await message.delete()
         except discord.errors.NotFound:
