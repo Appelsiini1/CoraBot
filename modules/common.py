@@ -244,7 +244,9 @@ def initializeDatabase():
             Hour INT,
             Minute INT,
             Second INT,
-            Timezone TEXT
+            Timezone TEXT,
+            Repeat INT,
+            Repeat_interval TEXT
         );"""
         )
 

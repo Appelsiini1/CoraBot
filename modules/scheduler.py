@@ -6,7 +6,15 @@ from datetime import datetime, timedelta
 from discord.ext import commands
 
 
-def addEvent(ctx, eventType, eventTime, eventName, eventInfo):
+def addEvent(
+    eventType,
+    eventTime,
+    eventName,
+    eventInfo,
+    Timezone,
+    repeating=0,
+    repeat_interval=None,
+):
     with sqlite3.connect(DB_F) as conn:
         c = conn.cursor()
 
@@ -18,7 +26,7 @@ def addEvent(ctx, eventType, eventTime, eventName, eventInfo):
         second = eventTime.strftime("%S")
 
         c.execute(
-            "INSERT INTO Scheduler (?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO Scheduler (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
                 None,
                 eventType,
@@ -31,6 +39,9 @@ def addEvent(ctx, eventType, eventTime, eventName, eventInfo):
                 hour,
                 minute,
                 second,
+                Timezone,
+                repeating,
+                repeat_interval,
             ),
         )
 
@@ -42,6 +53,11 @@ def delEvent(eventID):
         c = conn.cursor()
         c.execute(f"DELETE FROM Scheduler WHERE Event_ID={eventID}")
         conn.commit()
+
+
+def addRepeatTime(event):
+    """Add repeat interval time to the event. If the event has a limited number of runs, -1 to the number of runs. Returns the new event as a list."""
+    pass
 
 
 class SCHEDULER(commands.Cog):
@@ -60,7 +76,7 @@ class SCHEDULER(commands.Cog):
         current_time = datetime.today()
         for i, event in enumerate(self.LessThanHourTasks):
             event_time = datetime.strptime(event[4])
-            if current_time-event_time <= timedelta(seconds=600):
+            if current_time - event_time <= timedelta(seconds=600):
                 self.LessThanTenTasks.append(event)
                 del self.LessThanHourTasks[i]
                 try:
@@ -75,7 +91,7 @@ class SCHEDULER(commands.Cog):
         current_time = datetime.today()
         for i, event in enumerate(self.LessThanTenTasks):
             event_time = datetime.strptime(event[4])
-            if current_time-event_time <= timedelta(seconds=600):
+            if current_time - event_time <= timedelta(seconds=600):
                 self.LessThanOneTasks.append(event)
                 del self.LessThanTenTasks[i]
                 try:
@@ -90,9 +106,20 @@ class SCHEDULER(commands.Cog):
         current_time = datetime.today()
         for i, event in enumerate(self.LessThanOneTasks):
             event_time = datetime.strptime(event[4])
-            if current_time-event_time <= timedelta(seconds=2):
-                #EVENT STARTUP LOGIC
-                
+            if current_time - event_time <= timedelta(seconds=2):
+                # EVENT STARTUP LOGIC
+                if event[12] > 0 or event[12] == -1:
+                    new_event = addRepeatTime(event)
+                    addEvent(
+                        new_event[1],
+                        new_event[4],
+                        new_event[2],
+                        new_event[3],
+                        new_event[11],
+                        new_event[12],
+                        new_event[13],
+                    )
+
                 del self.LessThanOneTasks[i]
 
     @tasks.loop(seconds=5.0, count=3)
@@ -109,7 +136,7 @@ class SCHEDULER(commands.Cog):
             year_now = current_time.strftime("%Y")
             month_now = current_time.strftime("%m")
             day_now = current_time.strftime("%d")
-            
+
             c.execute(
                 "SELECT * FROM Scheduler WHERE Year=? AND Month=? AND Day=?",
                 (year_now, month_now, day_now),
@@ -129,11 +156,13 @@ class SCHEDULER(commands.Cog):
                 # Minute INT,      9
                 # Second INT       10
                 # Timezone TEXT    11
+                # Repeat INT,      12
+                # Repeat_interval TEXT 13
                 event_time = datetime.strptime(event[4])
 
                 # check for past/missed events?
                 # Add logic to not get events twice
-                if current_time-event_time <= timedelta(seconds=3600):
+                if current_time - event_time <= timedelta(seconds=3600):
                     self.LessThanHourTasks.append(event)
                     try:
                         self.less_than_hour.start()
