@@ -214,7 +214,8 @@ def initializeDatabase():
             Min_increase INT,
             Autobuy INT,
             Start_time TEXT,
-            End_time TEXT
+            End_time TEXT,
+            Title TEXT
         );"""
         )
 

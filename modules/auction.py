@@ -1,9 +1,10 @@
-import discord
 import logging
-import datetime
+from datetime import datetime
 import sqlite3
 from currency_symbols import CurrencySymbols
 from dateutil import tz
+from discord.errors import Forbidden
+from discord import Embed
 from discord.ext import commands
 from modules.common import (
     get_hex_colour,
@@ -54,19 +55,37 @@ class AUCTION(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def lockChannel(self, ctx):
+        pass
+
+    def makeCountdown(self, theTime, title):
+        # Countdown example: https://www.timeanddate.com/countdown/generic?iso=20240322T1442&p0=101&msg=Event+name&font=slab&csz=1 
+        # NOTES: Always Helsinki time (p0=101), csz=1 -> stop countdown at zero
+        # Fonts: 'cursive', 'slab'
+
+        countdownLink = "https://www.timeanddate.com/countdown/generic?iso="
+        timeConverted = timeConverter(theTime, timezone=tz.gettz("Europe/Helsinki"))
+        ISOtime = timeConverted.isoformat(timespec='minutes').replace("-", "").replace(":", "")
+        countdownLink += ISOtime
+        countdownLink += "&p0=101&msg="
+        countdownLink += title.replace(" ", "+") # title can be ~60 characters, the rest is cut off by the site
+        countdownLink += "&font=slab&csz=1"
+
+        return countdownLink
+
     # helper function
     async def sendEmbed(self, ctx, emb):
         try:
             await ctx.send(embed=emb)
             return
-        except discord.errors.Forbidden:
+        except Forbidden:
             await forbiddenErrorHandler(ctx.message)
             return
 
     # parse auction start
     async def parseStartCommand(self, ctx):
         cmd_split = ctx.message.content.split(" ")
-        emb = discord.Embed()
+        emb = Embed()
 
         if len(cmd_split) <= 3:
             emb.title = "No arguments given, see `!c auction help` for correct syntax."
@@ -120,7 +139,7 @@ class AUCTION(commands.Cog):
 
             if start_time_raw == "now":
                 timezone = tz.gettz()
-                start_time = datetime.datetime.today().replace(tzinfo=timezone)
+                start_time = datetime.today().replace(tzinfo=timezone)
                 startsnow = 1
             else:
                 try:
@@ -166,11 +185,12 @@ class AUCTION(commands.Cog):
     async def makeAuction(self, ctx):
         # Command structure
         # !c auction start title;number of slots [int];currency as a 3-letter identifier (ISO-4217);starting bid [int, x > 0];min increase [int, x >= 0];autobuy [int, 0 if disabled, x >= 0];start time [DD.MM.YYYY HH:MM, Area/Location (as 24-hour clock)(Timezone as per the Olson database)] or [now];end time or empty
-        # Countdown example: https://www.timeanddate.com/countdown/generic?iso=20240322T1442&p0=101&msg=Event+name&font=cursive&csz=1 NOTES: Always Helsinki time (p0=101), csz=1 -> stop countdown at zero
 
         parsed = self.parseStartCommand(ctx)
         if parsed == -1:
             return
+
+        self.lockChannel(ctx)
 
         # Auction_ID INT,   0
         # Channel_ID INT,   1
@@ -183,6 +203,7 @@ class AUCTION(commands.Cog):
         # Autobuy INT,      8
         # Start_time TEXT,  9
         # End_time TEXT,    10
+        # Title             11
         # PRIMARY KEY (Auction_ID)
         with sqlite3.connect(DB_F) as conn:
             c = conn.cursor()
@@ -205,6 +226,7 @@ class AUCTION(commands.Cog):
                     parsed.autobuy,
                     parsed.rawStartTime,
                     parsed.rawEndTime,
+                    parsed.title,
                 ),
             )
             conn.commit()
@@ -212,23 +234,50 @@ class AUCTION(commands.Cog):
                 f"SELECT Auction_ID FROM Auctions WHERE Channel_ID={ctx.channel.id} AND Author_ID={ctx.author.id}"
             )
             auctionID = c.fetchone()[0]
-            if parsed.startsnow == 1:
-                self.startAuction()
-            else:
+        if parsed.startsnow == 1:
+            self.startAuction(auctionID)
+        else:
+            addEvent(
+                1,
+                parsed.rawStartTime,
+                parsed.title,
+                auctionID,
+                parsed.timezone,
+            )
+            if parsed.end_time != None:
                 addEvent(
-                    1,
-                    parsed.rawStartTime,
-                    parsed.title,
-                    auctionID,
-                    parsed.timezone,
+                    2, parsed.rawEndtime, parsed.title, auctionID, parsed.timezone
                 )
-                if parsed.end_time != None:
-                    addEvent(
-                        2, parsed.rawEndtime, parsed.title, auctionID, parsed.timezone
-                    )
+            emb = Embed()
+            emb.title = "Auction scheduled"
+            emb.description = "An auction has been scheduled for this channel. Permissions have been saved and will be returned when the auction begins. This message will be autodeleted."
+            emb.color = get_hex_colour(cora_eye=True)
+            self.sendEmbed(ctx, emb)
+        
+        # make auction embeds
 
-    async def startAuction(self):
-        pass
+
+    async def startAuction(self, auctionID):
+        with sqlite3.connect(DB_F) as conn:
+            c = conn.cursor()
+            c.execute(f"SELECT * FROM Auctions WHERE Auction_ID={auctionID}")
+            auctionData = c.fetchall()
+            if auctionData == []:
+                logging.error(f"Failed to find auction {auctionID} from the Auctions table.")
+            auctionInfo = AUCTION_INFO(
+                auctionData[11],
+                auctionData[4],
+                auctionData[5],
+                auctionData[6],
+                auctionData[7],
+                auctionData[8],
+                timeParser(auctionData[9]),
+                timeParser(auctionData[10]),
+                auctionData[9],
+                auctionData[10],
+                1,
+                None,
+            )
 
     async def endAuction(self, ctx):
         pass
@@ -244,14 +293,14 @@ class AUCTION(commands.Cog):
                 .lower()
             )
         except IndexError:
-            emb = discord.Embed()
+            emb = Embed()
             emb.title = "No argument given. See `!c auction help` for arguments."
             emb.color = get_hex_colour(error=True)
 
             try:
                 await ctx.send(embed=emb)
                 return
-            except discord.errors.Forbidden:
+            except Forbidden:
                 await forbiddenErrorHandler(ctx.message)
                 return
 
@@ -262,13 +311,13 @@ class AUCTION(commands.Cog):
         elif cmd == "help":
             await auction_help()
         else:
-            emb = discord.Embed()
+            emb = Embed()
             emb.title = "Invalid argument. See `!c auction help` for correct syntax."
             emb.color = get_hex_colour(error=True)
 
             try:
                 await ctx.send(embed=emb)
-            except discord.errors.Forbidden:
+            except Forbidden:
                 await forbiddenErrorHandler(ctx.message)
 
 
