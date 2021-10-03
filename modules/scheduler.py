@@ -25,6 +25,12 @@ def addEvent(
         minute = eventTime.strftime("%M")
         second = eventTime.strftime("%S")
 
+        # EVENT TYPES
+        # Auction START     1
+        # Auction END       2
+        # General reminder  3
+        # Birthday          4
+
         c.execute(
             "INSERT INTO Scheduler (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
@@ -108,6 +114,8 @@ class SCHEDULER(commands.Cog):
             event_time = datetime.strptime(event[4])
             if current_time - event_time <= timedelta(seconds=2):
                 # EVENT STARTUP LOGIC
+
+                
                 if event[12] > 0 or event[12] == -1:
                     new_event = addRepeatTime(event)
                     addEvent(
