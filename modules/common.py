@@ -73,7 +73,7 @@ async def forbiddenErrorHandler(message):
     await dm_channel.send(embed=emb)
 
 
-def timeParser(timeToParse):
+def timeParser(timeToParse: str):
     """Parses time data. Input is string in the format 'DD.MM.YYYY HH:MM, Area/Location', where timezone is per the IANA tz database.
     Returns a timezone-aware datetime object converted to local time."""
     # DD.MM.YYYY HH:MM, America/Los_Angeles (as 24-hour clock)(Timezone as per the IANA Database: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
