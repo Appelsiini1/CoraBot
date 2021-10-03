@@ -12,6 +12,7 @@ Version 2.0.0 brings a major rework to CoraBot.
 - Basic polls now use their own IDs instead of message IDs
 - Basic poll results now give the text options instead of emojis
 - Now sends an error message to the channel if the bot is unable to send a private message for voting errors or confirmations
+- Add reaction messages to "morning", "good morning" and "huomenta"
 ###
 v1.14.13
 - Fix nitro boost tracking for the n+1th f*****g time
