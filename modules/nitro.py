@@ -535,7 +535,7 @@ class Nitro(commands.Cog):
                 # Boost_Time TEXT, 3
                 # LatestBoost TEXT, 4
                 # Boosts INT 5
-                btext = "**Name, Boost Amount**\n"
+                btext = "**Name \N{sparkles} Boost Amount**\n"
                 texts = []
 
                 for i, b in enumerate(boosts, start=1):
