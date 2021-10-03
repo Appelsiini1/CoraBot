@@ -115,13 +115,11 @@ class MESSAGE_LISTENER(commands.Cog):
             await message.channel.send(msg)
             return
         elif (
-            lower_message.startswith("morning")
-            or lower_message.startswith("merning")
-            or lower_message.startswith("mornign")
-            or lower_message.startswith("good mornign")
-            or lower_message.startswith("good morning")
+            lower_message.startswith("morni")
+            or lower_message.startswith("good morni")
             or lower_message.startswith("huomenta")
             or lower_message.startswith("hyvää huomenta")
+            or lower_message.startswith("mernin")
         ):
             msgIndex = randint(0, self.morning_len - 1)
             msgToSend = self.morning_messages[msgIndex] + " \N{sparkling heart}"
