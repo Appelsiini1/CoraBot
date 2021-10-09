@@ -126,15 +126,18 @@ class Dice(commands.Cog):
                 dice_string = dice_string[:-2]
                 if len(dice_string) > 2048:
                     filename = "results.txt"
-                    with open(filename, "w", encoding="utf-8") as f:
-                        i = 0
-                        for r in result:
-                            if i == 15:
-                                f.write("\n")
-                                i = 0
-                            else:
-                                f.write(f"{r}, ")
-                                i += 1
+                    try:
+                        with open(filename, "w", encoding="utf-8") as f:
+                            i = 0
+                            for r in result:
+                                if i == 15:
+                                    f.write("\n")
+                                    i = 0
+                                else:
+                                    f.write(f"{r}, ")
+                                    i += 1
+                    except Exception:
+                        logging.exception("Error writing dice result file")
                     fileToSend = discord.File(filename)
                     try:
                         await ctx.send(f"**Your {dice_mode} result:**")
@@ -146,7 +149,7 @@ class Dice(commands.Cog):
                             os.remove(filename)
                         except Exception:
                             logging.exception(
-                                "Unable to delete the local copy of boost export CSV."
+                                "Unable to delete the local copy of dice result."
                             )
             if len(dice_string) < 2048:
                 emb.description = f"**Your {dice_mode} result:**\n```{dice_string}```"

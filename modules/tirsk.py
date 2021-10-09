@@ -277,20 +277,23 @@ class Tirsk(commands.Cog):
                 await msg.edit(embed=emb)
             else:
                 filename = f"export_{channelID}.csv"
-                with open(filename, "w", encoding="utf-8") as f:
-                    f.write("DisplayName;UserID;Quote\n")
-                    for q in quotes:
-                        user = message.guild.get_member(q[1])
-                        if user:
-                            displayName = user.display_name
-                        else:
-                            user = await message.guild.fetch_member(q[1])
-                            time.sleep(0.07)
+                try:
+                    with open(filename, "w", encoding="utf-8") as f:
+                        f.write("DisplayName;UserID;Quote\n")
+                        for q in quotes:
+                            user = message.guild.get_member(q[1])
                             if user:
                                 displayName = user.display_name
                             else:
-                                displayName = q[1]
-                        f.write(f"{displayName};{q[1]};{q[4]}\n")
+                                user = await message.guild.fetch_member(q[1])
+                                time.sleep(0.07)
+                                if user:
+                                    displayName = user.display_name
+                                else:
+                                    displayName = q[1]
+                            f.write(f"{displayName};{q[1]};{q[4]}\n")
+                except Exception:
+                    logging.exception("Error in exporting quotes.")
 
                 fileToSend = discord.File(filename)
 

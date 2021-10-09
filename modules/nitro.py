@@ -605,26 +605,29 @@ class Nitro(commands.Cog):
                 await msg.edit(embed=emb)
             else:
                 filename = f"export_{guildID}.csv"
-                with open(filename, "w", encoding="utf-8") as f:
-                    f.write("DisplayName;EarliestBoost;LatestBoost;NumberOfBoosts\n")
-                    for b in boosts:
-                        # Boost_ID INT UNIQUE,
-                        # User_ID INT,
-                        # Guild_ID INT,
-                        # Boost_Time TEXT,
-                        # LatestBoost TEXT,
-                        # Boosts INT,
-                        user = message.guild.get_member(b[1])
-                        if user:
-                            user = user.display_name
-                        else:
-                            user = await message.guild.fetch_member(b[1])
-                            sleep(0.08)
+                try:
+                    with open(filename, "w", encoding="utf-8") as f:
+                        f.write("DisplayName;EarliestBoost;LatestBoost;NumberOfBoosts\n")
+                        for b in boosts:
+                            # Boost_ID INT UNIQUE,
+                            # User_ID INT,
+                            # Guild_ID INT,
+                            # Boost_Time TEXT,
+                            # LatestBoost TEXT,
+                            # Boosts INT,
+                            user = message.guild.get_member(b[1])
                             if user:
                                 user = user.display_name
                             else:
-                                user = b[1]
-                        f.write(f"{user};{b[3]};{b[4]};{b[5]}\n")
+                                user = await message.guild.fetch_member(b[1])
+                                sleep(0.08)
+                                if user:
+                                    user = user.display_name
+                                else:
+                                    user = b[1]
+                            f.write(f"{user};{b[3]};{b[4]};{b[5]}\n")
+                except Exception:
+                    logging.exception("Error creating local boost export.")
 
                 fileToSend = discord.File(filename)
 

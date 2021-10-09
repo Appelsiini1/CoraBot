@@ -1,9 +1,8 @@
-from discord.ext import tasks
+from discord.ext import tasks, commands
 from constants import *
 import sqlite3
 from dateutil import tz
 from datetime import datetime, timedelta
-from discord.ext import commands
 
 
 def addEvent(
