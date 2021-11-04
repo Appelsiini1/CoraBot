@@ -23,7 +23,7 @@ from modules import vote
 from modules import pop
 from modules import nitro
 from modules import dice_comm
-from modules import auction
+#from modules import auction
 from modules import short_comms
 from modules import saimaa
 from modules import message_listener
@@ -41,7 +41,7 @@ class CoraBot(commands.Bot):
 
     def __cogsetup__(self):
         # Load cogs
-        auction.setup(self)
+        #auction.setup(self)
         command_help.setup(self)
         choose.setup(self)
         dice_comm.setup(self)

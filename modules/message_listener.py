@@ -1,7 +1,8 @@
 from constants import PREFIX, TRACKED_CHANNELS
 from discord import ChannelType, MessageType
 from discord.ext import commands
-from modules import auction, nitro, tirsk
+from modules import nitro, tirsk
+#from modules import auction
 from random import randint
 from discord.errors import Forbidden
 from modules.common import forbiddenErrorHandler
@@ -139,7 +140,7 @@ class MESSAGE_LISTENER(commands.Cog):
                 await tirsk.tirskTrack(message)
                 return
             elif chtype == 2:
-                await auction.bid(message)
+                #await auction.bid(message)
                 return
 
 
