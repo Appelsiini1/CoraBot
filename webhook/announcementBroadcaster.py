@@ -17,6 +17,8 @@ def main():
         txtFromFile = file.readline()
         title = txtFromFile
         text = ""
+        
+        txtFromFile = file.readline()
         while txtFromFile.strip() != "###":
             text += txtFromFile
             txtFromFile = file.readline()
