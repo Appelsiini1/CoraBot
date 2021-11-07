@@ -54,6 +54,7 @@ class Dice(commands.Cog):
                                     await ctx.send(embed=emb)
                                 except discord.errors.Forbidden:
                                     await forbiddenErrorHandler(ctx.message)
+                                return
                             else:
                                 if int(dices[0]) > MAX_DICE:
                                     emb.title = "Too many dice!"
