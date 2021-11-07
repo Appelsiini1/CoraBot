@@ -48,7 +48,7 @@ class Giveaway(commands.Cog):
             )
             react = await ctx.channel.fetch_message(args)
             list_user = await react.reactions[0].users().flatten()
-            random_n = randInt(1, 0, len(list_user) - 1, ctx.message.id)
+            random_n = randInt(1, 0, len(list_user) - 1, ctx.message.id)[0]
             if len(list_user) == 1:
                 await ctx.send("No entries to the giveaway :(")
                 return
