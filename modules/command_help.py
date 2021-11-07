@@ -28,6 +28,7 @@ class COMMAND_HELP(commands.Cog):
 `pop [number between 1-14]`
 `dice [help | [N]dS | [N]wS | [N]uS]` (extra arguments can be seen from dice help)
 `saimaa`
+`status`
 
 **_Admin commands:_**
 `giveaway`
