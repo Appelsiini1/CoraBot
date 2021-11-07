@@ -1,7 +1,7 @@
 import random
 import discord
 from discord.ext import commands
-from modules.common import get_hex_colour
+from modules.common import get_hex_colour, check_if_channel, check_if_bot
 
 
 class Choose(commands.Cog):
@@ -9,6 +9,8 @@ class Choose(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def choose(self, ctx, *arg):
         repl = ctx.message.content[9:]
         args = repl.strip().split("|")

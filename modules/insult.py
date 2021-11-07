@@ -1,4 +1,5 @@
 from discord.ext import commands
+from modules.common import check_if_channel, check_if_bot
 import requests
 import json
 import logging
@@ -9,6 +10,8 @@ class Insult(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def insult(self, ctx):
         prefix = "!c insult "
         response = requests.get(

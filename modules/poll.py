@@ -7,7 +7,7 @@ import datetime
 
 from discord.ext import commands
 
-from modules.common import get_hex_colour, selectReactionEmoji
+from modules.common import get_hex_colour, selectReactionEmoji, check_if_channel, check_if_bot
 from modules.command_help import pollHelp
 from modules.emoji_list import _EMOJIS
 from constants import DB_F
@@ -26,7 +26,10 @@ class Polls(commands.Cog):
 
     # Poll junction
     @commands.command(name="poll")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def Poll(self, ctx):
+        
         try:
             content = ctx.message.content.split(" ")[2].strip().lstrip("[").rstrip("]")
         except IndexError:

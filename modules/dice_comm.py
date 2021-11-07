@@ -5,7 +5,7 @@ import os
 
 from discord.ext import commands
 
-from modules.common import get_hex_colour, forbiddenErrorHandler
+from modules.common import get_hex_colour, forbiddenErrorHandler, check_if_channel, check_if_bot
 from modules.command_help import dice_help
 
 MAX_DICE = 2 ** 20
@@ -16,6 +16,8 @@ class Dice(commands.Cog):
         self.bot = bot
 
     @commands.command(name="dice")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def dice_comm(self, ctx):
         # Command structure
         # !c dice [help | [N]dS]

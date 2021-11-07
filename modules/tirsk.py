@@ -4,7 +4,7 @@ import logging
 import time
 from discord.errors import Forbidden
 from discord.ext import commands
-from modules.common import forbiddenErrorHandler, get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour, check_if_bot, check_if_channel
 from modules.command_help import tirskHelp
 from constants import DB_F, TRACKED_CHANNELS
 import datetime
@@ -333,6 +333,8 @@ class Tirsk(commands.Cog):
                         )
 
     @commands.command(name="tirsk")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def tirskJunction(self, ctx):
         try:
             arg2 = (

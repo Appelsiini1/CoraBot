@@ -3,7 +3,7 @@ from discord.errors import Forbidden
 from discord.ext import commands
 import requests
 import discord
-from modules.common import forbiddenErrorHandler, get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour, check_if_channel, check_if_bot
 import logging
 
 ALUEET = {
@@ -169,6 +169,8 @@ class Vaccine(commands.Cog):
         return emb
 
     @commands.command(name="vacc")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def sendVaccInfo(self, ctx):
         emb = discord.Embed(
             description="_Getting latest vaccine data from THL..._",

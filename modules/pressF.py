@@ -1,5 +1,5 @@
 import logging
-from modules.common import forbiddenErrorHandler
+from modules.common import forbiddenErrorHandler, check_if_bot, check_if_channel
 from discord.errors import Forbidden
 from discord.ext import commands
 
@@ -9,6 +9,8 @@ class PressF(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=["f", "F"])
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def pressF(self, ctx):
         if ctx.guild.id == 181079344611852288:
             emote_name = "cacF"

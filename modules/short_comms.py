@@ -1,7 +1,7 @@
 from discord import Embed
 from discord.errors import Forbidden
 from discord.ext import commands
-from modules.common import forbiddenErrorHandler, get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour, check_if_channel, check_if_bot
 
 
 class Short(commands.Cog):
@@ -9,6 +9,8 @@ class Short(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=["hello"])
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def hi(self, ctx):
         if ctx.invoked_with == "hi":
             try:
@@ -22,6 +24,8 @@ class Short(commands.Cog):
                 await forbiddenErrorHandler(ctx.message)
 
     @commands.command()
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def status(self, ctx):
         emb = Embed()
         emb.color = get_hex_colour()
@@ -33,6 +37,8 @@ class Short(commands.Cog):
             await forbiddenErrorHandler(ctx.message)
 
     @commands.command()
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def mood(self, ctx):
         try:
             await ctx.send(

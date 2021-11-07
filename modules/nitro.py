@@ -6,7 +6,7 @@ import datetime
 import os
 from time import sleep
 
-from modules.common import forbiddenErrorHandler, get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour, check_if_bot, check_if_channel
 from modules.command_help import nitroHelp
 from constants import DB_F
 from discord.ext import commands
@@ -782,6 +782,8 @@ class Nitro(commands.Cog):
 
     # Junction
     @commands.command(name="nitro")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def nitroJunction(self, ctx):
         try:
             arg2 = (

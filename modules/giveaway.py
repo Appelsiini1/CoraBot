@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from modules.common import get_hex_colour
+from modules.common import get_hex_colour, check_if_bot, check_if_channel
 from modules.random_api import randInt
 
 EMOJI = "\N{PARTY POPPER}"
@@ -11,6 +11,8 @@ class Giveaway(commands.Cog):
         self.bot = bot
 
     @commands.command(name="giveaway")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def initiate_giveaway(self, ctx):
         if ctx.author.guild_permissions.administrator:
             msg = (
@@ -31,6 +33,8 @@ class Giveaway(commands.Cog):
             )
 
     @commands.command(name="endgiveaway")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def end_giveaway(self, ctx):
         if ctx.author.guild_permissions.administrator:
             if len(ctx.message.content.split(" ")) <= 2:

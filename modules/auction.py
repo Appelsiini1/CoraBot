@@ -11,6 +11,8 @@ from modules.common import (
     forbiddenErrorHandler,
     timeParser,
     timeConverter,
+    check_if_bot,
+    check_if_channel
 )
 from constants import DB_F, TRACKED_CHANNELS
 from modules.command_help import auction_help
@@ -283,6 +285,8 @@ class AUCTION(commands.Cog):
         pass
 
     @commands.command(name="auction")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def auctionJunction(self, ctx):
         try:
             cmd = (

@@ -1,7 +1,7 @@
 from discord import Embed
 from discord.errors import Forbidden
 from discord.ext import commands
-from modules.common import forbiddenErrorHandler, get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour, check_if_channel, check_if_bot
 
 
 class Pop(commands.Cog):
@@ -9,6 +9,8 @@ class Pop(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def pop(self, ctx):
         # Command structure
         # !c pop [integer]
