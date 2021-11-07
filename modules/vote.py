@@ -3,7 +3,8 @@ import sqlite3
 import logging
 import datetime
 from discord.ext import commands
-from modules.common import forbiddenErrorHandler, get_hex_colour
+from modules.common import forbiddenErrorHandler, get_hex_colour, check_if_bot, check_if_channel
+from modules.command_help import voteHelp
 from constants import DB_F
 
 
@@ -12,6 +13,8 @@ class Vote(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def vote(self, ctx):
         # Command structure
         # !c vote [Poll ID] [option number]:[amount of votes], [option number]:[amount of votes], ...
@@ -27,9 +30,9 @@ class Vote(commands.Cog):
         emb = discord.Embed()
 
         if arg == "":
-            await self.voteHelp(ctx.message)
+            await voteHelp(ctx.message)
         elif arg.strip() == "help":
-            await self.voteHelp(ctx.message)
+            await voteHelp(ctx.message)
         elif arg.strip() == "delete":
             await self.delVotes(ctx.message)
         else:
@@ -243,34 +246,6 @@ class Vote(commands.Cog):
         except discord.errors.NotFound:
             logging.exception(
                 "Could not delete vote command message. Message not found."
-            )
-
-    async def voteHelp(self, message):
-        emb = discord.Embed()
-        emb.color = get_hex_colour()
-        emb.title = "Voting in polls"
-        emb.description = "You can vote in the _basic polls_ by reacting to the corresponding emote.\n\n\
-    The vote command can be used in _advanced polls_ (indicated by the poll having numbers before the options instead of emotes).\n\
-    **Vote command usage:**\n\
-    ```!c vote [Poll ID] [option number]:[amount of votes], [option number]:[amount of votes], ...```\n\
-    _NOTE!_ Poll ID can be found in the footer under the poll. You do not need to type the brackets.\n\
-    You also do not need to type the options that you are not voting for, only those you _are_ voting for.\n\
-    \n\
-    **Deleting your votes**\n\
-    If your votes were incorrect or you want to change them, you can use \n\
-    ```!c vote delete [Poll ID]```\n\
-    to delete all your votes from that poll and try again."
-
-        dm_channel = message.author.dm_channel
-        if dm_channel == None:
-            dm_channel = await message.author.create_dm()
-
-        await dm_channel.send(embed=emb)
-        try:
-            await message.delete()
-        except discord.errors.NotFound:
-            logging.exception(
-                "Could not delete vote help command message. Message not found."
             )
 
     async def delVotes(self, message):

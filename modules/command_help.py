@@ -1,8 +1,8 @@
 import logging
-from discord.errors import Forbidden
+from discord.errors import Forbidden, NotFound
 from discord.ext import commands
 from discord import Embed
-from modules.common import get_hex_colour, forbiddenErrorHandler
+from modules.common import get_hex_colour, forbiddenErrorHandler, check_if_bot, check_if_channel
 from constants import VERSION
 
 
@@ -11,6 +11,8 @@ class COMMAND_HELP(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def help(self, ctx):
         cmd_list = """`hi` (alias: `hello`)
 `help`
@@ -53,6 +55,8 @@ class COMMAND_HELP(commands.Cog):
             await dm_channel.send(embed=emb)
 
     @commands.command()
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
     async def info(self, ctx, *arg):
         emb = Embed()
         emb.title = "CoraBot Info"
@@ -237,3 +241,31 @@ _Kaikki komennot vaativat 'administrator' oikeudet._"
         await message.channel.send(embed=emb)
     except Forbidden:
         await forbiddenErrorHandler(message)
+
+async def voteHelp(message):
+    emb = Embed()
+    emb.color = get_hex_colour()
+    emb.title = "Voting in polls"
+    emb.description = "You can vote in the _basic polls_ by reacting to the corresponding emote.\n\n\
+The vote command can be used in _advanced polls_ (indicated by the poll having numbers before the options instead of emotes).\n\
+**Vote command usage:**\n\
+```!c vote [Poll ID] [option number]:[amount of votes], [option number]:[amount of votes], ...```\n\
+_NOTE!_ Poll ID can be found in the footer under the poll. You do not need to type the brackets.\n\
+You also do not need to type the options that you are not voting for, only those you _are_ voting for.\n\
+\n\
+**Deleting your votes**\n\
+If your votes were incorrect or you want to change them, you can use \n\
+```!c vote delete [Poll ID]```\n\
+to delete all your votes from that poll and try again."
+
+    dm_channel = message.author.dm_channel
+    if dm_channel == None:
+        dm_channel = await message.author.create_dm()
+
+    await dm_channel.send(embed=emb)
+    try:
+        await message.delete()
+    except NotFound:
+        logging.exception(
+            "Could not delete vote help command message. Message not found."
+        )
