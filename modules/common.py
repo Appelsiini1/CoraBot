@@ -96,10 +96,13 @@ def timeConverter(timeToConvert: datetime, timezone=None):
     return new_time
 
 def check_if_channel(ctx):
-    return ctx.channel.type != discord.ChannelType.text and ctx.channel.type != discord.ChannelType.news
+    if ctx.channel.type == discord.ChannelType.text or ctx.channel.type == discord.ChannelType.news:
+        return True
+    else:
+        return False
 
 def check_if_bot(ctx):
-    return ctx.author.bot == True
+    return ctx.author.bot != True
 
 def initializeDatabase():
     """Initializes the required database tables if they do not exist yet.

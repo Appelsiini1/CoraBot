@@ -64,6 +64,8 @@ class CoraBot(commands.Bot):
         logging.info(f"{self.user.name} {VERSION} is online & ready.")
 
     async def on_command_error(self, ctx, error):
+        print("Error!")
+        logging.error("Command Error!")
         time = datetime.now().strftime("%d.%m.%Y at %H:%M")
         ignored = (
             commands.NoPrivateMessage,
