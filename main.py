@@ -130,6 +130,7 @@ class CoraBot(commands.Bot):
         print(
             f"{time} - An unhandled exception occured in {event}, see log for details."
         )
+<<<<<<< HEAD
 
 
 def main():
@@ -138,6 +139,35 @@ def main():
         level=logging.INFO,
         format="%(asctime)s %(levelname)s - %(message)s",
         datefmt="%d/%m/%Y %H:%M:%S",
+=======
+    elif cmd == "nitro":
+        await nitro.nitroJunction(message)
+    elif cmd == "dice":
+        await dice_comm.dice_comm(message)
+    elif cmd == "status":
+        await message.channel.send("418 I'm a teapot")
+    elif cmd == "saimaa":
+        await saimaa.saimaa(message)
+    elif cmd == "test":
+        await message.add_reaction("\N{white heavy check mark}")
+    else:
+        await message.channel.send("What was that?")
+
+
+@client.event
+async def on_guild_join(guild):
+    emb = discord.Embed()
+    emb.color = common.get_hex_colour(cora_blonde=True)
+    emb.title = "Hey there!"
+    emb.description = "Hi! Thanks for adding me to your server! <3\n\
+        You can use my features by typing commands with the prefix `!c`. To access a list of available commands, use `!c help`.\n\
+        \nPlease make sure I have the proper rights, especially to view the channels you want me to listen for commands in, send messages & embed links.\n\
+        \n\
+        Sincerely,\n\
+        ~ Cora ~"
+    emb.set_thumbnail(
+        url="https://media.discordapp.net/attachments/693166291468681227/834200862246043648/cora_pfp.png"
+>>>>>>> master
     )
     common.initializeDatabase()
     CLIENT = CoraBot()
