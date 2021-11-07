@@ -535,7 +535,7 @@ class Nitro(commands.Cog):
                 # Boost_Time TEXT, 3
                 # LatestBoost TEXT, 4
                 # Boosts INT 5
-                btext = "**Name \N{sparkles} Boost Amount**\n"
+                btext = "_Name \N{sparkles} Boost Amount_\n\n"
                 texts = []
 
                 for i, b in enumerate(boosts, start=1):
@@ -565,7 +565,8 @@ class Nitro(commands.Cog):
                         emb2.title = title
                         emb2.description = t
                         try:
-                            await msg.edit(embed=emb2)
+                            await message.channel.send(embed=emb2)
+                            await msg.delete()
                         except discord.Forbidden:
                             forbiddenErrorHandler(message)
                             return
