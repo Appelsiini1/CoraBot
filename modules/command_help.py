@@ -116,11 +116,19 @@ Note that you can also delete all roles with the keyword `all`, as in\n\
         dm_channel = await message.author.create_dm()
 
     emb.description = txt1
-    await dm_channel.send(embed=emb)
+    try:
+        await dm_channel.send(embed=emb)
+    except Forbidden:
+        await forbiddenErrorHandler(message)
+        return
     emb.description = txt2
     emb.title = "How to use polls 2/2"
     await dm_channel.send(embed=emb)
     await message.add_reaction("\N{white heavy check mark}")
+    try:
+        await message.channel.send("Help message sent via private message.")
+    except Forbidden:
+        await forbiddenErrorHandler(message)
 
 
 async def dice_help(ctx):
