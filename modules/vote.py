@@ -207,7 +207,7 @@ class Vote(commands.Cog):
             emb.description = f"\N{no entry} **You gave too many votes for poll '{poll_name}'. You can still give a maximum of {maxvotes}.**\n\
                 Your command was: ```{message.content}```"
         elif err_type == 6:
-            emb.description = f"\N{no entry} **Invalid option number or vote amount in poll {poll_name}. Please give them as an integer and make sure they are within the poll options.\n\
+            emb.description = f"\N{no entry} **Invalid option number or vote amount in poll '{poll_name}'. Please give them as an integer and make sure they are within the poll options.\n\
                 See `!c vote help` for more help.**\n\
                 Your command was: ```{message.content}```"
         elif err_type == 7:

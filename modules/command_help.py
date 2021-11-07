@@ -106,12 +106,10 @@ Please note that the poll has a character limit of about ~1850 to ~1950 characte
 \n**For voting help, type:**\n\
 ```!c vote help```\n\
 \n\
-**Editing or deleting roles from the database:**\n\
-If you want to change how many votes a role has use:\n\
-```!c poll editrole [role]:[voteamount],[role]:[voteamount], ...```\n\
-Note, that if you change anything in the role you do not need to add or edit the role in the bot's database unless you delete and create a new role in the server settings (i.e. you only need to re-add it if the ID of it changes).\
+**Deleting roles from the database:**\n\
+Note, that if you change anything in the role you do not need to add the role in the bot's database again unless you delete and create a new role in the server settings (i.e. you only need to re-add it if the ID of the role changes).\
 If you wish to delete a role, use\n\
-```!c poll delrole [role], [role], ...```\n\
+```!c poll delroles [role], [role], ...```\n\
 where `role` is a role ID or a role mention.\n\
 Note that you can also delete all roles with the keyword `all`, as in\n\
 ```!c poll delrole all```"

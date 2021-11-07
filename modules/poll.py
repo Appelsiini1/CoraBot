@@ -115,10 +115,14 @@ class Polls(commands.Cog):
                 if titleStatus == 1:
                     title = None
 
+                c.execute("SELECT ID FROM IDs WHERE Type='BasicPoll' ORDER BY ID DESC")
+                prevPollID = c.fetchone()
+                poll_id = 200 if prevPollID == None else prevPollID[0] + 1
+
                 c.execute(
                     "INSERT INTO BasicPolls VALUES (?,?,?,?,?,?,?,?)",
                     (
-                        None,
+                        poll_id,
                         message.channel.id,
                         message.guild.id,
                         message.author.id,
@@ -128,9 +132,8 @@ class Polls(commands.Cog):
                         0,
                     ),
                 )
+                c.execute("INSERT INTO IDs VALUES (?,?)", (poll_id, "BasicPoll"))
                 conn.commit()
-                c.execute(f"SELECT Poll_ID FROM BasicPolls WHERE PollOptions='{arg_str}'")
-                poll_id = c.fetchone()[0]
                 footer = "Poll ID: " + str(poll_id)
                 emb.set_footer(text=footer)
                 logging.info(
@@ -531,7 +534,7 @@ class Polls(commands.Cog):
                 )
                 amount = -1
             else:
-                for i, arg in enumerate(args):
+                for i, arg in enumerate(args, start=1):
                     match = RoleRE1.match(arg)
                     if match:
                         role_id = match.group(1).strip()
@@ -552,7 +555,7 @@ class Polls(commands.Cog):
                 amount = 1
             conn.commit()
             if amount == -1:
-                amount = "all"
+                i = "all"
             emb.description = f"Deleted {i} roles from database."
             emb.color = get_hex_colour(cora_eye=True)
             await message.channel.send(embed=emb)
@@ -593,7 +596,7 @@ class Polls(commands.Cog):
 
             c.execute("SELECT ID FROM IDs WHERE Type='RolePoll' ORDER BY ID DESC")
             prevPollID = c.fetchone()
-            poll_id = 103 if prevPollID == None else prevPollID[0] + 1
+            poll_id = 100 if prevPollID == None else prevPollID[0] + 1
 
             if len(args) <= 1 or message.content.find(";") == -1:
                 # help command
