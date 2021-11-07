@@ -1,0 +1,9 @@
+MAINTENANCE NOTICE!
+CoraBot will be taken offline for database migration and version upgrade on **8th of November 2021 at 8pm _Finnish time_**. Below is a link to a countdown.
+
+Expected maintenance duration is 1 hour. A notification with the release notes will be sent when the new version is live.
+
+Please report any bugs you encounter with the new version. If you see that data (such as poll votes etc.) has gone unintentionally missing after the database migration, please contact the developer ASAP.
+
+https://www.timeanddate.com/countdown/wfh?iso=20211108T20&p0=101&msg=CoraBot+Maintenance&font=cursive&csz=1
+###

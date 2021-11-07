@@ -13,14 +13,12 @@ def main():
     with open("urls.txt", "r") as file:
         urls = file.readlines()
 
-    with open("versions.txt", "r") as file:
+    with open("announcements.txt", "r") as file:
         txtFromFile = file.readline()
-        if txtFromFile.startswith("v"):
-            title = f"New version of CoraBot is live!"
-            version = txtFromFile
-            txtFromFile = file.readline()
-
-        text = f"**{version}**\n"
+        title = txtFromFile
+        text = ""
+        
+        txtFromFile = file.readline()
         while txtFromFile.strip() != "###":
             text += txtFromFile
             txtFromFile = file.readline()

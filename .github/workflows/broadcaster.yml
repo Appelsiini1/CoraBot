@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Notification system
+name: Update notification system
 
 # Controls when the action will run. 
 on:
@@ -28,4 +28,4 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd ~/CoraBot/webhook
-            python3 announcementBroadcaster.py
+            python3 updateBroadcaster.py

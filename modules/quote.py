@@ -1,22 +1,48 @@
+from discord.errors import Forbidden
+from discord.ext import commands
 import requests
 import json
-from modules.common import get_hex_colour  # pylint: disable=import-error
+from modules.common import forbiddenErrorHandler, get_hex_colour, check_if_channel, check_if_bot
 import logging
-import discord
+from discord import Embed
 
 
-async def get_quote(message):
+class Inspire(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-    response = requests.get("https://zenquotes.io/api/random")
-    if response.status_code == 200:
-        json_data = json.loads(response.text)
-        quote = "_" + json_data[0]["q"] + "_ -" + json_data[0]["a"]
-        emb = discord.Embed(description=quote, color=get_hex_colour())
-    else:
-        msg = "Could not get quote, server responded with code {}".format(
-            response.status_code
-        )
-        logging.error(msg)
-        emb = discord.Embed(description=msg, color=0xFF0000)
+    @commands.command(name="inspire")
+    @commands.check(check_if_channel)
+    @commands.check(check_if_bot)
+    async def get_quote(self, ctx):
+        try:
+            response = requests.get("https://zenquotes.io/api/random")
+        except Exception as e:
+            logging.exception("Request for inspire failed.")
+            msg = f"Could not get a quote because of a network error."
+            emb = Embed(description=msg, color=get_hex_colour(error=True))
+            try:
+                await ctx.send(embed=emb)
+            except Forbidden:
+                await forbiddenErrorHandler(ctx.message)
+            return
 
-    await message.channel.send(embed=emb)
+        if response.status_code == 200:
+            json_data = json.loads(response.text)
+            quote = "_" + json_data[0]["q"] + "_ -" + json_data[0]["a"]
+            emb = Embed(description=quote, color=get_hex_colour())
+        else:
+            msg = "Could not get quote, server responded with code {}".format(
+                response.status_code
+            )
+            logging.error(msg)
+            emb = Embed(description=msg, color=get_hex_colour(error=True))
+
+        try:
+            await ctx.send(embed=emb)
+        except Forbidden:
+            await forbiddenErrorHandler(ctx.message)
+
+
+def setup(client):
+    client.add_cog(Inspire(client))

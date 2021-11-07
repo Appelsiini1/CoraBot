@@ -1,8 +1,18 @@
-v1.14.15
-- Add '!c saimaa' command to get the surface temperature of the Saimaa lake
-###
-v1.14.14
-- Add `!c status` command to check bot status
+v2.0.0
+Version 2.0.0 brings a major rework to CoraBot.
+- Refactor codebase to use discord.ext.commands framework
+- Add scheduling framework
+- Add auction commands
+- Rework how IDs are autoincremented in the database
+- Add support for Random.org's API to use true randomness
+- Nitro spin and giveaway now uses true randomness in winner selection
+- Added a command to list nitro boosters in a more visually pleasing manner (`!c nitro list`).
+- Vaccine command now shows percentage of the population vaccinated
+- Fixed polls being able to accept empty options
+- Basic polls now use their own IDs instead of message IDs
+- Basic poll results now give the text options instead of emojis
+- Now sends an error message to the channel if the bot is unable to send a private message for voting errors or confirmations
+- Add reaction messages to "morning", "good morning" and "huomenta"
 ###
 v1.14.13
 - Fix nitro boost tracking for the n+1th f*****g time
