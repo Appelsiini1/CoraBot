@@ -122,6 +122,7 @@ class MESSAGE_LISTENER(commands.Cog):
             or lower_message.startswith("hyvää huomenta")
             or lower_message.startswith("mernin")
         ):
+            return
             msgIndex = randint(0, self.morning_len - 1)
             msgToSend = self.morning_messages[msgIndex] + " \N{sparkling heart}"
             try:
