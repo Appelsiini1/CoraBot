@@ -3,7 +3,12 @@ from discord.errors import Forbidden
 from discord.ext import commands
 import requests
 import discord
-from modules.common import forbiddenErrorHandler, get_hex_colour, check_if_channel, check_if_bot
+from modules.common import (
+    forbiddenErrorHandler,
+    get_hex_colour,
+    check_if_channel,
+    check_if_bot,
+)
 import logging
 
 ALUEET = {
@@ -99,6 +104,14 @@ QUERY = {
 }
 
 
+class VACC_DATA():
+    def __init__(self, oneDose, twoDoses, threeDoses, populationData):
+        self.oneDose = oneDose
+        self.twoDoses = twoDoses
+        self.threeDoses = threeDoses
+        self.populationData = populationData
+        
+
 class Vaccine(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -117,10 +130,15 @@ class Vaccine(commands.Cog):
             headers={"User-Agent": "Appelsiini1:n Discord Botti"},
             json=QUERY,
         )
+        response4 = requests.post(
+            f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-639082&row=area-{param}",
+            headers={"User-Agent": "Appelsiini1:n Discord Botti"},
+        )
         if (
             response.status_code == 200
             and response2.status_code == 200
             and response3.status_code == 200
+            and response4.status_code == 200
         ):
             json_data = json.loads(response.text)
             vacc_data = json_data["dataset"]["value"].items()
@@ -137,11 +155,19 @@ class Vaccine(commands.Cog):
             two_doses = 0
             for keypair in vacc_data:
                 two_doses = keypair[1]
-            return one_dose, two_doses, pop_data
+
+            json_data = json.loads(response4.text)
+            vacc_data = json_data["dataset"]["value"].items()
+            three_doses = 0
+            for keypair in vacc_data:
+                three_doses = keypair[1]
+
+            ResultData = VACC_DATA(one_dose, two_doses, three_doses, pop_data)
+            return ResultData
 
         else:
-            msg = "Could not fetch vaccination data, server responded with code {0} and {1} and {2}.".format(
-                response.status_code, response2.status_code, response3.status_code
+            msg = "Could not fetch vaccination data, server responded with codes {0}, {1}, {2} and {3}.".format(
+                response.status_code, response2.status_code, response3.status_code, response4.status_code
             )
             logging.error(msg)
             msg2 = f"PARAM = {param}"
@@ -149,11 +175,11 @@ class Vaccine(commands.Cog):
             logging.error(response.content)
             logging.error(response2.content)
             logging.error(response3.content)
-            return msg, msg2
+            return (msg, msg2)
 
-    def makeEmbed(self, one_dose, two_doses, emb, pop_data, areaCode="Finland"):
-        if two_doses.startswith("PARAM"):
-            emb.description = one_dose
+    def makeEmbed(self, emb, vaccData = None, error_msg = "", areaCode="Finland"):
+        if error_msg != "":
+            emb.description = error_msg
             emb.color = get_hex_colour(error=True)
         else:
             if areaCode != "Finland":
@@ -161,7 +187,9 @@ class Vaccine(commands.Cog):
             else:
                 area = "Finland"
             emb.title = f"Current number of COVID-19 vaccinated people in {area}:"
-            emb.description = f"One dose: {one_dose} ({round((int(one_dose)/int(pop_data))*100)}% of area population)\nTwo doses: {two_doses} ({round((int(two_doses)/int(pop_data))*100)}% of area population)"
+            emb.description = f"One dose: {vaccData.oneDose} ({round((int(vaccData.oneDose)/int(vaccData.populationData))*100)}% of area population)\n\
+                Two doses: {vaccData.twoDoses} ({round((int(vaccData.twoDoses)/int(vaccData.populationData))*100)}% of area population)\n\
+                Three doses: {vaccData.threeDoses} ({round((int(vaccData.threeDoses)/int(vaccData.populationData))*100)}% of area population)"
             emb.color = get_hex_colour(cora_eye=True)
             emb.set_footer(
                 text=f"Source: Finnish Institute for Health and Welfare (THL.fi) and Statistics Finland (tilastokeskus.fi)"
@@ -180,9 +208,13 @@ class Vaccine(commands.Cog):
             s_msg = await ctx.send(embed=emb)
         except Forbidden:
             await forbiddenErrorHandler(ctx.message)
+        
         if len(ctx.message.content.split(" ")) == 2:
-            one_dose, two_doses, pop_data = self.getVaccineInfo("518362")
-            emb = self.makeEmbed(one_dose, two_doses, emb, pop_data)
+            result = self.getVaccineInfo("518362")
+            if type(result) == VACC_DATA:
+                emb = self.makeEmbed(emb, vaccData=result)
+            else:
+                emb = self.makeEmbed(emb, error_msg=result)
             await s_msg.edit(embed=emb)
 
         elif len(ctx.message.content.split(" ")) > 2:
@@ -205,8 +237,12 @@ class Vaccine(commands.Cog):
                     emb.color = get_hex_colour(error=True)
                     await s_msg.edit(embed=emb)
                     return
-                one_dose, two_doses, pop_data = self.getVaccineInfo(param)
-                emb = self.makeEmbed(one_dose, two_doses, emb, pop_data, areaCode=param)
+                
+                result = self.getVaccineInfo(param)
+                if type(result) == VACC_DATA:
+                    emb = self.makeEmbed(emb, vaccData=result)
+                else:
+                    emb = self.makeEmbed(emb, error_msg=result)
                 await s_msg.edit(embed=emb)
 
 

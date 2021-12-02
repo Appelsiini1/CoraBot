@@ -1,3 +1,6 @@
+v2.0.2
+- Add third dose to vaccine command
+###
 v2.0.1
 Hotfix
 - Disable reactions to 'good morning' and 'morning' due to user backlash
