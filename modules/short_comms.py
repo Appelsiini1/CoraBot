@@ -36,16 +36,16 @@ class Short(commands.Cog):
         except Forbidden:
             await forbiddenErrorHandler(ctx.message)
 
-    @commands.command()
-    @commands.check(check_if_channel)
-    @commands.check(check_if_bot)
-    async def mood(self, ctx):
-        try:
-            await ctx.send(
-                "https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4"
-            )
-        except Forbidden:
-            await forbiddenErrorHandler(ctx.message)
+    # @commands.command()
+    # @commands.check(check_if_channel)
+    # @commands.check(check_if_bot)
+    # async def mood(self, ctx):
+    #     try:
+    #         await ctx.send(
+    #             "https://cdn.discordapp.com/attachments/816694548457324544/830847194142605403/hui_saakeli_tata_elamaa.mp4"
+    #         )
+    #     except Forbidden:
+    #         await forbiddenErrorHandler(ctx.message)
 
 
 def setup(client):
