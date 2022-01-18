@@ -105,11 +105,12 @@ QUERY = {
 
 
 class VACC_DATA():
-    def __init__(self, oneDose, twoDoses, threeDoses, populationData):
+    def __init__(self, oneDose, twoDoses, threeDoses, populationData, area):
         self.oneDose = oneDose
         self.twoDoses = twoDoses
         self.threeDoses = threeDoses
         self.populationData = populationData
+        self.area = area
         
 
 class Vaccine(commands.Cog):
@@ -162,7 +163,7 @@ class Vaccine(commands.Cog):
             for keypair in vacc_data:
                 three_doses = keypair[1]
 
-            ResultData = VACC_DATA(one_dose, two_doses, three_doses, pop_data)
+            ResultData = VACC_DATA(one_dose, two_doses, three_doses, pop_data, param)
             return ResultData
 
         else:
@@ -177,15 +178,16 @@ class Vaccine(commands.Cog):
             logging.error(response3.content)
             return (msg, msg2)
 
-    def makeEmbed(self, emb, vaccData = None, error_msg = "", areaCode="Finland"):
+    def makeEmbed(self, emb, vaccData = None, error_msg = ""):
+        if vaccData.area == "518362":
+            area = "Finland"
+        else:
+            area = ALUEET[vaccData.area]
+
         if error_msg != "":
             emb.description = error_msg
             emb.color = get_hex_colour(error=True)
         else:
-            if areaCode != "Finland":
-                area = ALUEET[areaCode]
-            else:
-                area = "Finland"
             emb.title = f"Current number of COVID-19 vaccinated people in {area}:"
             emb.description = f"One dose: {vaccData.oneDose} ({round((int(vaccData.oneDose)/int(vaccData.populationData))*100)}% of area population)\n\
                 Two doses: {vaccData.twoDoses} ({round((int(vaccData.twoDoses)/int(vaccData.populationData))*100)}% of area population)\n\
