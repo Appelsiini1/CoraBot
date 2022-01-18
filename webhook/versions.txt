@@ -1,3 +1,7 @@
+v2.0.3
+- Fix area name in vaccine command
+- Rework `!c mood` command
+###
 v2.0.2
 - Add third dose to vaccine command
 ###
