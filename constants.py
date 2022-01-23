@@ -135,4 +135,4 @@ TRACKED_CHANNELS = CHANNEL_TRACKER()
 REQUEST_LIMITS = requestLimits()
 
 # Version number
-VERSION = "v2.0.3"
+VERSION = "v2.0.4"
