@@ -1,3 +1,6 @@
+v2.0.4
+- Add error handling for HTTP requests in vaccine command
+###
 v2.0.3
 - Fix area name in vaccine command
 - Rework `!c mood` command

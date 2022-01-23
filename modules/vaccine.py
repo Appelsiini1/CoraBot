@@ -117,24 +117,35 @@ class Vaccine(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def getVaccineInfo(self, param):
-        response = requests.get(
-            f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-533170&row=area-{param}",
-            headers={"User-Agent": "Appelsiini1:n Discord Botti"},
-        )
-        response2 = requests.get(
-            f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-533164&row=area-{param}",
-            headers={"User-Agent": "Appelsiini1:n Discord Botti"},
-        )
-        response3 = requests.post(
-            "https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/StatFin/vrm/vaerak/statfin_vaerak_pxt_11ra.px",
-            headers={"User-Agent": "Appelsiini1:n Discord Botti"},
-            json=QUERY,
-        )
-        response4 = requests.post(
-            f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-639082&row=area-{param}",
-            headers={"User-Agent": "Appelsiini1:n Discord Botti"},
-        )
+    def getVaccineInfo(self, param, ctx):
+        try:
+            response = requests.get(
+                f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-533170&row=area-{param}",
+                headers={"User-Agent": "Appelsiini1:n Discord Botti"},
+            )
+            response2 = requests.get(
+                f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-533164&row=area-{param}",
+                headers={"User-Agent": "Appelsiini1:n Discord Botti"},
+            )
+            response3 = requests.post(
+                "https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/StatFin/vrm/vaerak/statfin_vaerak_pxt_11ra.px",
+                headers={"User-Agent": "Appelsiini1:n Discord Botti"},
+                json=QUERY,
+            )
+            response4 = requests.post(
+                f"https://sampo.thl.fi/pivot/prod/fi/vaccreg/cov19cov/fact_cov19cov.json?row=cov_vac_dose-639082&row=area-{param}",
+                headers={"User-Agent": "Appelsiini1:n Discord Botti"},
+            )
+        except requests.exceptions.ConnectionError:
+            emb = discord.Embed(color=get_hex_colour(error=True))
+            emb.description = "Could not fetch vaccination data from THL or population data from Statistics Finland.\n[Connection timed out]"
+            ctx.send(embed=emb)
+            return
+        except Exception:
+            emb = discord.Embed(color=get_hex_colour(error=True))
+            emb.description = "Could not fetch vaccination data from THL or population data from Statistics Finland.\n[General error]"
+            ctx.send(embed=emb)
+            return
         if (
             response.status_code == 200
             and response2.status_code == 200
@@ -212,7 +223,7 @@ class Vaccine(commands.Cog):
             await forbiddenErrorHandler(ctx.message)
         
         if len(ctx.message.content.split(" ")) == 2:
-            result = self.getVaccineInfo("518362")
+            result = self.getVaccineInfo("518362", ctx)
             if type(result) == VACC_DATA:
                 emb = self.makeEmbed(emb, vaccData=result)
             else:
@@ -240,7 +251,7 @@ class Vaccine(commands.Cog):
                     await s_msg.edit(embed=emb)
                     return
                 
-                result = self.getVaccineInfo(param)
+                result = self.getVaccineInfo(param, ctx)
                 if type(result) == VACC_DATA:
                     emb = self.makeEmbed(emb, vaccData=result)
                 else:
