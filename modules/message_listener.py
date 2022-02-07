@@ -2,7 +2,8 @@ from constants import PREFIX, TRACKED_CHANNELS
 from discord import ChannelType, MessageType
 from discord.ext import commands
 from modules import nitro, tirsk
-#from modules import auction
+
+# from modules import auction
 from random import randint
 from discord.errors import Forbidden
 from modules.common import forbiddenErrorHandler
@@ -116,13 +117,15 @@ class MESSAGE_LISTENER(commands.Cog):
             await message.channel.send(msg)
             return
         elif (
-            lower_message.startswith("morni")
-            or lower_message.startswith("good morni")
-            or lower_message.startswith("huomenta")
-            or lower_message.startswith("hyvää huomenta")
-            or lower_message.startswith("mernin")
+            lower_message == "morning"
+            or lower_message == "merning"
+            or lower_message == "morn"
+            or lower_message == "good morning"
+            or lower_message == "morniing"
+            or lower_message == "mornin"
+            or lower_message == "mornign"
+            or lower_message == "mern"
         ):
-            return
             msgIndex = randint(0, self.morning_len - 1)
             msgToSend = self.morning_messages[msgIndex] + " \N{sparkling heart}"
             try:
@@ -141,7 +144,7 @@ class MESSAGE_LISTENER(commands.Cog):
                 await tirsk.tirskTrack(message)
                 return
             elif chtype == 2:
-                #await auction.bid(message)
+                # await auction.bid(message)
                 return
 
 
