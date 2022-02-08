@@ -1,3 +1,7 @@
+v2.0.6
+- Re-enabled morning reactions
+- Changed the triggers for morning reactions
+###
 v2.0.4
 - Add error handling for HTTP requests in vaccine command
 ###
