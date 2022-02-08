@@ -94,6 +94,7 @@ class MESSAGE_LISTENER(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message, *args):
         lower_message = message.content.strip().lower()
+        lower_message2 = lower_message.strip("!")
         if message.author.bot == True:
             return
         elif message.type in [
@@ -117,15 +118,16 @@ class MESSAGE_LISTENER(commands.Cog):
             await message.channel.send(msg)
             return
         elif (
-            lower_message == "morning"
-            or lower_message == "merning"
-            or lower_message == "morn"
-            or lower_message == "good morning"
-            or lower_message == "morniing"
-            or lower_message == "mornin"
-            or lower_message == "mornign"
-            or lower_message == "mern"
-            or lower_message == "morning all"
+            lower_message2 == "morning"
+            or lower_message2 == "merning"
+            or lower_message2 == "morn"
+            or lower_message2 == "good morning"
+            or lower_message2 == "morniing"
+            or lower_message2 == "mornin"
+            or lower_message2 == "mornign"
+            or lower_message2 == "mern"
+            or lower_message2 == "morning all"
+            or lower_message2 == "good morning everyone!"
         ):
             msgIndex = randint(0, self.morning_len - 1)
             msgToSend = self.morning_messages[msgIndex] + " \N{sparkling heart}"
