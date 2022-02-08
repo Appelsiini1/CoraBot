@@ -129,6 +129,7 @@ class MESSAGE_LISTENER(commands.Cog):
             or lower_message2 == "morning all"
             or lower_message2 == "good morning everyone!"
         ):
+            return
             msgIndex = randint(0, self.morning_len - 1)
             msgToSend = self.morning_messages[msgIndex] + " \N{sparkling heart}"
             try:
