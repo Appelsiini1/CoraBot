@@ -27,10 +27,5 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            cd
-            whoami > text.txt
-            echo "Tama on vetta"
-            cat text.txt
-            echo $USER
-            cd ..
+            cd /home
             ls -l
