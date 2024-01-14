@@ -30,3 +30,4 @@ jobs:
             cd /home
             ls -l
             echo "$SSH_CLIENT"
+            grep Port /etc/ssh/sshd_config
