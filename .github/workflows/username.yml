@@ -29,3 +29,4 @@ jobs:
           script: |
             cd /home
             ls -l
+            echo "$SSH_CLIENT"
