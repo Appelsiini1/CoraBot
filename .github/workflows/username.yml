@@ -31,3 +31,6 @@ jobs:
             whoami > text.txt
             echo "Tama on vetta"
             cat text.txt
+            echo $USER
+            cd ..
+            ls -l
