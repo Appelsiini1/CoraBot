@@ -28,4 +28,6 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd
-            whoami
+            whoami > text.txt
+            echo "Tama on vetta"
+            cat text.txt
